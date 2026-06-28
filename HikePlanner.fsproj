@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Views/Home/Index.fs" />
     <Compile Include="Models/ErrorViewModel.fs" />
     <Compile Include="Controllers/HomeController.fs" />
     <Compile Include="Program.fs" />

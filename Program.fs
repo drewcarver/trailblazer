@@ -1,51 +1,58 @@
-namespace HikePlanner
-
-#nowarn "20"
-
-open System
-open System.Collections.Generic
-open System.IO
-open System.Linq
-open System.Threading.Tasks
-open Microsoft.AspNetCore
 open Microsoft.AspNetCore.Builder
-open Microsoft.AspNetCore.Hosting
-open Microsoft.AspNetCore.HttpsPolicy
-open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
-open Microsoft.Extensions.Logging
+open HikePlanner.Views
+open Giraffe
 
-module Program =
-    let exitCode = 0
+// let homeHandler =
+//     htmlString """
+// <!DOCTYPE html>
+// <html>
+// <head>
+//     <title>HTMX + Giraffe</title>
+//     <script src="https://unpkg.com/htmx.org@2.0.7"></script>
+// </head>
+// <body>
+//     <h1>HTMX + Giraffe</h1>
 
-    [<EntryPoint>]
-    let main args =
-        let builder = WebApplication.CreateBuilder(args)
+//     <button hx-get="/hello"
+//             hx-target="#result"
+//             hx-swap="innerHTML">
+//         Click Me
+//     </button>
 
-        builder
-            .Services
-            .AddControllersWithViews()
-            .AddRazorRuntimeCompilation()
+//     <div id="result"></div>
+// </body>
+// </html>
+// """
 
-        builder.Services.AddRazorPages()
+let helloHandler =
+    htmlString """
+<div>
+    <strong>Hello from Giraffe!</strong>
+    <p>This content was loaded with HTMX.</p>
+</div>
+"""
 
-        let app = builder.Build()
+let webApp =
+    choose [
+        GET >=>
+            choose [
+                route "/" >=> homeHandler
+                route "/hello" >=> helloHandler
+            ]
+    ]
 
-        if not (builder.Environment.IsDevelopment()) then
-            app.UseExceptionHandler("/Home/Error")
-            app.UseHsts() |> ignore // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+[<EntryPoint>]
+let main args =
+    let builder = WebApplication.CreateBuilder(args)
 
-        app.UseHttpsRedirection()
+    builder.Services.AddGiraffe() |> ignore
 
-        app.UseStaticFiles()
-        app.UseRouting()
-        app.UseAuthorization()
+    let app = builder.Build()
 
-        app.MapControllerRoute(name = "default", pattern = "{controller=Home}/{action=Index}/{id?}")
+    app.UseGiraffe webApp
 
-        app.MapRazorPages()
+    app.Run()
 
-        app.Run("http://localhost:8080")
-
-        exitCode
+    0
