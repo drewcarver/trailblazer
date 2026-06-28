@@ -6,14 +6,12 @@
 
   <ItemGroup>
     <Compile Include="Views/Home/Index.fs" />
-    <Compile Include="Models/ErrorViewModel.fs" />
-    <Compile Include="Controllers/HomeController.fs" />
+    <Compile Include="Views/Plan/Plan.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Giraffe" Version="8.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.9" />
   </ItemGroup>
 
 </Project>

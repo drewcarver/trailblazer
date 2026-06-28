@@ -1,7 +1,7 @@
 open Microsoft.AspNetCore.Builder
-open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
-open HikePlanner.Views
+open HikePlanner.Views.Home
+open HikePlanner.Views.Plan
 open Giraffe
 
 // let homeHandler =
@@ -26,20 +26,13 @@ open Giraffe
 // </html>
 // """
 
-let helloHandler =
-    htmlString """
-<div>
-    <strong>Hello from Giraffe!</strong>
-    <p>This content was loaded with HTMX.</p>
-</div>
-"""
 
 let webApp =
     choose [
         GET >=>
             choose [
                 route "/" >=> homeHandler
-                route "/hello" >=> helloHandler
+                route "/plan" >=> planHandler
             ]
     ]
 

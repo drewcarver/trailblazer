@@ -1,4 +1,4 @@
-﻿module HikePlanner.Views
+﻿module HikePlanner.Views.Home
 
 open Giraffe.ViewEngine
 open Giraffe
