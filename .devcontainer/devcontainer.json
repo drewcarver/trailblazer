@@ -1,0 +1,11 @@
+{
+  "name": "HikePlanner",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "postCreateCommand": "git clone https://github.com/drewcarver/neovim-config.git ~/.config/nvim && dotnet tool install -g fsautocomplete && dotnet restore",
+  "remoteEnv": {
+    "PATH": "${containerEnv:PATH}:/root/.dotnet/tools"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "HikePlanner",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

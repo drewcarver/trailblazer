@@ -1,40 +1,60 @@
+open System
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.Hosting
 open HikePlanner.Views.Home
 open HikePlanner.Views.Plan
+open HikePlanner.Repositories.HikeRepo
 open Giraffe
 
-// let homeHandler =
-//     htmlString """
-// <!DOCTYPE html>
-// <html>
-// <head>
-//     <title>HTMX + Giraffe</title>
-//     <script src="https://unpkg.com/htmx.org@2.0.7"></script>
-// </head>
-// <body>
-//     <h1>HTMX + Giraffe</h1>
+[<CLIMutable>]
+type SaveHikeForm = {
+    TrailName: string
+    StartDate: string
+    EndDate: string
+}
 
-//     <button hx-get="/hello"
-//             hx-target="#result"
-//             hx-swap="innerHTML">
-//         Click Me
-//     </button>
+let private tryParseDate (input: string) =
+    match DateTime.TryParse input with
+    | true, parsed -> Ok parsed
+    | false, _ -> Error "Invalid date"
 
-//     <div id="result"></div>
-// </body>
-// </html>
-// """
+let private tryParseEndDate (input: string) =
+    match String.IsNullOrWhiteSpace input with
+    | true -> Ok None
+    | false ->
+        match DateTime.TryParse input with
+        | true, parsed -> Ok (Some parsed)
+        | false, _ -> Error "Invalid date"
 
+let savePlanHandlerWith connectionString : HttpHandler =
+    fun next ctx ->
+        task {
+            let! form = ctx.TryBindFormAsync<SaveHikeForm>()
 
-let webApp =
+            match form with
+            | Ok f ->
+                match tryParseDate f.StartDate, tryParseEndDate f.EndDate with
+                | Ok startDate, Ok endDate ->
+                    let savedId = saveHike connectionString f.TrailName startDate endDate
+                    return! text $"Hike '{f.TrailName}' saved from {f.StartDate} to {f.EndDate} (id {savedId})" next ctx
+                | Error e, _
+                | _, Error e ->
+                    return! text ("Invalid form data: " + e) next ctx
+            | Error e -> return! text ("Invalid form data: " + e) next ctx
+        }
+
+let private defaultConnectionString = "Data Source=hikes.db"
+
+let webAppWith connectionString =
     choose [
-        GET >=>
-            choose [
-                route "/" >=> homeHandler
-                route "/plan" >=> planHandler
-            ]
+        route "/" >=> homeHandler
+        route "/plan" >=> choose [
+            GET >=> planHandler
+            POST >=> savePlanHandlerWith connectionString
+        ]
     ]
+
+let webApp = webAppWith defaultConnectionString
 
 [<EntryPoint>]
 let main args =
