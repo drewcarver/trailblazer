@@ -1,10 +1,12 @@
 ﻿namespace HikePlanner.App
 
 open System
+open System.Runtime.CompilerServices
 open System.Threading.Tasks
 
 type App<'env, 'err, 'a> =
     App of ('env -> Task<Result<'a, 'err>>)
+
 
 [<RequireQualifiedAccess>]
 module App =
@@ -36,6 +38,15 @@ module App =
         App(fun _ ->
             task {
                 return result
+            })
+
+    let ofTaskResult (t: Task<Result<'a, 'err>>) =
+        App(fun _ ->
+            task {
+                let! x = t
+                return match x with
+                       | Ok v -> Ok v
+                       | Error e -> Error e
             })
 
     let ofTask (t: Task<'a>) =
@@ -214,18 +225,23 @@ type AppBuilder() =
                     compensation ()
             })
 
+
     member _.Source(app: App<'env, 'err, 'a>) =
         app
 
+    member _.Source(task: Task<Result<'a, 'err>>) : App<'env, 'err, 'a> =
+        App (fun _ -> task)
+
     member _.Source(result: Result<'a, 'err>) =
         App.ofResult result
-
-    member _.Source(task: Task<'a>) =
-        App.ofTask task
 
     member _.Source(async: Async<'a>) =
         App.ofAsync async
 
 [<AutoOpen>]
 module AppExtensions =
+    type AppBuilder with
+        member _.Source(task: Task<'a>) : App<'env, 'err, 'a> =
+            App.ofTask task
+
     let app = AppBuilder()

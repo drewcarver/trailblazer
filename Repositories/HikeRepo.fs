@@ -38,9 +38,10 @@ let private toInt64 (value: obj) =
         | :? string as s -> Int64.Parse s
         | _ -> -1L
 
-let saveHike (trail: string) (start: DateTime) (endDate: DateTime option) : App<string, exn, int64> =
+let saveHike (trail: string) (start: DateTime) (endDate: DateTime) =
     app {
-        let! connStr = App.ask<string, exn>
+        let! connStr =
+            App.local (fun _ -> "Data Source=hikes.db") App.ask
 
         use conn = new SqliteConnection(connStr)
         conn.Open() |> ignore
@@ -50,12 +51,13 @@ let saveHike (trail: string) (start: DateTime) (endDate: DateTime option) : App<
         cmd.CommandText <- "INSERT INTO hike (trail, start_date, end_date) VALUES ($trail, $start_date, $end_date); SELECT last_insert_rowid();"
         cmd.Parameters.AddWithValue("$trail", trail) |> ignore
         cmd.Parameters.AddWithValue("$start_date", start.ToString("o")) |> ignore
+        cmd.Parameters.AddWithValue("$end_date", endDate.ToString("o")) |> ignore
 
-        match endDate with
-        | Some d -> cmd.Parameters.AddWithValue("$end_date", d.ToString("o")) |> ignore
-        | None -> cmd.Parameters.AddWithValue("$end_date", DBNull.Value) |> ignore
+        let! result = 
+            App.catch 
+                (fun ex -> HikeRepoError.DatabaseError (sprintf "Error saving hike: %s" ex.Message)) 
+                (fun () -> cmd.ExecuteScalar() |> toInt64 |> Task.FromResult)
 
-        let result = cmd.ExecuteScalar()
         return toInt64 result
     }
 
@@ -88,6 +90,16 @@ let getSavedHikes : App<string, HikeRepoError, Hike list> =
             App.fail (HikeRepoError.DatabaseError (sprintf "Error retrieving hikes: %s" ex.Message)) 
     }
 
+let withReader (command: SqliteCommand) f : App<'a, HikeRepoError, 'b> =
+    try
+        use sqliteReader = command.ExecuteReader()
+        if sqliteReader.Read() then
+            f sqliteReader |> App.succeed
+        else
+            App.fail (HikeRepoError.NotFound "No rows found.")
+    with ex ->
+        App.fail (HikeRepoError.DatabaseError (sprintf "Error reading from SQLite: %s" ex.Message))
+
 let getHikeByName (trailName: string) : App<string, HikeRepoError, Hike> =
     app {
         let! connStr = App.ask
@@ -100,19 +112,15 @@ let getHikeByName (trailName: string) : App<string, HikeRepoError, Hike> =
         cmd.CommandText <- "SELECT id, trail, start_date, end_date FROM hike WHERE trail = $trail LIMIT 1;"
         cmd.Parameters.AddWithValue("$trail", trailName) |> ignore
 
-        return! try
-                use rdr = cmd.ExecuteReader()
-                if rdr.Read() then
-                    let id = toInt64 (rdr.GetValue(0))
-                    let trail = rdr.GetString(1)
-                    let startDate = DateTime.Parse(rdr.GetString(2))
-                    let endDate =
-                        match rdr.IsDBNull(3) with
-                        | true -> None
-                        | false -> Some(DateTime.Parse(rdr.GetString(3)))
-                    App.succeed { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate }
-                else
-                    App.fail (HikeRepoError.NotFound (sprintf "Hike not found: %s" trailName))
-            with ex ->
-                App.fail (HikeRepoError.DatabaseError (sprintf "Error retrieving hike: %s" ex.Message))
+        return! withReader cmd (fun rdr ->
+            let id = toInt64 (rdr.GetValue(0))
+            let trail = rdr.GetString(1)
+            let startDate = DateTime.Parse(rdr.GetString(2))
+            let endDate =
+                match rdr.IsDBNull(3) with
+                | true -> None
+                | false -> Some(DateTime.Parse(rdr.GetString(3)))
+
+            { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate }
+        )
     }
