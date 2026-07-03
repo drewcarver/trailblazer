@@ -10,6 +10,7 @@ open Microsoft.Extensions.DependencyInjection
 open Microsoft.Data.Sqlite
 open Giraffe
 open Xunit
+open HikePlanner
 open HikePlanner.Repositories.HikeRepo
 
 [<Fact>]
@@ -19,8 +20,8 @@ let ``getSavedHikes returns the saved hikes`` () =
     let start = DateTime(2026, 6, 28)
     let endDate = Some(DateTime(2026, 6, 29))
 
-    let savedId = saveHike connectionString trail start endDate
-    let hikes = getSavedHikes connectionString
+    let savedId = saveHike trail start endDate |> Reader.run connectionString
+    let hikes = getSavedHikes |> Reader.run connectionString
 
     Assert.Single(hikes)
     let hike = hikes.Head

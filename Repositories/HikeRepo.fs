@@ -2,6 +2,7 @@ module HikePlanner.Repositories.HikeRepo
 
 open System
 open Microsoft.Data.Sqlite
+open HikePlanner
 
 type Hike = { 
     Id: int64
@@ -31,35 +32,68 @@ let private toInt64 (value: obj) =
         | :? string as s -> Int64.Parse s
         | _ -> -1L
 
-let saveHike (connectionString: string) (trail: string) (start: DateTime) (endDate: DateTime option) : int64 =
-    use conn = new SqliteConnection(connectionString)
-    conn.Open()
-    ensureTable conn
-    use cmd = conn.CreateCommand()
-    cmd.CommandText <- "INSERT INTO hike (trail, start_date, end_date) VALUES ($trail, $start_date, $end_date); SELECT last_insert_rowid();"
-    cmd.Parameters.AddWithValue("$trail", trail) |> ignore
-    cmd.Parameters.AddWithValue("$start_date", start.ToString("o")) |> ignore
-    match endDate with
-    | Some d -> cmd.Parameters.AddWithValue("$end_date", d.ToString("o")) |> ignore
-    | None -> cmd.Parameters.AddWithValue("$end_date", DBNull.Value) |> ignore
-    let result = cmd.ExecuteScalar()
-    toInt64 result
+let saveHike (trail: string) (start: DateTime) (endDate: DateTime option) : Reader<string, int64> =
+    reader {
+        let! connStr = Reader.ask
+        use conn = new SqliteConnection(connStr)
+        let _ = conn.Open()
+        let _ = ensureTable conn
+        use cmd = conn.CreateCommand()
+        let _ = cmd.CommandText <- "INSERT INTO hike (trail, start_date, end_date) VALUES ($trail, $start_date, $end_date); SELECT last_insert_rowid();"
+        let _ = cmd.Parameters.AddWithValue("$trail", trail) |> ignore
+        let _ = cmd.Parameters.AddWithValue("$start_date", start.ToString("o")) |> ignore
+        let _ =
+            match endDate with
+            | Some d -> cmd.Parameters.AddWithValue("$end_date", d.ToString("o")) |> ignore
+            | None -> cmd.Parameters.AddWithValue("$end_date", DBNull.Value) |> ignore
+        let result = cmd.ExecuteScalar()
+        return toInt64 result
+    }
 
-let getSavedHikes (connectionString: string) : Hike list =
-    use conn = new SqliteConnection(connectionString)
-    conn.Open()
-    ensureTable conn
-    use cmd = conn.CreateCommand()
-    cmd.CommandText <- "SELECT id, trail, start_date, end_date FROM hike ORDER BY id;"
+let getSavedHikes : Reader<string, Hike list> =
+    reader {
+        let! connStr = Reader.ask
+        use conn = new SqliteConnection(connStr)
+        let _ = conn.Open()
+        let _ = ensureTable conn
+        use cmd = conn.CreateCommand()
+        let _ = cmd.CommandText <- "SELECT id, trail, start_date, end_date FROM hike ORDER BY id;"
 
-    use reader = cmd.ExecuteReader()
-    [ while reader.Read() do
-          let id = toInt64 (reader.GetValue(0))
-          let trail = reader.GetString(1)
-          let startDate = DateTime.Parse(reader.GetString(2))
-          let endDate =
-              match reader.IsDBNull(3) with
-              | true -> None
-              | false -> Some(DateTime.Parse(reader.GetString(3)))
+        use rdr = cmd.ExecuteReader()
+        let results =
+            [ while rdr.Read() do
+                  let id = toInt64 (rdr.GetValue(0))
+                  let trail = rdr.GetString(1)
+                  let startDate = DateTime.Parse(rdr.GetString(2))
+                  let endDate =
+                      match rdr.IsDBNull(3) with
+                      | true -> None
+                      | false -> Some(DateTime.Parse(rdr.GetString(3)))
 
-          yield { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate } ]
+                  yield { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate } ]
+        return results
+    }
+
+let getHikeByName (trailName: string) : Reader<string, Hike option> =
+    reader {
+        let! connStr = Reader.ask
+        use conn = new SqliteConnection(connStr)
+        let _ = conn.Open()
+        let _ = ensureTable conn
+        use cmd = conn.CreateCommand()
+        let _ = cmd.CommandText <- "SELECT id, trail, start_date, end_date FROM hike WHERE trail = $trail LIMIT 1;"
+        let _ = cmd.Parameters.AddWithValue("$trail", trailName) |> ignore
+
+        use rdr = cmd.ExecuteReader()
+        if rdr.Read() then
+            let id = toInt64 (rdr.GetValue(0))
+            let trail = rdr.GetString(1)
+            let startDate = DateTime.Parse(rdr.GetString(2))
+            let endDate =
+                match rdr.IsDBNull(3) with
+                | true -> None
+                | false -> Some(DateTime.Parse(rdr.GetString(3)))
+            return Some { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate }
+        else
+            return None
+    }
