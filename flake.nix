@@ -1,18 +1,12 @@
 {
-  description = "Dotnet dev environment with Home Manager";
+  description = "HikePlanner dev environment";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-
     flake-utils.url = "github:numtide/flake-utils";
-
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, home-manager }:
+  outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
@@ -20,29 +14,25 @@
       {
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
-	    direnv
+            # .NET SDK
             dotnet-sdk_10
-	    fsautocomplete
-            neovim
-            tmux
+
+            # F# tooling
+            fsautocomplete
+            fantomas
+
+            # useful CLI tools
             git
             curl
             jq
             ripgrep
             fd
           ];
+
+          shellHook = ''
+            echo "HikePlanner dev shell loaded"
+          '';
         };
       }
-    )
-    // {
-      homeConfigurations.dev = {
-        default = home-manager.lib.homeManagerConfiguration {
-          pkgs = import nixpkgs { system = "x86_64-linux"; };
-
-          modules = [
-            ./home/home.nix
-          ];
-        };
-      };
-    };
+    );
 }
