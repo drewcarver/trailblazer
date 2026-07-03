@@ -28,13 +28,12 @@ let private tryParseEndDate (input: string) =
         | true, parsed -> Ok (Some parsed)
         | false, _ -> Error "Invalid date"
 
-let saveHikePlan connectionString: HttpHandler = 
+let saveHikePlan connectionString: HttpHandler =
     fun next ctx ->
-      App {
-          let! form = ctx.TryBindFormAsync<SaveHikeForm>()
-
-          return! text "hi"
-      } 
+        task {
+            let! form = ctx.TryBindFormAsync<SaveHikeForm>()
+            return! text "hi" next ctx
+        }
 
 let private defaultConnectionString = "Data Source=hikes.db"
 

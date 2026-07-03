@@ -174,49 +174,14 @@ type AppBuilder() =
     member _.Zero() =
         App.succeed ()
 
-    member _.Delay(f) =
-        App.bind f (App.succeed ())
+    member _.Delay(f: unit -> App<'env, 'err, 'a>) =
+        f
 
-    member _.Combine(a, b) =
+    member _.Run(f: unit -> App<'env, 'err, 'a>) =
+        f ()
+
+    member _.Combine(a: App<'env, 'err, unit>, b: App<'env, 'err, 'a>) =
         App.bind (fun () -> b) a
-
-    member _.While(guard, body) =
-        if not (guard()) then
-            App.succeed ()
-        else
-            App.bind (fun () -> _.While(guard, body)) body
-
-    member _.For(sequence: seq<'a>, body) =
-        let enumerator = sequence.GetEnumerator()
-
-        _.While(
-            (fun () -> enumerator.MoveNext()),
-            _.Delay(fun () -> body enumerator.Current)
-        )
-
-    member _.TryWith(body, handler) =
-        try
-            body ()
-        with ex ->
-            handler ex
-
-    member _.TryFinally(body, compensation) =
-        try
-            body ()
-        finally
-            compensation ()
-
-    member _.Using(resource: #IDisposable, body) =
-        _.TryFinally(
-            (fun () -> body resource),
-            (fun () ->
-                if not (isNull (box resource)) then
-                    resource.Dispose())
-        )
-
-    //----------------------------------------------------------------------
-    // Automatic lifting
-    //----------------------------------------------------------------------
 
     member _.Source(app: App<'env, 'err, 'a>) =
         app
@@ -230,4 +195,6 @@ type AppBuilder() =
     member _.Source(async: Async<'a>) =
         App.ofAsync async
 
-let app = AppBuilder()
+[<AutoOpen>]
+module AppExtensions =
+    let app = AppBuilder()

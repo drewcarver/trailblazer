@@ -11,6 +11,7 @@ open Microsoft.Data.Sqlite
 open Giraffe
 open Xunit
 open HikePlanner
+open HikePlanner.App
 open HikePlanner.Repositories.HikeRepo
 
 [<Fact>]
@@ -20,8 +21,15 @@ let ``getSavedHikes returns the saved hikes`` () =
     let start = DateTime(2026, 6, 28)
     let endDate = Some(DateTime(2026, 6, 29))
 
-    let savedId = saveHike trail start endDate |> Reader.run connectionString
-    let hikes = getSavedHikes |> Reader.run connectionString
+    let savedId =
+        match saveHike trail start endDate |> App.run connectionString |> Async.AwaitTask |> Async.RunSynchronously with
+        | Ok id -> id
+        | Error err -> failwith (string err)
+
+    let hikes =
+        match getSavedHikes |> App.run connectionString |> Async.AwaitTask |> Async.RunSynchronously with
+        | Ok hikes -> hikes
+        | Error err -> failwith (string err)
 
     Assert.Single(hikes)
     let hike = hikes.Head
