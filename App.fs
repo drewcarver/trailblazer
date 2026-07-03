@@ -175,13 +175,44 @@ type AppBuilder() =
         App.succeed ()
 
     member _.Delay(f: unit -> App<'env, 'err, 'a>) =
-        f
+        App(fun env ->
+            task {
+                return! App.run env (f ())
+            })
 
-    member _.Run(f: unit -> App<'env, 'err, 'a>) =
-        f ()
+    member _.Run(app: App<'env, 'err, 'a>) =
+        app
 
     member _.Combine(a: App<'env, 'err, unit>, b: App<'env, 'err, 'a>) =
         App.bind (fun () -> b) a
+
+    member _.Using(resource: #IDisposable, body: #IDisposable -> App<'env, 'err, 'a>) =
+        App(fun env ->
+            task {
+                try
+                    return! App.run env (body resource)
+                finally
+                    if not (isNull (box resource)) then
+                        resource.Dispose()
+            })
+
+    member _.TryWith(body: unit -> App<'env, 'err, 'a>, handler: exn -> App<'env, 'err, 'a>) =
+        App(fun env ->
+            task {
+                try
+                    return! App.run env (body ())
+                with ex ->
+                    return! App.run env (handler ex)
+            })
+
+    member _.TryFinally(body: unit -> App<'env, 'err, 'a>, compensation: unit -> unit) =
+        App(fun env ->
+            task {
+                try
+                    return! App.run env (body ())
+                finally
+                    compensation ()
+            })
 
     member _.Source(app: App<'env, 'err, 'a>) =
         app
