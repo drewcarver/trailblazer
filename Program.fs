@@ -24,9 +24,9 @@ let private tryParseDate (input: string) =
 type ConnectionString = ConnectionString of string
 
 let withRouteContext (connectionString: ConnectionString) (httpHandler: Microsoft.AspNetCore.Http.HttpContext) f =
-    (connectionString, httpHandler) |> App.run |> f
+     App.run (connectionString, httpHandler) f 
 
-let saveHikePlan connectionString: App<(string * Microsoft.AspNetCore.Http.HttpContext), string, string> =
+let saveHikePlan: App<(string * Microsoft.AspNetCore.Http.HttpContext), string, string> =
     app {
         let! (connectionString, ctx) = App.ask
         let! form = ctx.TryBindFormAsync<SaveHikeForm>() 
@@ -43,15 +43,26 @@ let saveHikePlan connectionString: App<(string * Microsoft.AspNetCore.Http.HttpC
             )
 
         return sprintf "Hike plan for %s saved successfully!" form.TrailName
-    } |> App.run
+    } 
 
-let private defaultConnectionString = "Data Source=hikes.db"
+let private defaultConnectionString = ConnectionString "Data Source=hikes.db"
 
-let webAppWith connectionString =
+let webAppWith (ConnectionString connectionString) =
     choose [
         route "/" >=> homeHandler
         route "/plan" >=> choose [
             GET >=> planHandler
+            POST >=> (fun next ctx ->  
+                task {
+                    let! result = App.run (connectionString, ctx) saveHikePlan
+
+                    match result with
+                    | Ok message ->
+                        return! text message next ctx
+                    | Error errorMsg ->
+                        return! text errorMsg next ctx
+                }
+            )
         ]
     ]
 
