@@ -6,6 +6,7 @@ open HikePlanner.Views.Plan
 open HikePlanner
 open HikePlanner.Repositories.HikeRepo
 open Giraffe
+open HikePlanner.App
 
 [<CLIMutable>]
 type SaveHikeForm = {
@@ -27,6 +28,13 @@ let private tryParseEndDate (input: string) =
         | true, parsed -> Ok (Some parsed)
         | false, _ -> Error "Invalid date"
 
+let saveHikePlan connectionString: HttpHandler = 
+    fun next ctx ->
+      App {
+          let! form = ctx.TryBindFormAsync<SaveHikeForm>()
+
+          return! text "hi"
+      } 
 
 let private defaultConnectionString = "Data Source=hikes.db"
 
