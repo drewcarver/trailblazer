@@ -2,9 +2,10 @@ module HikePlanner.Repositories.HikeRepo
 
 open System
 open Microsoft.Data.Sqlite
-open HikePlanner
 open HikePlanner.App
 open System.Threading.Tasks
+
+type ConnectionString = ConnectionString of string
 
 type Hike = { 
     Id: int64
@@ -50,24 +51,29 @@ let saveHike (trail: string) (start: DateTime) (endDate: DateTime) =
         use cmd = conn.CreateCommand()
         cmd.CommandText <- "INSERT INTO hike (trail, start_date, end_date) VALUES ($trail, $start_date, $end_date); SELECT last_insert_rowid();"
         cmd.Parameters.AddWithValue("$trail", trail) |> ignore
-        cmd.Parameters.AddWithValue("$start_date", start.ToString("o")) |> ignore
-        cmd.Parameters.AddWithValue("$end_date", endDate.ToString("o")) |> ignore
+        cmd.Parameters.AddWithValue("$start_date", start.ToString "o") |> ignore
+        cmd.Parameters.AddWithValue("$end_date", endDate.ToString "o") |> ignore
 
         let! result = 
             App.catch 
-                (fun ex -> HikeRepoError.DatabaseError (sprintf "Error saving hike: %s" ex.Message)) 
+                (fun ex -> DatabaseError (sprintf "Error saving hike: %s" ex.Message)) 
                 (fun () -> cmd.ExecuteScalar() |> toInt64 |> Task.FromResult)
 
         return toInt64 result
     }
 
-let getSavedHikes : App<string, HikeRepoError, Hike list> =
+let getSavedHikes : App<ConnectionString, HikeRepoError, Hike list> =
     app {
-        let! connStr = App.ask
-
-        use conn = new SqliteConnection(connStr)
-        conn.Open() |> ignore
-        ensureTable conn
+        let! ConnectionString connStr = App.ask
+        
+        use! conn = 
+          try
+              let connection = new SqliteConnection(connStr)
+              connection.Open() |> ignore
+              ensureTable connection
+              App.succeed connection
+          with ex ->
+              App.fail (DatabaseError "Couldn't open database")
 
         use cmd = conn.CreateCommand()
         cmd.CommandText <- "SELECT id, trail, start_date, end_date FROM hike ORDER BY id;"
@@ -76,18 +82,18 @@ let getSavedHikes : App<string, HikeRepoError, Hike list> =
                 use rdr = cmd.ExecuteReader()
                 let results =
                     [ while rdr.Read() do
-                        let id = toInt64 (rdr.GetValue(0))
-                        let trail = rdr.GetString(1)
-                        let startDate = DateTime.Parse(rdr.GetString(2))
+                        let id = toInt64 (rdr.GetValue 0)
+                        let trail = rdr.GetString 1
+                        let startDate = DateTime.Parse(rdr.GetString 2)
                         let endDate =
-                            match rdr.IsDBNull(3) with
+                            match rdr.IsDBNull 3 with
                             | true -> None
-                            | false -> Some(DateTime.Parse(rdr.GetString(3)))
+                            | false -> Some(DateTime.Parse(rdr.GetString 3))
 
                         yield { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate } ]
                 App.succeed results 
         with ex ->
-            App.fail (HikeRepoError.DatabaseError (sprintf "Error retrieving hikes: %s" ex.Message)) 
+            App.fail (DatabaseError (sprintf "Error retrieving hikes: %s" ex.Message)) 
     }
 
 let withReader (command: SqliteCommand) f : App<'a, HikeRepoError, 'b> =
@@ -96,13 +102,13 @@ let withReader (command: SqliteCommand) f : App<'a, HikeRepoError, 'b> =
         if sqliteReader.Read() then
             f sqliteReader |> App.succeed
         else
-            App.fail (HikeRepoError.NotFound "No rows found.")
+            App.fail (NotFound "No rows found.")
     with ex ->
-        App.fail (HikeRepoError.DatabaseError (sprintf "Error reading from SQLite: %s" ex.Message))
+        App.fail (DatabaseError (sprintf "Error reading from SQLite: %s" ex.Message))
 
-let getHikeByName (trailName: string) : App<string, HikeRepoError, Hike> =
+let getHikeByName (trailName: string) : App<ConnectionString, HikeRepoError, Hike> =
     app {
-        let! connStr = App.ask
+        let! ConnectionString connStr = App.ask
 
         use conn = new SqliteConnection(connStr)
         conn.Open() |> ignore
@@ -113,13 +119,13 @@ let getHikeByName (trailName: string) : App<string, HikeRepoError, Hike> =
         cmd.Parameters.AddWithValue("$trail", trailName) |> ignore
 
         return! withReader cmd (fun rdr ->
-            let id = toInt64 (rdr.GetValue(0))
-            let trail = rdr.GetString(1)
-            let startDate = DateTime.Parse(rdr.GetString(2))
+            let id = toInt64 (rdr.GetValue 0)
+            let trail = rdr.GetString 1
+            let startDate = DateTime.Parse(rdr.GetString 2)
             let endDate =
-                match rdr.IsDBNull(3) with
+                match rdr.IsDBNull 3 with
                 | true -> None
-                | false -> Some(DateTime.Parse(rdr.GetString(3)))
+                | false -> Some(DateTime.Parse(rdr.GetString 3))
 
             { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate }
         )

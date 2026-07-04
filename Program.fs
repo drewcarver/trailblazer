@@ -6,6 +6,7 @@ open HikePlanner.Views.Plan
 open HikePlanner.Repositories.HikeRepo
 open Giraffe
 open HikePlanner.App
+open HikePlanner.Views.ListPlans
 
 [<CLIMutable>]
 type SaveHikeForm = {
@@ -19,12 +20,10 @@ let private tryParseDate (input: string) =
     | true, parsed -> Ok parsed
     | false, _ -> Error "Invalid date"
 
-type ConnectionString = ConnectionString of string
-
 let withRouteContext (connectionString: ConnectionString) (httpHandler: Microsoft.AspNetCore.Http.HttpContext) f =
      App.run (connectionString, httpHandler) f 
 
-let saveHikePlan: App<(string * Microsoft.AspNetCore.Http.HttpContext), string, string> =
+let saveHikePlan: App<(ConnectionString * Microsoft.AspNetCore.Http.HttpContext), string, string> =
     app {
         let! _, ctx = App.ask
         let! form = ctx.TryBindFormAsync<SaveHikeForm>() 
@@ -45,12 +44,18 @@ let saveHikePlan: App<(string * Microsoft.AspNetCore.Http.HttpContext), string, 
 
 let private defaultConnectionString = ConnectionString "Data Source=hikes.db"
 
-let webAppWith (ConnectionString connectionString) =
+let webAppWith connectionString =
     choose [
         route "/" >=> homeHandler
         route "/plan" >=> choose [
-            GET >=> planHandler
-            POST >=> (fun next ctx ->  
+            //route "/create" >=> planHandler
+            GET >=> fun next ctx -> 
+                task {
+                    let! result = App.run connectionString getSavedHikes
+
+                    return! htmlView (listPlans result) next ctx
+                } 
+            (* POST >=> (fun next ctx ->  
                 task {
                     let! result = App.run (connectionString, ctx) saveHikePlan
 
@@ -61,6 +66,7 @@ let webAppWith (ConnectionString connectionString) =
                         return! text errorMsg next ctx
                 }
             )
+            *)
         ]
     ]
 
