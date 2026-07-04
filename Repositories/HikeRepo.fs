@@ -4,8 +4,8 @@ open System
 open Microsoft.Data.Sqlite
 open HikePlanner.App
 open System.Threading.Tasks
-
-type ConnectionString = ConnectionString of string
+open HikePlanner.Utilities
+open HikePlanner.Utilities.Utilities
 
 type Hike = { 
     Id: int64

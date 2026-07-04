@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Compile Include="App.fs" />
+    <Compile Include="Utilities.fs" />
     <Compile Include="Repositories/HikeRepo.fs" />
     <Compile Include="Views/Components/DatePicker.fs" />
     <Compile Include="Views/Components/TextInput.fs" />
@@ -14,6 +15,7 @@
     <Compile Include="Views/Shared/Table.fs" />
     <Compile Include="Views/Plan/ListPlans.fs" />
     <Compile Include="Views/Plan/Plan.fs" />
+    <Compile Include="Handlers/Handlers.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
