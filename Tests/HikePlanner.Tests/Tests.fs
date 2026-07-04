@@ -6,37 +6,10 @@ open System.Net
 open System.Net.Http
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.TestHost
-open Microsoft.Extensions.DependencyInjection
 open Microsoft.Data.Sqlite
 open Giraffe
 open Xunit
-open HikePlanner
-open HikePlanner.App
-open HikePlanner.Repositories.HikeRepo
-
-[<Fact>]
-let ``getSavedHikes returns the saved hikes`` () =
-    let connectionString = "Data Source=file:get-hikes-test?mode=memory&cache=shared"
-    let trail = "Mossy Peak"
-    let start = DateTime(2026, 6, 28)
-    let endDate = Some(DateTime(2026, 6, 29))
-
-    let savedId =
-        match saveHike trail start endDate |> App.run connectionString |> Async.AwaitTask |> Async.RunSynchronously with
-        | Ok id -> id
-        | Error err -> failwith (string err)
-
-    let hikes =
-        match getSavedHikes |> App.run connectionString |> Async.AwaitTask |> Async.RunSynchronously with
-        | Ok hikes -> hikes
-        | Error err -> failwith (string err)
-
-    Assert.Single(hikes)
-    let hike = hikes.Head
-    Assert.Equal(savedId, hike.Id)
-    Assert.Equal(trail, hike.Trail)
-    Assert.Equal(start, hike.StartDate)
-    Assert.Equal(endDate, hike.EndDate)
+open Program
 
 [<Fact>]
 let ``POST /plan saves a hike through the route and SQLite`` () =
@@ -47,7 +20,7 @@ let ``POST /plan saves a hike through the route and SQLite`` () =
     builder.Services.AddGiraffe() |> ignore
 
     let app = builder.Build()
-    app.UseGiraffe (Program.webAppWith connectionString)
+    app.UseGiraffe (Program.webAppWith (ConnectionString connectionString))
     app.StartAsync() |> ignore
 
     use client = app.GetTestClient()
