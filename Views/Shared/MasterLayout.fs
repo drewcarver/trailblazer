@@ -2,7 +2,7 @@ module HikePlanner.Views.MasterLayout
 
 open Giraffe.ViewEngine
 
-let withMasterLayout body = 
+let withMasterLayout bodyContent = 
     html [ _lang "en" ] [
         head [] [
             meta [ _charset "UTF-8" ] 
@@ -51,5 +51,22 @@ let withMasterLayout body =
                 """
             ]
         ]
-        body
+        body [ _class "bg-[#EDE4D5] text-gray-800" ] [
+            nav [ _class "bg-[#2E5A3D] text-white sticky top-0 z-50 shadow-md" ] [
+                div [ _class "max-w-7xl mx-auto px-6 py-4 flex items-center justify-between" ] [
+                    div [ _class "flex items-center gap-3" ] [
+                        i [ _class "fa-solid fa-mountain text-3xl text-[#EDE4D5]" ] []
+                        div [ _class "logo-font text-3xl font-bold tracking-tight" ] [ str "TrailForge" ]
+                    ]
+                    div [ _class "hidden md:flex items-center gap-8 text-sm font-medium" ] [
+                        a [ _href "#"; _class "hover:text-[#D4C3A8] transition-colors" ] [ str "Discover Trails" ]
+                        a [ _href "#"; _class "hover:text-[#D4C3A8] transition-colors" ] [ str "Plan Hike" ]
+                        a [ _href "#"; _class "hover:text-[#D4C3A8] transition-colors" ] [ str "My Journal" ]
+                        a [ _href "#"; _class "hover:text-[#D4C3A8] transition-colors" ] [ str "Past Hikes" ]
+                        a [ _href "#"; _class "hover:text-[#D4C3A8] transition-colors" ] [ str "Community" ]
+                    ]
+                ]
+            ]    
+            bodyContent
+          ]
     ]
