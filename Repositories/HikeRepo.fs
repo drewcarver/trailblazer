@@ -11,7 +11,7 @@ type Hike = {
     Id: int64
     Trail: string
     StartDate: DateTime
-    EndDate: DateTime option }
+    EndDate: DateTime }
 
 type HikeRepoError =
     | DatabaseError of string
@@ -85,10 +85,7 @@ let getSavedHikes : App<ConnectionString, HikeRepoError, Hike list> =
                         let id = toInt64 (rdr.GetValue 0)
                         let trail = rdr.GetString 1
                         let startDate = DateTime.Parse(rdr.GetString 2)
-                        let endDate =
-                            match rdr.IsDBNull 3 with
-                            | true -> None
-                            | false -> Some(DateTime.Parse(rdr.GetString 3))
+                        let endDate = DateTime.Parse(rdr.GetString 3)
 
                         yield { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate } ]
                 App.succeed results 
@@ -122,10 +119,7 @@ let getHikeByName (trailName: string) : App<ConnectionString, HikeRepoError, Hik
             let id = toInt64 (rdr.GetValue 0)
             let trail = rdr.GetString 1
             let startDate = DateTime.Parse(rdr.GetString 2)
-            let endDate =
-                match rdr.IsDBNull 3 with
-                | true -> None
-                | false -> Some(DateTime.Parse(rdr.GetString 3))
+            let endDate = DateTime.Parse(rdr.GetString 3)
 
             { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate }
         )

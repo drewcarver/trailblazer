@@ -11,6 +11,7 @@
     <Compile Include="Views/Components/TextInput.fs" />
     <Compile Include="Views/Home/Index.fs" />
     <Compile Include="Views/Shared/MasterLayout.fs" />
+    <Compile Include="Views/Shared/Table.fs" />
     <Compile Include="Views/Plan/ListPlans.fs" />
     <Compile Include="Views/Plan/Plan.fs" />
     <Compile Include="Program.fs" />
