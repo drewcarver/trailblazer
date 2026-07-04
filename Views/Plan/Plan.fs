@@ -4,56 +4,9 @@ open Giraffe.ViewEngine
 open Giraffe
 open HikePlanner.Views.Components.TextInput
 open HikePlanner.Views.Components.DatePicker
+open HikePlanner.Views.MasterLayout
 
 let planView =
-    html [ _lang "en" ] [
-        head [] [
-            meta [ _charset "UTF-8" ] 
-            meta [ _name "viewport"; _content "width=device-width, initial-scale=1.0" ] 
-            title [] [ str "TrailForge • Plan. Hike. Remember." ]
-            script [ _src "https://cdn.tailwindcss.com" ] []
-            link [ _href "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"; _rel "stylesheet" ] 
-            link [ _rel "stylesheet"; _href "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"; _integrity "sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="; _crossorigin ""]
-            script [ _src "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"; _integrity "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="; _crossorigin "" ] []
-            style [] [
-                str """
-                @import url(https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap);
-
-                :root {
-                    --green-dark: #2E5A3D;
-                    --green-med: #4A7043;
-                    --brown: #8B5A2B;
-                    --beige: #EDE4D5;
-                }
-
-                body {
-                    font-family: 'Inter', system-ui, sans-serif;
-                }
-
-                .logo-font {
-                    font-family: 'Playfair Display', sans-serif;
-                }
-
-                .hero-bg {
-                    background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)),
-                                      url(https://picsum.photos/id/1015/2000/1200);
-                    background-size: cover;
-                    background-position: center;
-                }
-                """
-            ]
-            script [] [
-                rawText """
-                document.addEventListener('DOMContentLoaded', function () {
-                    var map = L.map('map').setView([34.628, -84.193], 13); // Springer Mountain, Georgia
-
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    }).addTo(map);
-                });
-                """
-            ]
-        ]
         body [ _class "bg-[#EDE4D5] text-gray-800" ] [
             nav [ _class "bg-[#2E5A3D] text-white sticky top-0 z-50 shadow-md" ] [
                 div [ _class "max-w-7xl mx-auto px-6 py-4 flex items-center justify-between" ] [
@@ -75,14 +28,13 @@ let planView =
                 ]
             ]
             div [ _id "map"; _class "w-[90vw] h-[400px]" ] []
-            form [ _class "max-w-3xl mx-auto mt-8 p-6 bg-white rounded-3xl shadow-md border border-[#D4C3A8]" ] [
+            form [ _class "max-w-3xl mx-auto mt-8 p-6 bg-white rounded-3xl shadow-md border border-[#D4C3A8]"; attr "hx-post" "/plan" ] [
                 textInput "trail-name" "trailName" "Trail Name"
                 datePicker "start-date" "Start Date" "Start Date"
                 datePicker "end-date" "End Date" "End Date"
                 button [ _type "submit"; _class "bg-[#4A7043] hover:bg-[#2E5A3D] text-white px-6 py-2 rounded-full font-medium transition-colors" ] [ str "Submit Plan" ]
             ]
-        ]
-    ]
+        ] |> withMasterLayout
 
 let planHandler : HttpHandler =
     htmlView planView
