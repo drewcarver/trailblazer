@@ -1,10 +1,10 @@
 namespace HikePlanner.Handlers
 
 open HikePlanner.App
-open HikePlanner.Views.ListPlans
 open HikePlanner.Repositories.HikeRepo
 open Giraffe
 open HikePlanner.Utilities.Utilities
+open HikePlanner.Views.Plan.ListPlans
 
 module Handlers = 
     [<CLIMutable>]
@@ -33,9 +33,22 @@ module Handlers =
             return form
         } 
 
-    let listPlansHandler connectionString = (fun next ctx -> 
+    let listPlansHandler connectionString : HttpHandler = (fun next ctx -> 
         task {
             let! result = App.run connectionString getSavedHikes
 
             return! htmlView (listPlans result) next ctx
         })
+
+
+    let planHandler =
+        app {
+            let! ConnectionString connStr = App.ask
+            let! trailPointsOfInterest = getTrailPointsOfInterest "AppalachianTrail"
+
+            return htmlView (planView trailPointsOfInterest)
+        } |> App.mapError (fun err ->
+            match err with
+            | DatabaseError msg -> text (sprintf "Database error: %s" msg)
+            | NotFound msg -> text (sprintf "Not found: %s" msg)
+        )

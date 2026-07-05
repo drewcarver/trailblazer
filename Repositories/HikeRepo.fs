@@ -4,7 +4,6 @@ open System
 open Microsoft.Data.Sqlite
 open HikePlanner.App
 open System.Threading.Tasks
-open HikePlanner.Utilities
 open HikePlanner.Utilities.Utilities
 
 type Hike = { 
@@ -12,6 +11,13 @@ type Hike = {
     Trail: string
     StartDate: DateTime
     EndDate: DateTime }
+
+type TrailPointOfInterest = { 
+    Id: int64
+    TrailName: string
+    TrailMile: float
+    Name: string
+    }
 
 type HikeRepoError =
     | DatabaseError of string
@@ -123,4 +129,30 @@ let getHikeByName (trailName: string) : App<ConnectionString, HikeRepoError, Hik
 
             { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate }
         )
+    }
+
+let getTrailPointsOfInterest (trailName: string) : App<ConnectionString, HikeRepoError, TrailPointOfInterest list> =
+    app {
+        let! ConnectionString connStr = App.ask
+
+        use conn = new SqliteConnection(connStr)
+        conn.Open() |> ignore
+
+        use cmd = conn.CreateCommand()
+        cmd.CommandText <- "SELECT Id, TrailName, TrailMile, Name FROM TrailPointsOfInterest WHERE TrailName = $trailName ORDER BY TrailMile;"
+        cmd.Parameters.AddWithValue("$trailName", trailName) |> ignore
+
+        return! try
+                use rdr = cmd.ExecuteReader()
+                let results =
+                    [ while rdr.Read() do
+                        let id = toInt64 (rdr.GetValue 0)
+                        let trailName = rdr.GetString 1
+                        let trailMile = rdr.GetDouble 2
+                        let name = rdr.GetString 3
+
+                        yield { Id = id; TrailName = trailName; TrailMile = trailMile; Name = name } ]
+                App.succeed results 
+        with ex ->
+            App.fail (DatabaseError (sprintf "Error retrieving points of interest: %s" ex.Message)) 
     }

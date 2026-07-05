@@ -14,8 +14,8 @@ let endpoints connectionString =
     [
         GET [
             route "/" homeHandler
-            route "/plan/create" planHandler
-            route "/plan" (listPlansHandler connectionString )
+            // route "/plan/create" (App.run connectionString planHandler |> collapse)
+            route "/plan" (listPlansHandler connectionString)
         ]
         POST [
             route "/plan" (fun next ctx ->  

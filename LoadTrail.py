@@ -13,11 +13,10 @@ def process_and_insert(csv_path, db_name):
             print("Error: CSV must have at least two columns.")
             return
 
-        print("Debug - DataFrame Head:")
         print(df.head())  
 
         df_insert = pd.DataFrame({
-            'TrailID': 'AppalachianTrail',
+            'TrailName': 'AppalachianTrail',
             'TrailMile': df.iloc[:, 1], 
             'Name': df.iloc[:, 0]       
         })
@@ -33,20 +32,20 @@ def process_and_insert(csv_path, db_name):
 
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS TrailPointsOfInterest (
-                PointID INTEGER PRIMARY KEY,
-                TrailID TEXT NOT NULL,
-                TrailMile REAL,
-                Name TEXT
+                ID INTEGER PRIMARY KEY,
+                Name TEXT NOT NULL,
+                TrailName TEXT NOT NULL,
+                TrailMile REAL NOT NULL
             );
         """)
         cursor.execute("""
-            CREATE INDEX IF NOT EXISTS idx_trail_points ON TrailPointsOfInterest (TrailID, TrailMile);
+            CREATE INDEX IF NOT EXISTS idx_trail_points ON TrailPointsOfInterest (TrailName, TrailMile);
         """)
 
         # Insertion
         try:
             cursor.executemany("""
-                INSERT INTO TrailPointsOfInterest (TrailID, TrailMile, Name) VALUES (?, ?, ?)
+                INSERT INTO TrailPointsOfInterest (TrailName, TrailMile, Name) VALUES (?, ?, ?)
             """, data_to_insert)
             conn.commit()
             print(f"Success: {len(data_to_insert)} records inserted into {db_name}.")
