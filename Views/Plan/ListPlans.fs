@@ -1,9 +1,9 @@
-module HikingPlanner.Views.Plan.ListPlans  
+module HikePlanner.Views.Plan.ListPlans
 
 open Giraffe.ViewEngine
 open HikePlanner.Views.MasterLayout
 open HikePlanner.Repositories.HikeRepo
-open SharedModules
+open HikePlanner.Views.Shared.Table
 
 let hikingTable (hikes: Hike list) = 
   odysseeTable 

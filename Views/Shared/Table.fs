@@ -1,4 +1,5 @@
-module SharedModules
+module HikePlanner.Views.Shared.Table
+
 open Giraffe.ViewEngine
 open FSharp.Core
 open Giraffe.ViewEngine

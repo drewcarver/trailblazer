@@ -1,12 +1,15 @@
 namespace HikePlanner.Handlers
 
-open HikePlanner.App
+open HikePlanner.Infrastructure
 open HikePlanner.Repositories.HikeRepo
+open HikePlanner.Core
 open Giraffe
-open HikePlanner.Utilities.Utilities
+open HikePlanner.Core.Utils
+open HikePlanner.Views.Plan
 open HikePlanner.Views.Plan.ListPlans
 
 module Handlers = 
+    open Giraffe.ViewEngine
     [<CLIMutable>]
     type SaveHikeForm = {
         TrailName: string
@@ -37,18 +40,18 @@ module Handlers =
         task {
             let! result = App.run connectionString getSavedHikes
 
-            return! htmlView (listPlans result) next ctx
+            return! htmlView (ListPlans.listPlans result) next ctx
         })
 
 
-    let planHandler =
+    // planHandler is not currently used - reserved for future expansion
+    let planHandler : App<ConnectionString, HttpHandler, HttpHandler>=
         app {
-            let! ConnectionString connStr = App.ask
-            let! trailPointsOfInterest = getTrailPointsOfInterest "AppalachianTrail"
+            let! plans = getTrailPointsOfInterest "AppalachianTrail"
 
-            return htmlView (planView trailPointsOfInterest)
+            return htmlView (Plan.planView plans)
         } |> App.mapError (fun err ->
             match err with
-            | DatabaseError msg -> text (sprintf "Database error: %s" msg)
-            | NotFound msg -> text (sprintf "Not found: %s" msg)
+            | DatabaseError msg -> htmlView (div [] [ str (sprintf "Database error: %s" msg) ])
+            | NotFound msg -> htmlView (div [] [ str (sprintf "Not found: %s" msg) ])
         )

@@ -1,4 +1,4 @@
-module HikePlanner.Views.Plan
+module HikePlanner.Views.Plan.Plan
 
 open Giraffe.ViewEngine
 open HikePlanner.Views.Components.TextInput

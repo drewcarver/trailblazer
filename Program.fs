@@ -4,17 +4,38 @@ open Microsoft.Extensions.Hosting
 open HikePlanner.Views.Home
 open HikePlanner.Views.Plan
 open Giraffe.EndpointRouting
-open HikePlanner.App
-open HikePlanner.Utilities.Utilities
+open HikePlanner.Infrastructure
+open HikePlanner.Core
+open HikePlanner.Core.Utils
 open HikePlanner.Handlers.Handlers
 
 let private defaultConnectionString = ConnectionString "Data Source=hikes.db"
+
+let withAppCtx (env: 'env) (app: App<'env * 'ctx, 'a, 'b>) = 
+    fun next (ctx: 'ctx) -> 
+    task {
+        let! result = App.run (env, ctx) app
+
+        match result with
+            | Ok handler -> return! handler next ctx
+            | Error handler -> return! handler next ctx
+    }
+
+let withApp (env: 'env) (app: App<'env, 'a, 'b>) = (fun next ctx ->
+    task {
+        let! result = App.run env app
+
+        match result with
+            | Ok handler -> return! handler next ctx
+            | Error handler -> return! handler next ctx
+    }
+)
 
 let endpoints connectionString = 
     [
         GET [
             route "/" homeHandler
-            // route "/plan/create" (App.run connectionString planHandler |> collapse)
+            route "/plan/create" (withApp connectionString planHandler)
             route "/plan" (listPlansHandler connectionString)
         ]
         POST [

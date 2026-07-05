@@ -9,6 +9,7 @@ open Microsoft.AspNetCore.TestHost
 open Microsoft.Data.Sqlite
 open Giraffe
 open Xunit
+open HikePlanner.Core
 open Program
 
 [<Fact>]

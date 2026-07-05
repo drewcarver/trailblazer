@@ -2,9 +2,10 @@ module HikePlanner.Repositories.HikeRepo
 
 open System
 open Microsoft.Data.Sqlite
-open HikePlanner.App
+open HikePlanner.Infrastructure
 open System.Threading.Tasks
-open HikePlanner.Utilities.Utilities
+open HikePlanner.Core
+open HikePlanner.Core.Utils
 
 type Hike = { 
     Id: int64
