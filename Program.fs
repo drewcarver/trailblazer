@@ -31,25 +31,17 @@ let withApp (env: 'env) (app: App<'env, 'a, 'b>) = (fun next ctx ->
     }
 )
 
+let render app = app |> App.map(fun v -> Giraffe.Core.htmlView v) |> App.mapError(fun v -> Giraffe.Core.htmlView v)
+
 let endpoints connectionString = 
     [
         GET [
             route "/" homeHandler
-            route "/plan/create" (withApp connectionString planHandler)
+            route "/plan/create" (withApp connectionString (planHandler |> render))
             route "/plan" (listPlansHandler connectionString)
         ]
         POST [
-            route "/plan" (fun next ctx ->  
-                task {
-                    let! result = App.run (connectionString, ctx) saveHikePlan
-
-                    match result with
-                    | Ok _ ->
-                        return! Giraffe.Core.redirectTo false "/plan" next ctx
-                    | Error errorMsg ->
-                        return! Giraffe.Core.text errorMsg next ctx
-                }
-            )
+            route "/plan" (withAppCtx connectionString (saveHikePlan |> render))
         ]
     ]
 

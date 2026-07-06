@@ -10,6 +10,7 @@ open HikePlanner.Views.Plan.ListPlans
 
 module Handlers = 
     open Giraffe.ViewEngine
+    open System
     [<CLIMutable>]
     type SaveHikeForm = {
         TrailName: string
@@ -17,23 +18,35 @@ module Handlers =
         EndDate: string
     }
 
-    let saveHikePlan: App<(ConnectionString * Microsoft.AspNetCore.Http.HttpContext), string, SaveHikeForm> =
-        app {
-            let! _, ctx = App.ask
-            let! form = ctx.TryBindFormAsync<SaveHikeForm>() 
+    let showStandardError app = 
+        App.mapError (fun err ->
+            match err with
+            | DatabaseError msg -> div [] [ str (sprintf "Database error: %s" msg) ]
+            | NotFound msg -> div [] [ str (sprintf "Not found: %s" msg) ]
+        ) app
 
+    type Hike = {
+        name: string
+        startDate: DateTime
+        endDate: DateTime
+    }
+
+    let saveHikePlan =
+        let! hike : App<(ConnectionString * Microsoft.AspNetCore.Http.HttpContext), string, Hike>  = app {
+            let! _, ctx = App.ask
+
+            let! form = ctx.TryBindFormAsync<SaveHikeForm>() 
             let! startDate = tryParseDate form.StartDate 
             let! endDate = tryParseDate form.EndDate 
 
-            let! _ = 
-                saveHike form.TrailName startDate endDate
-                |> App.mapError (fun err ->
-                    match err with
-                    | DatabaseError msg -> sprintf "Database error: %s" msg
-                    | NotFound msg -> sprintf "Not found: %s" msg
-                )
-            
-            return form
+            return { name = form.TrailName; startDate = startDate; endDate = endDate }
+        } 
+        app {
+            let! hike = hike |> App.mapError (fun e -> div [] [ str e ])
+
+            return! saveHike hike.name hike.startDate hike.endDate 
+                |> showStandardError
+                |> App.map (fun _ -> div [] [ str "Saved" ])
         } 
 
     let listPlansHandler connectionString : HttpHandler = (fun next ctx -> 
@@ -43,15 +56,9 @@ module Handlers =
             return! htmlView (ListPlans.listPlans result) next ctx
         })
 
-
-    // planHandler is not currently used - reserved for future expansion
-    let planHandler : App<ConnectionString, HttpHandler, HttpHandler>=
+    let planHandler =
         app {
             let! plans = getTrailPointsOfInterest "AppalachianTrail"
 
-            return htmlView (Plan.planView plans)
-        } |> App.mapError (fun err ->
-            match err with
-            | DatabaseError msg -> htmlView (div [] [ str (sprintf "Database error: %s" msg) ])
-            | NotFound msg -> htmlView (div [] [ str (sprintf "Not found: %s" msg) ])
-        )
+            return Plan.planView plans
+        } |> showStandardError
