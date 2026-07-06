@@ -32,7 +32,7 @@ module Handlers =
     }
 
     let saveHikePlan =
-        let! hike : App<(ConnectionString * Microsoft.AspNetCore.Http.HttpContext), string, Hike>  = app {
+        let hike : App<(ConnectionString * Microsoft.AspNetCore.Http.HttpContext), string, Hike>  = app {
             let! _, ctx = App.ask
 
             let! form = ctx.TryBindFormAsync<SaveHikeForm>() 
