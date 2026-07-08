@@ -41,7 +41,7 @@ let endpoints connectionString =
             route "/plan" (listPlansHandler connectionString)
         ]
         POST [
-            // route "/plan" (withAppCtx connectionString (saveHikePlan |> render))
+            route "/plan" (withAppCtx connectionString (saveHikePlan |> render))
         ]
     ]
 
