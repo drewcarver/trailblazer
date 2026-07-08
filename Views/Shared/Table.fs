@@ -5,7 +5,7 @@ open FSharp.Core
 open Giraffe.ViewEngine
 open Giraffe.ViewEngine
 
-let odysseeTableButton label text = 
+let trailblazerTableButton label text = 
   td [ _class "px-4 py-3 text-center whitespace-nowrap" ] [
     button [
         _type "button"
@@ -17,14 +17,14 @@ let odysseeTableButton label text =
 type ColumnValue =
     | StringValue of string
     | XmlNodeValue of XmlNode
-let odysseeTableColumn (value: ColumnValue) =
+let trailblazerTableColumn (value: ColumnValue) =
     td [ _class "px-4 py-3 border-r border-black font-sans font-medium truncate max-w-[200px]" ] [ match value with | StringValue s -> str s | XmlNodeValue n -> n ]
 
-let odysseeTableRow cols = 
+let trailblazerTableRow cols = 
   tr [ _class "hover:bg-neutral-50 transition-colors" ] cols
   
 
-let odysseeTableHeader headers =
+let trailblazerTableHeader headers =
     thead [] [
         tr [ _class "border border-black bg-neutral-100" ] [
             for header in headers do
@@ -32,7 +32,7 @@ let odysseeTableHeader headers =
         ]
     ]
 
-let odysseeTable title header rows  =
+let trailblazerTable title header rows  =
   div [ _class "w-full overflow-x-auto border border-black rounded-lg bg-white p-4 font-sans selection:bg-neutral-200" ] [
         div [ _class "text-[10px] font-mono tracking-widest text-neutral-500 uppercase mb-2 pl-1" ] [
             str title

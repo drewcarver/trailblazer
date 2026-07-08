@@ -6,15 +6,15 @@ open HikePlanner.Repositories.HikeRepo
 open HikePlanner.Views.Shared.Table
 
 let hikingTable (hikes: Hike list) = 
-  odysseeTable 
+  trailblazerTable 
     "My Hikes" 
-    (odysseeTableHeader ["Hike Name"; "Start Date"; "End Date"; "Action"]) 
+    (trailblazerTableHeader ["Hike Name"; "Start Date"; "End Date"; "Action"]) 
     (hikes |> List.map (fun h -> 
-    odysseeTableRow [
-        odysseeTableColumn (StringValue h.Trail)
-        odysseeTableColumn (StringValue (h.StartDate.ToString "yyyy-MM-dd"))
-        odysseeTableColumn (StringValue (h.EndDate.ToString "yyyy-MM-dd"))
-        odysseeTableButton (sprintf "View details for %s" h.Trail) "View Hike"
+    trailblazerTableRow [
+        trailblazerTableColumn (StringValue h.Trail)
+        trailblazerTableColumn (StringValue (h.StartDate.ToString "yyyy-MM-dd"))
+        trailblazerTableColumn (StringValue (h.EndDate.ToString "yyyy-MM-dd"))
+        trailblazerTableButton (sprintf "View details for %s" h.Trail) "View Hike"
     ]
     ))
 
