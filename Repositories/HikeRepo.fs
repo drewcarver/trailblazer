@@ -20,10 +20,6 @@ type TrailPointOfInterest = {
     Name: string
     }
 
-type HikeRepoError =
-    | DatabaseError of string
-    | NotFound of string
-
 let private ensureTable (conn: SqliteConnection) =
     use cmd = conn.CreateCommand()
     cmd.CommandText <- """
@@ -48,8 +44,7 @@ let private toInt64 (value: obj) =
 
 let saveHike (trail: string) (start: DateTime) (endDate: DateTime) =
     app {
-        let! connStr =
-            App.local (fun _ -> "Data Source=hikes.db") App.ask
+        let! { Environment = { ConnectionString = ConnectionString connStr }} = App.ask
 
         use conn = new SqliteConnection(connStr)
         conn.Open() |> ignore
@@ -69,9 +64,9 @@ let saveHike (trail: string) (start: DateTime) (endDate: DateTime) =
         return toInt64 result
     }
 
-let getSavedHikes : App<ConnectionString, HikeRepoError, Hike list> =
+let getSavedHikes =
     app {
-        let! ConnectionString connStr = App.ask
+        let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
         
         use! conn = 
           try
@@ -100,7 +95,7 @@ let getSavedHikes : App<ConnectionString, HikeRepoError, Hike list> =
             App.fail (DatabaseError (sprintf "Error retrieving hikes: %s" ex.Message)) 
     }
 
-let withReader (command: SqliteCommand) f : App<'a, HikeRepoError, 'b> =
+let withReader (command: SqliteCommand) f : App<'a, TrailblazerError, 'b> =
     try
         use sqliteReader = command.ExecuteReader()
         if sqliteReader.Read() then
@@ -110,7 +105,7 @@ let withReader (command: SqliteCommand) f : App<'a, HikeRepoError, 'b> =
     with ex ->
         App.fail (DatabaseError (sprintf "Error reading from SQLite: %s" ex.Message))
 
-let getHikeByName (trailName: string) : App<ConnectionString, HikeRepoError, Hike> =
+let getHikeByName (trailName: string) : App<ConnectionString, TrailblazerError, Hike> =
     app {
         let! ConnectionString connStr = App.ask
 
@@ -132,9 +127,9 @@ let getHikeByName (trailName: string) : App<ConnectionString, HikeRepoError, Hik
         )
     }
 
-let getTrailPointsOfInterest (trailName: string) : App<ConnectionString, HikeRepoError, TrailPointOfInterest list> =
+let getTrailPointsOfInterest (trailName: string) =
     app {
-        let! ConnectionString connStr = App.ask
+        let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
 
         use conn = new SqliteConnection(connStr)
         conn.Open() |> ignore

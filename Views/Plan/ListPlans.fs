@@ -4,6 +4,7 @@ open Giraffe.ViewEngine
 open HikePlanner.Views.MasterLayout
 open HikePlanner.Repositories.HikeRepo
 open HikePlanner.Views.Shared.Table
+open HikePlanner.Core
 
 let hikingTable (hikes: Hike list) = 
   trailblazerTable 
@@ -18,12 +19,6 @@ let hikingTable (hikes: Hike list) =
     ]
     ))
 
-let listPlans (hikes: Result<Hike list, HikeRepoError>)  = 
-    match hikes with
-      | Ok h -> hikingTable h
-      | Error e -> div [] [ 
-          match e with
-            | DatabaseError e -> str e 
-            | NotFound e -> str e 
-      ] 
+let listPlans hikes = 
+    hikingTable hikes
     |> withMasterLayout

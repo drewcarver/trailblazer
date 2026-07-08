@@ -7,21 +7,22 @@ open System.Net.Http
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.TestHost
 open Microsoft.Data.Sqlite
-open Giraffe
+open Giraffe.EndpointRouting
 open Xunit
 open HikePlanner.Core
 open Program
 
 [<Fact>]
 let ``POST /plan saves a hike through the route and SQLite`` () =
-    let connectionString = "Data Source=file:plan-test?mode=memory&cache=shared"
+    let connectionString = ConnectionString "Data Source=file:plan-test?mode=memory&cache=shared"
 
     let builder = WebApplication.CreateBuilder()
     builder.WebHost.UseTestServer() |> ignore
-    builder.Services.AddGiraffe() |> ignore
 
     let app = builder.Build()
-    app.UseGiraffe (Program.webAppWith (ConnectionString connectionString))
+    app.UseRouting().UseEndpoints(fun e->
+        e.MapGiraffeEndpoints (endpoints connectionString)
+    ) |> ignore
     app.StartAsync() |> ignore
 
     use client = app.GetTestClient()
@@ -36,9 +37,10 @@ let ``POST /plan saves a hike through the route and SQLite`` () =
 
     Assert.Equal(HttpStatusCode.OK, response.StatusCode)
     let body = response.Content.ReadAsStringAsync().Result
-    Assert.Contains("Mossy Peak", body)
+    Assert.Contains("Saved", body)
 
-    use conn = new SqliteConnection(connectionString)
+    let (ConnectionString rawString) = connectionString
+    use conn = new SqliteConnection(rawString)
     conn.Open()
 
     use cmd = conn.CreateCommand()

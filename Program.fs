@@ -8,40 +8,36 @@ open HikePlanner.Infrastructure
 open HikePlanner.Core
 open HikePlanner.Core.Utils
 open HikePlanner.Handlers.Handlers
+open Microsoft.AspNetCore.Http
 
 let private defaultConnectionString = ConnectionString "Data Source=hikes.db"
 
-let withAppCtx (env: 'env) (app: App<'env * 'ctx, 'a, 'b>) = 
-    fun next (ctx: 'ctx) -> 
-    task {
-        let! result = App.run (env, ctx) app
+let withApp (appEnv: AppEnv) (app: App<EnvironmentWithContext, Giraffe.ViewEngine.HtmlElements.XmlNode, Giraffe.ViewEngine.HtmlElements.XmlNode>) next ctx =  
+        task {
+            let environment = { Environment = appEnv; Context = ctx}
+            let! result = App.run environment app
 
-        match result with
-            | Ok handler -> return! handler next ctx
-            | Error handler -> return! handler next ctx
-    }
+            return! match result with
+                    | Ok handler -> Giraffe.Core.htmlView handler next ctx
+                    | Error handler -> Giraffe.Core.htmlView handler next ctx
+        }
 
-let withApp (env: 'env) (app: App<'env, 'a, 'b>) = (fun next ctx ->
-    task {
-        let! result = App.run env app
 
-        match result with
-            | Ok handler -> return! handler next ctx
-            | Error handler -> return! handler next ctx
-    }
-)
+// let render a: App<EnvironmentWithContext, Giraffe.ViewEngine.HtmlElements.XmlNode, Giraffe.ViewEngine.HtmlElements.XmlNode> = 
+//     a
+//         |> App.map(fun v -> Giraffe.Core.htmlView v) 
+//         |> App.mapError(fun v -> Giraffe.Core.htmlView v)
+    
 
-let render app = app |> App.map(fun v -> Giraffe.Core.htmlView v) |> App.mapError(fun v -> Giraffe.Core.htmlView v)
-
-let endpoints connectionString = 
+let endpoints env = 
     [
         GET [
             route "/" homeHandler
-            route "/plan/create" (withApp connectionString (planHandler |> render))
-            route "/plan" (listPlansHandler connectionString)
+            route "/plan/create" (withApp env planHandler)
+            route "/plan" (withApp env listPlansHandler)
         ]
         POST [
-            route "/plan" (withAppCtx connectionString (saveHikePlan |> render))
+            route "/plan" (withApp env saveHikePlan)
         ]
     ]
 
@@ -51,8 +47,12 @@ let main _ =
 
     let app = builder.Build()
 
+    let env = {
+        ConnectionString = defaultConnectionString
+    }
+
     app.UseRouting().UseEndpoints(fun e->
-        e.MapGiraffeEndpoints (endpoints defaultConnectionString)
+        e.MapGiraffeEndpoints (endpoints env)
     ) |> ignore
 
     app.Run()

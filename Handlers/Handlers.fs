@@ -7,6 +7,7 @@ open Giraffe
 open HikePlanner.Core.Utils
 open HikePlanner.Views.Plan
 open HikePlanner.Views.Plan.ListPlans
+open HikePlanner.Core
 
 module Handlers = 
     open Giraffe.ViewEngine
@@ -31,9 +32,9 @@ module Handlers =
         endDate: DateTime
     }
 
-    let saveHikePlan =
-        let hike : App<(ConnectionString * Microsoft.AspNetCore.Http.HttpContext), string, Hike>  = app {
-            let! _, ctx = App.ask
+    let saveHikePlan: App<EnvironmentWithContext, XmlNode, XmlNode> =
+        let hike = app {
+            let! { Context = ctx } = App.ask
 
             let! form = ctx.TryBindFormAsync<SaveHikeForm>() 
             let! startDate = tryParseDate form.StartDate 
@@ -49,12 +50,12 @@ module Handlers =
                 |> App.map (fun _ -> div [] [ str "Saved" ])
         } 
 
-    let listPlansHandler connectionString : HttpHandler = (fun next ctx -> 
-        task {
-            let! result = App.run connectionString getSavedHikes
+    let listPlansHandler =
+        app {
+            let! hikes = getSavedHikes
 
-            return! htmlView (ListPlans.listPlans result) next ctx
-        })
+            return ListPlans.listPlans hikes
+        } |> showStandardError
 
     let planHandler =
         app {
