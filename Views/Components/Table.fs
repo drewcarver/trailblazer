@@ -1,9 +1,7 @@
-module HikePlanner.Views.Shared.Table
+module HikePlanner.Views.Components.Table
 
 open Giraffe.ViewEngine
 open FSharp.Core
-open Giraffe.ViewEngine
-open Giraffe.ViewEngine
 
 let trailblazerTableButton label text = 
   td [ _class "px-4 py-3 text-center whitespace-nowrap" ] [

@@ -7,7 +7,6 @@ open Giraffe
 open HikePlanner.Core.Utils
 open HikePlanner.Views.Plan
 open HikePlanner.Views.Plan.ListPlans
-open HikePlanner.Core
 
 module Handlers = 
     open Giraffe.ViewEngine
@@ -54,7 +53,7 @@ module Handlers =
         app {
             let! hikes = getSavedHikes
 
-            return ListPlans.listPlans hikes
+            return listPlans hikes
         } |> showStandardError
 
     let planHandler =

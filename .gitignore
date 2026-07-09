@@ -66,3 +66,5 @@ _teamcity*
 appsettings.Development.json
 # Uncomment the line below if you store secrets in local JSON files
 # secrets.json
+
+*.db

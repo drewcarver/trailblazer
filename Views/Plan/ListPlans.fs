@@ -3,7 +3,7 @@ module HikePlanner.Views.Plan.ListPlans
 open Giraffe.ViewEngine
 open HikePlanner.Views.MasterLayout
 open HikePlanner.Repositories.HikeRepo
-open HikePlanner.Views.Shared.Table
+open HikePlanner.Views.Components.Table
 open HikePlanner.Core
 
 let hikingTable (hikes: Hike list) = 
