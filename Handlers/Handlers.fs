@@ -7,15 +7,19 @@ open Giraffe
 open HikePlanner.Core.Utils
 open HikePlanner.Views.Plan
 open HikePlanner.Views.Plan.ListPlans
+open System
+open Giraffe.ViewEngine
 
 module Handlers = 
-    open Giraffe.ViewEngine
-    open System
+    open Microsoft.AspNetCore.Http
+
     [<CLIMutable>]
     type SaveHikeForm = {
-        TrailName: string
-        StartDate: string
-        EndDate: string
+        HikeName: string
+        StartDate: DateTime
+        EndDate: DateTime
+        StartPointId: int
+        EndPointId: int
     }
 
     let showStandardError app = 
@@ -31,22 +35,25 @@ module Handlers =
         endDate: DateTime
     }
 
+    let getFormHelper<'T> (ctx: HttpContext) =
+        app {
+            let result = ctx.TryBindFormAsync<'T>() |> App.ofTaskResult
+
+            return result
+        }
+
+
     let saveHikePlan: App<EnvironmentWithContext, XmlNode, XmlNode> =
-        let hike = app {
+        app {
             let! { Context = ctx } = App.ask
 
-            let! form = ctx.TryBindFormAsync<SaveHikeForm>() 
-            let! startDate = tryParseDate form.StartDate 
-            let! endDate = tryParseDate form.EndDate 
+            let! form: SaveHikeForm = ctx.TryBindFormAsync<SaveHikeForm>() |> App.ofTaskResult |> App.mapError (fun e -> div [] [])
 
-            return { name = form.TrailName; startDate = startDate; endDate = endDate }
-        } 
-        app {
-            let! hike = hike |> App.mapError (fun e -> div [] [ str e ])
+            return! App.succeed (div [] [])
 
-            return! saveHike hike.name hike.startDate hike.endDate 
-                |> showStandardError
-                |> App.map (fun _ -> div [] [ str "Saved" ])
+            // let! saved = saveHike hike hike.startDate hike.endDate 
+            //     |> showStandardError
+            //     |> App.map (fun _ -> div [] [ str "Saved" ])
         } 
 
     let listPlansHandler =
@@ -60,5 +67,5 @@ module Handlers =
         app {
             let! plans = getTrailPointsOfInterest "AppalachianTrail"
 
-            return Plan.planView plans
-        } |> showStandardError
+            return Plan.planView (Ok plans)
+        } |> App.mapError (fun e -> Plan.planView (Error e))

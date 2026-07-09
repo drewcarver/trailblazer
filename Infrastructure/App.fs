@@ -114,6 +114,14 @@ module App =
                     | Error e -> Error(f e)
             })
 
+    let mapResult f (App m) =
+        App(fun env ->
+            task {
+                let! result = m env
+
+                return f result
+            })
+
     //--------------------------------------------------------------------------
     // Monad
     //--------------------------------------------------------------------------
@@ -156,11 +164,21 @@ module App =
             else
                 fail error)
 
-    let catch (handler: exn -> 'err) (operation: unit -> Task<'a>) =
+    let catchAsync (handler: exn -> 'err) (operation: unit -> Task<'a>) =
         App(fun _ ->
             task {
                 try
                     let! value = operation ()
+                    return Ok value
+                with ex ->
+                    return Error(handler ex)
+            })
+
+    let catch (handler: exn -> 'err) (operation: unit -> 'a) =
+        App(fun _ ->
+            task {
+                try
+                    let! value = Task.FromResult (operation ())
                     return Ok value
                 with ex ->
                     return Error(handler ex)

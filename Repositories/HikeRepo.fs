@@ -127,7 +127,7 @@ let getHikeByName (trailName: string) : App<ConnectionString, TrailblazerError, 
         )
     }
 
-let getTrailPointsOfInterest (trailName: string) =
+let getTrailPointsOfInterest (trailName: string) : App<EnvironmentWithContext, TrailblazerError, TrailPointOfInterest list> =
     app {
         let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
 
@@ -138,17 +138,17 @@ let getTrailPointsOfInterest (trailName: string) =
         cmd.CommandText <- "SELECT Id, TrailName, TrailMile, Name FROM TrailPointsOfInterest WHERE TrailName = $trailName ORDER BY TrailMile;"
         cmd.Parameters.AddWithValue("$trailName", trailName) |> ignore
 
-        return! try
+        return! App.catch
+            (fun ex -> DatabaseError (sprintf "Error retrieving points of interest: %s" ex.Message))
+            (fun _ -> 
                 use rdr = cmd.ExecuteReader()
-                let results =
-                    [ while rdr.Read() do
-                        let id = toInt64 (rdr.GetValue 0)
-                        let trailName = rdr.GetString 1
-                        let trailMile = rdr.GetDouble 2
-                        let name = rdr.GetString 3
 
-                        yield { Id = id; TrailName = trailName; TrailMile = trailMile; Name = name } ]
-                App.succeed results 
-        with ex ->
-            App.fail (DatabaseError (sprintf "Error retrieving points of interest: %s" ex.Message)) 
+                [ while rdr.Read() do
+                    let id = toInt64 (rdr.GetValue 0)
+                    let trailName = rdr.GetString 1
+                    let trailMile = rdr.GetDouble 2
+                    let name = rdr.GetString 3
+
+                    yield { Id = id; TrailName = trailName; TrailMile = trailMile; Name = name } ]
+            )
     }

@@ -7,12 +7,14 @@ open HikePlanner.Views.Components.DatePicker
 open HikePlanner.Views.Components.Select
 open HikePlanner.Views.MasterLayout
 open HikePlanner.Repositories.HikeRepo
+open HikePlanner.Core
 
-let planView trailPointsOfInterest =
+let planView (trailPointsOfInterest: Result<TrailPointOfInterest seq, TrailblazerError>) =
         let toOptionLabel poi = sprintf "%s - Mile %.2f" poi.Name poi.TrailMile
-        let pointsOfInterestOptions = trailPointsOfInterest |> Seq.map (fun poi -> { Label = poi |> toOptionLabel; Value = poi.Name; Attributes = [ ("data-mile", poi.TrailMile.ToString())] })
-
-        
+        let pointsOfInterestOptions = 
+            trailPointsOfInterest 
+            |> Result.defaultWith (fun _ -> Seq.empty)
+            |> Seq.map (fun poi -> { Label = poi |> toOptionLabel; Value = string poi.Id; Attributes = [ ("data-mile", poi.TrailMile.ToString())] })
 
         div [] [
             div [ _id "map"; _class "w-[90vw] h-[400px]" ] []
@@ -26,7 +28,7 @@ let planView trailPointsOfInterest =
                     on change or load
                         set #start-date.max to my value
                 ") (Some DateTime.Now)
-                trailblazerSelect "start-point-select" "startPoint" "Starting Point" pointsOfInterestOptions (Some "
+                trailblazerSelect "start-point-select" "startPointId" "Starting Point" pointsOfInterestOptions (Some "
                     on change 
                         set startMile to parseFloat(my selectedOptions.dataset.mile)
           
@@ -43,7 +45,14 @@ let planView trailPointsOfInterest =
                         if #end-point-select.selectedOptions[0].disabled
                             set #end-point-select.value to ''
                 ") []
-                trailblazerSelect "end-point-select" "endPoint" "Ending Point" pointsOfInterestOptions (Some "
+                match trailPointsOfInterest with
+                    | Ok _ -> emptyText
+                    | Error e -> span [] [ 
+                        match e with
+                            | DatabaseError error -> str "An error ocurred when retrieving points of interest." 
+                            | _ -> str "An error has ocurred."
+                     ]
+                trailblazerSelect "end-point-select" "endPointId" "Ending Point" pointsOfInterestOptions (Some "
                     on change 
                         set endMile to parseFloat(my selectedOptions.dataset.mile)
           
