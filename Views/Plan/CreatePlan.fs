@@ -1,5 +1,6 @@
 module HikePlanner.Views.Plan.Plan
 
+open System;
 open Giraffe.ViewEngine
 open HikePlanner.Views.Components.TextInput
 open HikePlanner.Views.Components.DatePicker
@@ -9,18 +10,56 @@ open HikePlanner.Repositories.HikeRepo
 
 let planView trailPointsOfInterest =
         let toOptionLabel poi = sprintf "%s - Mile %.2f" poi.Name poi.TrailMile
+        let pointsOfInterestOptions = trailPointsOfInterest |> Seq.map (fun poi -> { Label = poi |> toOptionLabel; Value = poi.Name; Attributes = [ ("data-mile", poi.TrailMile.ToString())] })
+
+        
+
         div [] [
             div [ _id "map"; _class "w-[90vw] h-[400px]" ] []
             form [ _class "max-w-3xl mx-auto mt-8 p-6 bg-white rounded-3xl shadow-md border border-[#D4C3A8]"; attr "hx-post" "/plan" ] [
-                textInput "trail-name" "hikeName" "Trail Name"
-                datePicker "start-date" "startDate" "Start Date"
-                datePicker "end-date" "endDate" "End Date"
-                trailblazerSelect "start-point-select" "startPoint" "Starting Point" (
-                    trailPointsOfInterest 
-                    |> Seq.map (fun poi -> { Label = poi |> toOptionLabel; Value = poi.Name }))
-                trailblazerSelect "end-point-select" "endPoint" "Ending Point" (
-                    trailPointsOfInterest 
-                    |> Seq.map (fun poi -> { Label = poi |> toOptionLabel; Value = poi.Name }))
+                textInput "hike-name" "hikeName" "Hike Name"
+                datePicker "start-date" "startDate" "Start Date" (Some "
+                    on change or load
+                        set #end-date.min to my value
+                ") (Some DateTime.Now)
+                datePicker "end-date" "endDate" "End Date" (Some "
+                    on change or load
+                        set #start-date.max to my value
+                ") (Some DateTime.Now)
+                trailblazerSelect "start-point-select" "startPoint" "Starting Point" pointsOfInterestOptions (Some "
+                    on change 
+                        set startMile to parseFloat(my selectedOptions.dataset.mile)
+          
+                        for opt in #end-point-select.options
+                            set endMile to parseFloat(opt.dataset.mile)
+
+                            if endMile < startMile
+                                set opt.disabled to true
+                            else
+                                set opt.disabled to false
+                            end
+                        end
+          
+                        if #end-point-select.selectedOptions[0].disabled
+                            set #end-point-select.value to ''
+                ") []
+                trailblazerSelect "end-point-select" "endPoint" "Ending Point" pointsOfInterestOptions (Some "
+                    on change 
+                        set endMile to parseFloat(my selectedOptions.dataset.mile)
+          
+                        for opt in #start-point-select.options
+                            set startMile to parseFloat(opt.dataset.mile)
+
+                            if endMile < startMile
+                                set opt.disabled to true
+                            else
+                                set opt.disabled to false
+                            end
+                        end
+          
+                        if #start-point-select.selectedOptions[0].disabled
+                            set #start-point-select.value to ''
+                ") []
                 button [ _type "submit"; _class "bg-[#4A7043] hover:bg-[#2E5A3D] text-white px-6 py-2 rounded-full font-medium transition-colors" ] [ str "Submit Plan" ]
             ]
         ] |> withMasterLayout
