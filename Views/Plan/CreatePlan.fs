@@ -50,7 +50,7 @@ let planView (trailPointsOfInterest: Result<TrailPointOfInterest seq, Trailblaze
                     | Error e -> span [] [ 
                         match e with
                             | DatabaseError error -> str "An error ocurred when retrieving points of interest." 
-                            | _ -> str "An error has ocurred."
+                            | _ -> emptyText
                      ]
                 trailblazerSelect "end-point-select" "endPointId" "Ending Point" pointsOfInterestOptions (Some "
                     on change 
@@ -69,6 +69,13 @@ let planView (trailPointsOfInterest: Result<TrailPointOfInterest seq, Trailblaze
                         if #start-point-select.selectedOptions[0].disabled
                             set #start-point-select.value to ''
                 ") []
+                match trailPointsOfInterest with
+                    | Ok _ -> emptyText
+                    | Error e -> span [] [ 
+                        match e with
+                            | FormValidationError error -> str error
+                            | _ -> str "An error has occurred"
+                     ]
                 button [ _type "submit"; _class "bg-[#4A7043] hover:bg-[#2E5A3D] text-white px-6 py-2 rounded-full font-medium transition-colors" ] [ str "Submit Plan" ]
             ]
         ] |> withMasterLayout

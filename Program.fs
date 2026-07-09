@@ -19,6 +19,16 @@ let withApp (appEnv: AppEnv) (app: App<EnvironmentWithContext, Giraffe.ViewEngin
                     | Error handler -> Giraffe.Core.htmlView handler next ctx
         }
 
+let withAppHandler (appEnv: AppEnv) app next ctx =  
+        task {
+            let environment = { Environment = appEnv; Context = ctx}
+            let! result = App.run environment app
+
+            return! match result with
+                    | Ok handler -> handler next ctx
+                    | Error handler -> handler next ctx
+        }
+
 let endpoints env = 
     let render = withApp env
     [
@@ -28,7 +38,7 @@ let endpoints env =
             route "/plan" (listPlansHandler |> render)
         ]
         POST [
-            route "/plan" (saveHikePlan |> render)
+            route "/plan" (withAppHandler env saveHikePlan)
         ]
     ]
 

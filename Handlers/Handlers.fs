@@ -42,20 +42,6 @@ module Handlers =
             return result
         }
 
-
-    let saveHikePlan: App<EnvironmentWithContext, XmlNode, XmlNode> =
-        app {
-            let! { Context = ctx } = App.ask
-
-            let! form: SaveHikeForm = ctx.TryBindFormAsync<SaveHikeForm>() |> App.ofTaskResult |> App.mapError (fun e -> div [] [])
-
-            return! App.succeed (div [] [])
-
-            // let! saved = saveHike hike hike.startDate hike.endDate 
-            //     |> showStandardError
-            //     |> App.map (fun _ -> div [] [ str "Saved" ])
-        } 
-
     let listPlansHandler =
         app {
             let! hikes = getSavedHikes
@@ -69,3 +55,14 @@ module Handlers =
 
             return Plan.planView (Ok plans)
         } |> App.mapError (fun e -> Plan.planView (Error e))
+
+    let saveHikePlan : App<EnvironmentWithContext, HttpHandler, HttpHandler> =
+        app {
+            let! { Context = ctx } = App.ask
+
+            let! form: SaveHikeForm = ctx.TryBindFormAsync<SaveHikeForm>() |> App.ofTaskResult |> App.mapError (fun e -> FormValidationError e)
+
+            return! saveHike form.HikeName form.StartDate form.EndDate
+        } 
+        |> App.bind (fun _ -> App.succeed (redirectTo false "/plan"))
+        |> App.mapError (fun e -> htmlView (Plan.planView (Error e)))

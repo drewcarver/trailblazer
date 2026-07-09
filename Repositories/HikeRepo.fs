@@ -5,7 +5,6 @@ open Microsoft.Data.Sqlite
 open HikePlanner.Infrastructure
 open System.Threading.Tasks
 open HikePlanner.Core
-open HikePlanner.Core.Utils
 
 type Hike = { 
     Id: int64

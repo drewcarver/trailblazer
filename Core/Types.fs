@@ -5,6 +5,7 @@ type ConnectionString = ConnectionString of string
 
 type TrailblazerError =
     | DatabaseError of string
+    | FormValidationError of string
     | NotFound of string
 
 type AppEnv = {
