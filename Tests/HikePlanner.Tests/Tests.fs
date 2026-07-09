@@ -20,8 +20,11 @@ let ``POST /plan saves a hike through the route and SQLite`` () =
     builder.WebHost.UseTestServer() |> ignore
 
     let app = builder.Build()
+    let env = {
+        ConnectionString = connectionString
+    }
     app.UseRouting().UseEndpoints(fun e->
-        e.MapGiraffeEndpoints (endpoints connectionString)
+        e.MapGiraffeEndpoints (endpoints env)
     ) |> ignore
     app.StartAsync() |> ignore
 
