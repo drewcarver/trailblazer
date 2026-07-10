@@ -26,9 +26,12 @@ module Handlers =
         app {
             let! hikes = getSavedHikes
 
-            return htmlView (listPlans hikes)
+            return (hikes
+                |> Ok
+                |> listPlans
+                |> htmlView)
         } 
-        |> App.mapError (fun e -> htmlView (div [] []))
+        |> App.mapError (Error >> listPlans >> htmlView)
 
     let planHandler: TrailblazerEndpoint<_> =
         app {
