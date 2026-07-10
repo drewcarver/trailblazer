@@ -7,12 +7,9 @@ open HikePlanner.Views.Plan
 open HikePlanner.Views.Plan.ListPlans
 open System
 open Giraffe
-open Giraffe.ViewEngine
 open Utils
 
 module Handlers = 
-    open Microsoft.AspNetCore.Http
-
     [<CLIMutable>]
     type SaveHikeForm = {
         HikeName: string

@@ -11,6 +11,7 @@ open Giraffe.EndpointRouting
 open Xunit
 open HikePlanner.Core
 open Program
+open HikePlanner.Handlers.Handlers
 
 [<Fact>]
 let ``POST /plan saves a hike through the route and SQLite`` () =
@@ -30,17 +31,26 @@ let ``POST /plan saves a hike through the route and SQLite`` () =
 
     use client = app.GetTestClient()
 
+    let formToSave: SaveHikeForm = {
+        HikeName     = "Mossy Peak"
+        StartDate    = DateTime.Now
+        EndDate      = DateTime.Now.AddDays(2)
+        StartPointId = 1
+        EndPointId   = 2
+    }
+
     let form =
-        new FormUrlEncodedContent(
-            [ KeyValuePair<string, string>("TrailName", "Mossy Peak")
-              KeyValuePair<string, string>("StartDate", "2026-06-28")
-              KeyValuePair<string, string>("EndDate", "2026-06-29") ])
+        new FormUrlEncodedContent( dict [
+            nameof formToSave.HikeName,     formToSave.HikeName;
+            nameof formToSave.StartDate,    formToSave.StartDate.ToString "yyyy-MM-dd";
+            nameof formToSave.EndDate,      formToSave.EndDate.ToString "yyyy-MM-dd";
+            nameof formToSave.StartPointId, formToSave.StartPointId.ToString();
+            nameof formToSave.EndPointId,   formToSave.EndPointId.ToString();
+        ])
 
     let response = client.PostAsync("/plan", form).Result
 
-    Assert.Equal(HttpStatusCode.OK, response.StatusCode)
-    let body = response.Content.ReadAsStringAsync().Result
-    Assert.Contains("Saved", body)
+    Assert.Equal(HttpStatusCode.Found, response.StatusCode)
 
     let (ConnectionString rawString) = connectionString
     use conn = new SqliteConnection(rawString)
