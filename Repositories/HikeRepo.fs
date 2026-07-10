@@ -126,7 +126,7 @@ let getHikeByName (trailName: string) : App<ConnectionString, TrailblazerError, 
         )
     }
 
-let getTrailPointsOfInterest (trailName: string) : App<EnvironmentWithContext, TrailblazerError, TrailPointOfInterest list> =
+let getTrailPointsOfInterest (trailName: string) =
     app {
         let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
 

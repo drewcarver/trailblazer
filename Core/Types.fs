@@ -1,5 +1,7 @@
 namespace HikePlanner.Core
 open Microsoft.AspNetCore.Http
+open HikePlanner.Infrastructure
+open Giraffe
 
 type ConnectionString = ConnectionString of string
 
@@ -12,7 +14,9 @@ type AppEnv = {
     ConnectionString: ConnectionString
 }
 
-type EnvironmentWithContext = {
-    Environment: AppEnv
+type EnvironmentWithContext<'env> = {
+    Environment: 'env
     Context: HttpContext
 }
+
+type TrailblazerEndpoint<'env> = App<'env, HttpHandler, HttpHandler>

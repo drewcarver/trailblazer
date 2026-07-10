@@ -9,17 +9,7 @@ open HikePlanner.Handlers.Handlers
 
 let private defaultConnectionString = ConnectionString "Data Source=hikes.db"
 
-let withApp (appEnv: AppEnv) (app: App<EnvironmentWithContext, Giraffe.ViewEngine.HtmlElements.XmlNode, Giraffe.ViewEngine.HtmlElements.XmlNode>) next ctx =  
-        task {
-            let environment = { Environment = appEnv; Context = ctx}
-            let! result = App.run environment app
-
-            return! match result with
-                    | Ok handler -> Giraffe.Core.htmlView handler next ctx
-                    | Error handler -> Giraffe.Core.htmlView handler next ctx
-        }
-
-let withAppHandler (appEnv: AppEnv) app next ctx =  
+let withAppHandler (appEnv: 'env) app next ctx =  
         task {
             let environment = { Environment = appEnv; Context = ctx}
             let! result = App.run environment app
@@ -30,12 +20,11 @@ let withAppHandler (appEnv: AppEnv) app next ctx =
         }
 
 let endpoints env = 
-    let render = withApp env
     [
         GET [
             route "/" homeHandler
-            route "/plan/create" (planHandler |> render)
-            route "/plan" (listPlansHandler |> render)
+            route "/plan/create" (withAppHandler env planHandler)
+            route "/plan" (withAppHandler env listPlansHandler)
         ]
         POST [
             route "/plan" (withAppHandler env saveHikePlan)
