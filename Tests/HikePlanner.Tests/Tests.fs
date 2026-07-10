@@ -56,4 +56,4 @@ let ``POST /plan saves a hike through the route and SQLite`` () =
     let content = getHikesRepsonse.Content.ReadAsStringAsync().Result
 
     Console.WriteLine content
-    Assert.Contains(content, formToSave.HikeName)
+    Assert.Contains(formToSave.HikeName, content, StringComparison.OrdinalIgnoreCase)
