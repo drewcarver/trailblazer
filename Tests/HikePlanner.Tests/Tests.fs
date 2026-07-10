@@ -52,18 +52,8 @@ let ``POST /plan saves a hike through the route and SQLite`` () =
 
     Assert.Equal(HttpStatusCode.Found, response.StatusCode)
 
-    let (ConnectionString rawString) = connectionString
-    use conn = new SqliteConnection(rawString)
-    conn.Open()
+    let getHikesRepsonse = client.GetAsync("/plan").Result
+    let content = getHikesRepsonse.Content.ReadAsStringAsync().Result
 
-    use cmd = conn.CreateCommand()
-    cmd.CommandText <- "SELECT COUNT(*) FROM hike"
-    let count =
-        match cmd.ExecuteScalar() with
-        | :? int64 as id -> id
-        | :? int32 as i -> int64 i
-        | :? int16 as i -> int64 i
-        | :? string as s -> Int64.Parse s
-        | _ -> 0L
-
-    Assert.Equal(1L, count)
+    Console.WriteLine content
+    Assert.Contains(content, formToSave.HikeName)

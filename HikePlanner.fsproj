@@ -8,8 +8,6 @@
     <Compile Include="Infrastructure/App.fs" />
     <Compile Include="Core/Types.fs" />
     <Compile Include="Core/Utils.fs" />
-    <Compile Include="Infrastructure/Computation/Reader.fs" />
-    <Compile Include="Infrastructure/Computation/TaskReader.fs" />
     <Compile Include="Repositories/HikeRepo.fs" />
     <Compile Include="Views/Components/DatePicker.fs" />
     <Compile Include="Views/Components/TextInput.fs" />
