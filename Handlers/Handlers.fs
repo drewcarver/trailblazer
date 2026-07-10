@@ -23,22 +23,12 @@ module Handlers =
     }
 
     let listPlansHandler: TrailblazerEndpoint<_> =
-        app {
-            let! hikes = getSavedHikes
-
-            return (hikes
-                |> Ok
-                |> listPlans
-                |> htmlView)
-        } 
+        getSavedHikes |> App.map (Ok >> listPlans >> htmlView)
         |> App.mapError (Error >> listPlans >> htmlView)
 
     let planHandler: TrailblazerEndpoint<_> =
-        app {
-            let! plans = getTrailPointsOfInterest "AppalachianTrail"
-
-            return htmlView (Plan.planView (Ok plans))
-        } |> App.mapError (fun e -> htmlView (Plan.planView (Error e)))
+        getTrailPointsOfInterest "AppalachianTrail" |> App.map (Ok >> Plan.planView >> htmlView)
+        |> App.mapError (Error >> Plan.planView >> htmlView) 
 
     let saveHikePlan : TrailblazerEndpoint<_> =
         app {
@@ -50,4 +40,4 @@ module Handlers =
 
             return! App.succeed (redirectTo false "/plan")
         } 
-        |> App.mapError (fun e -> htmlView (Plan.planView (Error e)))
+        |> App.mapError (Error >> Plan.planView >> htmlView) 

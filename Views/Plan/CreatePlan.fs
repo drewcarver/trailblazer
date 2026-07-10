@@ -9,11 +9,11 @@ open HikePlanner.Views.MasterLayout
 open HikePlanner.Repositories.HikeRepo
 open HikePlanner.Core
 
-let planView (trailPointsOfInterest: Result<TrailPointOfInterest seq, TrailblazerError>) =
+let planView (trailPointsOfInterest: Result<TrailPointOfInterest list, TrailblazerError>) =
         let toOptionLabel poi = sprintf "%s - Mile %.2f" poi.Name poi.TrailMile
         let pointsOfInterestOptions = 
             trailPointsOfInterest 
-            |> Result.defaultWith (fun _ -> Seq.empty)
+            |> Result.defaultWith (fun _ -> List.empty)
             |> Seq.map (fun poi -> { Label = poi |> toOptionLabel; Value = string poi.Id; Attributes = [ ("data-mile", poi.TrailMile.ToString())] })
 
         div [] [
