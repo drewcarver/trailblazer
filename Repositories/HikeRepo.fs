@@ -84,7 +84,6 @@ let withReader (command: SqliteCommand) (f: SqliteDataReader -> 'b) : App<'a, Tr
         try
             use! sqliteReader = command.ExecuteReaderAsync()
             let! canRead = sqliteReader.ReadAsync()
-            failwith "test"
 
             if canRead then
                 let results = f sqliteReader 
