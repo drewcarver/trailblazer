@@ -38,7 +38,9 @@ module Handlers =
 
             let! _ = saveHike form.HikeName form.StartDate form.EndDate form.StartPointId form.EndPointId
 
-            return! App.succeed (redirectTo false "/plan")
+            return! App.succeed (
+                setHttpHeader "HX-Location" "/plan" >=> setStatusCode 204
+            )
         } 
         |> App.mapError (Error >> Plan.planView >> htmlView) 
 
