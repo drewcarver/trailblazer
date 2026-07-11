@@ -7,16 +7,19 @@ open System.Threading.Tasks
 open HikePlanner.Core
 
 type Hike = { 
-    Id: int64
-    Trail: string
-    StartDate: DateTime
-    EndDate: DateTime }
+    Id           : int64
+    Trail        : string
+    StartDate    : DateTime
+    EndDate      : DateTime
+    StartPointId : int64
+    EndPointId   : int64
+ }
 
 type TrailPointOfInterest = { 
-    Id: int64
-    TrailName: string
-    TrailMile: float
-    Name: string
+    Id          : int64
+    Name        : string
+    TrailName   : string
+    TrailMile   : float
     }
 
 let private ensureTable (conn: SqliteConnection) =
@@ -26,7 +29,9 @@ CREATE TABLE IF NOT EXISTS hike (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     trail TEXT NOT NULL,
     start_date TEXT NOT NULL,
-    end_date TEXT
+    end_date TEXT,
+    start_point_id INT,
+    end_point_id INT
 );"""
     cmd.ExecuteNonQuery() |> ignore
 
@@ -41,7 +46,7 @@ let private toInt64 (value: obj) =
         | :? string as s -> Int64.Parse s
         | _ -> -1L
 
-let saveHike (trail: string) (start: DateTime) (endDate: DateTime) =
+let saveHike (trail: string) (startDate: DateTime) (endDate: DateTime) (startPointId: int64) (endPointId: int64) =
     app {
         let! { Environment = { ConnectionString = ConnectionString connStr }} = App.ask
 
@@ -50,10 +55,12 @@ let saveHike (trail: string) (start: DateTime) (endDate: DateTime) =
         ensureTable conn
 
         use cmd = conn.CreateCommand()
-        cmd.CommandText <- "INSERT INTO hike (trail, start_date, end_date) VALUES ($trail, $start_date, $end_date); SELECT last_insert_rowid();"
+        cmd.CommandText <- "INSERT INTO hike (trail, start_date, end_date, start_point_id, end_point_id) VALUES ($trail, $start_date, $end_date, $start_point_id, $end_point_id); SELECT last_insert_rowid();"
         cmd.Parameters.AddWithValue("$trail", trail) |> ignore
-        cmd.Parameters.AddWithValue("$start_date", start.ToString "o") |> ignore
-        cmd.Parameters.AddWithValue("$end_date", endDate.ToString "o") |> ignore
+        cmd.Parameters.AddWithValue("$start_date", startDate) |> ignore
+        cmd.Parameters.AddWithValue("$end_date", endDate) |> ignore
+        cmd.Parameters.AddWithValue("$start_point_id", startPointId) |> ignore
+        cmd.Parameters.AddWithValue("$end_point_id", endPointId) |> ignore
 
         let! result = 
             App.catch 
@@ -77,7 +84,7 @@ let getSavedHikes =
               App.fail (DatabaseError "Couldn't open database")
 
         use cmd = conn.CreateCommand()
-        cmd.CommandText <- "SELECT id, trail, start_date, end_date FROM hike ORDER BY id;"
+        cmd.CommandText <- "SELECT id, trail, start_date, end_date, start_point_id, end_point_id FROM hike ORDER BY id;"
 
         return! try
                 use rdr = cmd.ExecuteReader()
@@ -87,8 +94,10 @@ let getSavedHikes =
                         let trail = rdr.GetString 1
                         let startDate = DateTime.Parse(rdr.GetString 2)
                         let endDate = DateTime.Parse(rdr.GetString 3)
+                        let startPointId = toInt64 (rdr.GetValue 4)
+                        let endPointId = if rdr.IsDBNull 5 then -1L else toInt64 (rdr.GetValue 5)
 
-                        yield { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate } ]
+                        yield { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate; StartPointId = startPointId; EndPointId = endPointId } ]
                 App.succeed results 
         with ex ->
             App.fail (DatabaseError (sprintf "Error retrieving hikes: %s" ex.Message)) 
@@ -113,7 +122,7 @@ let getHikeById (id: int64) =
         ensureTable conn
 
         use cmd = conn.CreateCommand()
-        cmd.CommandText <- "SELECT id, trail, start_date, end_date FROM hike WHERE id = $id LIMIT 1;"
+        cmd.CommandText <- "SELECT id, trail, start_date, end_date, start_point_id, end_point_id FROM hike WHERE id = $id LIMIT 1;"
         cmd.Parameters.AddWithValue("$id", id) |> ignore
 
         return! withReader cmd (fun rdr ->
@@ -121,8 +130,10 @@ let getHikeById (id: int64) =
             let trail = rdr.GetString 1
             let startDate = DateTime.Parse(rdr.GetString 2)
             let endDate = DateTime.Parse(rdr.GetString 3)
+            let startPointId = toInt64 (rdr.GetValue 4)
+            let endPointId = toInt64 (rdr.GetValue 5)
 
-            { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate }
+            { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate; StartPointId = startPointId; EndPointId = endPointId }
         )
     }
 
@@ -135,7 +146,7 @@ let getHikeByName (trailName: string) : App<ConnectionString, TrailblazerError, 
         ensureTable conn
 
         use cmd = conn.CreateCommand()
-        cmd.CommandText <- "SELECT id, trail, start_date, end_date FROM hike WHERE trail = $trail LIMIT 1;"
+        cmd.CommandText <- "SELECT id, trail, start_date, end_date, start FROM hike WHERE trail = $trail LIMIT 1;"
         cmd.Parameters.AddWithValue("$trail", trailName) |> ignore
 
         return! withReader cmd (fun rdr ->
@@ -143,8 +154,17 @@ let getHikeByName (trailName: string) : App<ConnectionString, TrailblazerError, 
             let trail = rdr.GetString 1
             let startDate = DateTime.Parse(rdr.GetString 2)
             let endDate = DateTime.Parse(rdr.GetString 3)
+            let startPointId = toInt64 (rdr.GetValue 4)
+            let endPointId = toInt64 (rdr.GetValue 5)
 
-            { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate }
+            { 
+                Id = id; 
+                Trail = trail; 
+                StartDate = startDate; 
+                EndDate = endDate;
+                StartPointId = startPointId;
+                EndPointId = endPointId;
+            }
         )
     }
 

@@ -21,11 +21,13 @@ module Handlers =
     }
 
     let listPlansHandler: TrailblazerEndpoint<_> =
-        getSavedHikes |> App.map (Ok >> listPlans >> htmlView)
+        getSavedHikes 
+        |> App.map (Ok >> listPlans >> htmlView)
         |> App.mapError (Error >> listPlans >> htmlView)
 
     let planHandler: TrailblazerEndpoint<_> =
-        getTrailPointsOfInterest "AppalachianTrail" |> App.map (Ok >> Plan.planView >> htmlView)
+        getTrailPointsOfInterest "AppalachianTrail" 
+        |> App.map (Ok >> Plan.planView >> htmlView)
         |> App.mapError (Error >> Plan.planView >> htmlView) 
 
     let saveHikePlan : TrailblazerEndpoint<_> =
@@ -34,13 +36,13 @@ module Handlers =
 
             let! form: SaveHikeForm = getFormHelper ctx 
 
-            let! _ = saveHike form.HikeName form.StartDate form.EndDate 
+            let! _ = saveHike form.HikeName form.StartDate form.EndDate form.StartPointId form.EndPointId
 
             return! App.succeed (redirectTo false "/plan")
         } 
         |> App.mapError (Error >> Plan.planView >> htmlView) 
 
-    let viewHikeHandler (hikeId: int64) : TrailblazerEndpoint<_> =
+    let viewHikeHandler hikeId : TrailblazerEndpoint<_> =
        getHikeById hikeId
         |> App.map (Ok >> hikeDetailView >> htmlView)
         |> App.mapError (Error >> hikeDetailView >> htmlView)
