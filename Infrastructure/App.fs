@@ -1,4 +1,4 @@
-namespace HikePlanner.Infrastructure
+﻿namespace HikePlanner.Infrastructure
 
 open System
 open System.Runtime.CompilerServices
@@ -20,7 +20,6 @@ module App =
     //--------------------------------------------------------------------------
     // Constructors
     //--------------------------------------------------------------------------
-
     let inline succeed x =
         App(fun _ ->
             task {
@@ -143,6 +142,26 @@ module App =
     //--------------------------------------------------------------------------
     // Helpers
     //--------------------------------------------------------------------------
+    let zip (App m1) (App m2) =
+        App(fun env ->
+            task {
+                let task1 = m1 env
+                let task2 = m2 env
+                
+                let! res1 = task1
+                let! res2 = task2
+
+                match res1, res2 with
+                | Ok v1, Ok v2 -> 
+                    return Ok (v1, v2)
+                | Error e1, _ -> 
+                    return Error e1  
+                | _, Error e2 -> 
+                    return Error e2
+            })
+
+    let combine a b =
+        bind (fun () -> b) a
 
     let tap f =
         bind (fun x ->
@@ -194,8 +213,8 @@ type AppBuilder() =
 
     member _.Bind
         (
-            app: App<'env, 'err, 'a>,
-            binder: 'a -> App<'env, 'err, 'b>
+            app,
+            binder
         ) =
         App.bind binder app
 
@@ -212,7 +231,7 @@ type AppBuilder() =
         app
 
     member _.Combine(a: App<'env, 'err, unit>, b: App<'env, 'err, 'a>) =
-        App.bind (fun () -> b) a
+        App.combine
 
     member _.Using(resource: #IDisposable, body: #IDisposable -> App<'env, 'err, 'a>) =
         App(fun env ->
@@ -254,6 +273,12 @@ type AppBuilder() =
 
     member _.Source(async: Async<'a>) =
         App.ofAsync async
+
+    member _.MergeSources(m1, m2) =
+        App.zip m1 m2 
+
+    member _.BindReturn(m, f) = 
+        App.map f m
 
 [<AutoOpen>]
 module AppExtensions =

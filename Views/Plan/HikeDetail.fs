@@ -5,7 +5,7 @@ open HikePlanner.Views.MasterLayout
 open HikePlanner.Repositories.HikeRepo
 open HikePlanner.Core
 
-let hikeDetailView (hikeResult: Result<Hike, TrailblazerError>) = 
+let hikeDetailView (hikeResult: Result<SavedHike, TrailblazerError>) = 
     match hikeResult with
     | Ok hike ->
         div [] [

@@ -11,7 +11,7 @@ let myHikesTable =
     "My Hikes" 
     (trailblazerTableHeader ["Hike Name"; "Start Date"; "End Date"; "Action"]) 
 
-let myHikeRow hike =
+let myHikeRow (hike: Hike) =
     trailblazerTableRow [
         trailblazerTableColumn (StringValue hike.Trail)
         trailblazerTableColumn (StringValue (hike.StartDate.ToString "yyyy-MM-dd"))

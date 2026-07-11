@@ -22,6 +22,15 @@ type TrailPointOfInterest = {
     TrailMile   : float
     }
 
+type SavedHike = {
+    Id           : int64
+    Trail        : string
+    StartDate    : DateTime
+    EndDate      : DateTime
+    StartPoint   : TrailPointOfInterest
+    EndPoint     : TrailPointOfInterest
+}
+
 let private ensureTable (conn: SqliteConnection) =
     use cmd = conn.CreateCommand()
     cmd.CommandText <- """
@@ -113,30 +122,6 @@ let withReader (command: SqliteCommand) f : App<'a, TrailblazerError, 'b> =
     with ex ->
         App.fail (DatabaseError (sprintf "Error reading from SQLite: %s" ex.Message))
 
-let getHikeById (id: int64) =
-    app {
-        let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
-
-        use conn = new SqliteConnection(connStr)
-        conn.Open() |> ignore
-        ensureTable conn
-
-        use cmd = conn.CreateCommand()
-        cmd.CommandText <- "SELECT id, trail, start_date, end_date, start_point_id, end_point_id FROM hike WHERE id = $id LIMIT 1;"
-        cmd.Parameters.AddWithValue("$id", id) |> ignore
-
-        return! withReader cmd (fun rdr ->
-            let id = toInt64 (rdr.GetValue 0)
-            let trail = rdr.GetString 1
-            let startDate = DateTime.Parse(rdr.GetString 2)
-            let endDate = DateTime.Parse(rdr.GetString 3)
-            let startPointId = toInt64 (rdr.GetValue 4)
-            let endPointId = toInt64 (rdr.GetValue 5)
-
-            { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate; StartPointId = startPointId; EndPointId = endPointId }
-        )
-    }
-
 let getHikeByName (trailName: string) : App<ConnectionString, TrailblazerError, Hike> =
     app {
         let! ConnectionString connStr = App.ask
@@ -193,3 +178,61 @@ let getTrailPointsOfInterest (trailName: string) =
                     yield { Id = id; TrailName = trailName; TrailMile = trailMile; Name = name } ]
             )
     }
+
+let getTrailPointOfInterestById (id: int64) =
+    app {
+        let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
+
+        use conn = new SqliteConnection(connStr)
+        conn.Open() |> ignore
+        ensureTable conn
+
+        use cmd = conn.CreateCommand()
+        cmd.CommandText <- "SELECT id, trail_name, trail_mile, name FROM TrailPointsOfInterest WHERE id = @id LIMIT 1;"
+        cmd.Parameters.AddWithValue("@id", id) |> ignore
+
+        return! withReader cmd (fun rdr ->
+            let id = toInt64 (rdr.GetValue 0)
+            let trailName = rdr.GetString 1
+            let trailMile = rdr.GetDouble 2
+            let name = rdr.GetString 3
+
+            { Id = id; TrailName = trailName; TrailMile = trailMile; Name = name }
+        )
+    }
+
+let getHikeById (id: int64) =
+    app {
+        let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
+
+        use conn = new SqliteConnection(connStr)
+        conn.Open() |> ignore
+        ensureTable conn
+
+        use cmd = conn.CreateCommand()
+        cmd.CommandText <- "SELECT id, trail, start_date, end_date, start_point_id, end_point_id FROM hike WHERE id = $id LIMIT 1;"
+        cmd.Parameters.AddWithValue("$id", id) |> ignore
+
+        let! hike = withReader cmd (fun rdr ->
+            let id = toInt64 (rdr.GetValue 0)
+            let trail = rdr.GetString 1
+            let startDate = DateTime.Parse(rdr.GetString 2)
+            let endDate = DateTime.Parse(rdr.GetString 3)
+            let startPointId = toInt64 (rdr.GetValue 4)
+            let endPointId = toInt64 (rdr.GetValue 5)
+
+            { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate; StartPointId = startPointId; EndPointId = endPointId }
+        )
+
+        let! startPoint = getTrailPointOfInterestById hike.StartPointId
+        and! endPoint   = getTrailPointOfInterestById hike.EndPointId
+
+        return {
+            Id = id; 
+            Trail = hike.Trail; 
+            StartDate = hike.StartDate; 
+            EndDate = hike.EndDate; 
+            StartPoint = startPoint; 
+            EndPoint = endPoint; 
+        }
+    } 
