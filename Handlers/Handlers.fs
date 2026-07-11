@@ -5,6 +5,7 @@ open HikePlanner.Repositories.HikeRepo
 open HikePlanner.Core
 open HikePlanner.Views.Plan
 open HikePlanner.Views.Plan.ListPlans
+open HikePlanner.Views.Plan.HikeDetail
 open System
 open Giraffe
 open Utils
@@ -38,3 +39,8 @@ module Handlers =
             return! App.succeed (redirectTo false "/plan")
         } 
         |> App.mapError (Error >> Plan.planView >> htmlView) 
+
+    let viewHikeHandler (hikeId: int64) : TrailblazerEndpoint<_> =
+       getHikeById hikeId
+        |> App.map (Ok >> hikeDetailView >> htmlView)
+        |> App.mapError (Error >> hikeDetailView >> htmlView)

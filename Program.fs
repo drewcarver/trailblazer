@@ -25,6 +25,7 @@ let endpoints env =
             route "/" homeHandler
             route "/plan/create" (withAppHandler env planHandler)
             route "/plan" (withAppHandler env listPlansHandler)
+            routef "/plan/%d:id" (viewHikeHandler >> withAppHandler env)
         ]
         POST [
             route "/plan" (withAppHandler env saveHikePlan)

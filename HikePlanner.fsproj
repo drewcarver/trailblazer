@@ -17,6 +17,7 @@
     <Compile Include="Views/Shared/MasterLayout.fs" />
     <Compile Include="Views/Plan/ListPlans.fs" />
     <Compile Include="Views/Plan/CreatePlan.fs" />
+    <Compile Include="Views/Plan/HikeDetail.fs" />
     <Compile Include="Handlers/Handlers.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

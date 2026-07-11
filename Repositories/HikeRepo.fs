@@ -104,6 +104,28 @@ let withReader (command: SqliteCommand) f : App<'a, TrailblazerError, 'b> =
     with ex ->
         App.fail (DatabaseError (sprintf "Error reading from SQLite: %s" ex.Message))
 
+let getHikeById (id: int64) =
+    app {
+        let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
+
+        use conn = new SqliteConnection(connStr)
+        conn.Open() |> ignore
+        ensureTable conn
+
+        use cmd = conn.CreateCommand()
+        cmd.CommandText <- "SELECT id, trail, start_date, end_date FROM hike WHERE id = $id LIMIT 1;"
+        cmd.Parameters.AddWithValue("$id", id) |> ignore
+
+        return! withReader cmd (fun rdr ->
+            let id = toInt64 (rdr.GetValue 0)
+            let trail = rdr.GetString 1
+            let startDate = DateTime.Parse(rdr.GetString 2)
+            let endDate = DateTime.Parse(rdr.GetString 3)
+
+            { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate }
+        )
+    }
+
 let getHikeByName (trailName: string) : App<ConnectionString, TrailblazerError, Hike> =
     app {
         let! ConnectionString connStr = App.ask
