@@ -40,7 +40,7 @@ let ``POST /plan saves a hike through the route and SQLite`` () =
         }
 
         let form =
-            new FormUrlEncodedContent( dict [
+            new FormUrlEncodedContent(dict [
                 nameof formToSave.HikeName,     formToSave.HikeName;
                 nameof formToSave.StartDate,    formToSave.StartDate.ToString "yyyy-MM-dd";
                 nameof formToSave.EndDate,      formToSave.EndDate.ToString "yyyy-MM-dd";

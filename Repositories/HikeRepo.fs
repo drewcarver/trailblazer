@@ -87,11 +87,8 @@ let withReader (command: SqliteCommand) (f: SqliteDataReader -> 'b) : App<'a, Tr
             if canRead then
                 let results = f sqliteReader 
 
-                let! _ = sqliteReader.CloseAsync()
-                
                 return! App.succeed results
             else
-                let! _ = sqliteReader.CloseAsync()
                 return! App.fail (NotFound "No rows found.")
         }
     with exn -> App.fail (DatabaseError "Couldn't connect to database.")
