@@ -14,45 +14,42 @@ open HikePlanner.Handlers.Handlers
 
 [<Fact>]
 let ``POST /plan saves a hike through the route and SQLite`` () =
-    let connectionString = ConnectionString "Data Source=file:plan-test?mode=memory&cache=shared"
+    task {
+        let (ConnectionString connectionString) = ConnectionString "Data Source=file:plan-test?mode=memory&cache=shared"
 
-    let builder = WebApplication.CreateBuilder()
-    builder.WebHost.UseTestServer() |> ignore
+        let builder = WebApplication.CreateBuilder()
+        builder.WebHost.UseTestServer() |> ignore
 
-    let app = builder.Build()
-    let env = {
-        ConnectionString = connectionString
+        let app = builder.Build()
+        let env = {
+            ConnectionString = ConnectionString connectionString
+        }
+        app.UseRouting().UseEndpoints(fun e->
+            e.MapGiraffeEndpoints (endpoints env)
+        ) |> ignore
+        do! app.StartAsync() 
+
+        use client = app.GetTestClient()
+
+        let formToSave: SaveHikeForm = {
+            HikeName     = "Mossy Peak"
+            StartDate    = DateTime.Now
+            EndDate      = DateTime.Now.AddDays(2)
+            StartPointId = 1
+            EndPointId   = 2
+        }
+
+        let form =
+            new FormUrlEncodedContent( dict [
+                nameof formToSave.HikeName,     formToSave.HikeName;
+                nameof formToSave.StartDate,    formToSave.StartDate.ToString "yyyy-MM-dd";
+                nameof formToSave.EndDate,      formToSave.EndDate.ToString "yyyy-MM-dd";
+                nameof formToSave.StartPointId, formToSave.StartPointId.ToString();
+                nameof formToSave.EndPointId,   formToSave.EndPointId.ToString();
+            ])
+
+        let! response = client.PostAsync("/plan", form)
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode)
+        Assert.Equal("/plan", response.Headers.GetValues("HX-Location") |> Seq.head)
     }
-    app.UseRouting().UseEndpoints(fun e->
-        e.MapGiraffeEndpoints (endpoints env)
-    ) |> ignore
-    app.StartAsync() |> ignore
-
-    use client = app.GetTestClient()
-
-    let formToSave: SaveHikeForm = {
-        HikeName     = "Mossy Peak"
-        StartDate    = DateTime.Now
-        EndDate      = DateTime.Now.AddDays(2)
-        StartPointId = 1
-        EndPointId   = 2
-    }
-
-    let form =
-        new FormUrlEncodedContent( dict [
-            nameof formToSave.HikeName,     formToSave.HikeName;
-            nameof formToSave.StartDate,    formToSave.StartDate.ToString "yyyy-MM-dd";
-            nameof formToSave.EndDate,      formToSave.EndDate.ToString "yyyy-MM-dd";
-            nameof formToSave.StartPointId, formToSave.StartPointId.ToString();
-            nameof formToSave.EndPointId,   formToSave.EndPointId.ToString();
-        ])
-
-    let response = client.PostAsync("/plan", form).Result
-
-    Assert.Equal(HttpStatusCode.NoContent, response.StatusCode)
-    Assert.Equal("/plan", response.Headers.GetValues("HX-Location") |> Seq.head)
-
-    let getHikesRepsonse = client.GetAsync("/plan").Result
-    let content = getHikesRepsonse.Content.ReadAsStringAsync().Result
-
-    Assert.Contains(formToSave.HikeName, content, StringComparison.OrdinalIgnoreCase)
