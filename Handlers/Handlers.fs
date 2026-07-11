@@ -21,7 +21,7 @@ module Handlers =
     }
 
     let listPlansHandler: TrailblazerEndpoint<_> =
-        getSavedHikes 
+        getHikes 
         |> App.map (Ok >> listPlans >> htmlView)
         |> App.mapError (Error >> listPlans >> htmlView)
 
@@ -36,7 +36,7 @@ module Handlers =
 
             let! form: SaveHikeForm = getFormHelper ctx 
 
-            let! _ = saveHike form.HikeName form.StartDate form.EndDate form.StartPointId form.EndPointId
+            let! _ =  saveHike form.HikeName form.StartDate form.EndDate form.StartPointId form.EndPointId
 
             return! App.succeed (
                 setHttpHeader "HX-Location" "/plan" >=> setStatusCode 204

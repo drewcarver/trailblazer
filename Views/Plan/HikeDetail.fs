@@ -23,6 +23,14 @@ let hikeDetailView (hikeResult: Result<SavedHike, TrailblazerError>) =
                     h2 [ _class "text-xl font-bold mb-2" ] [ str "End Date" ]
                     p [ _class "text-lg" ] [ str (hike.EndDate.ToString "yyyy-MM-dd") ]
                 ]
+                div [ _class "mb-4" ] [
+                    h2 [ _class "text-xl font-bold mb-2" ] [ str "End Date" ]
+                    p [ _class "text-lg" ] [ str (hike.StartPoint.Name) ]
+                ]
+                div [ _class "mb-4" ] [
+                    h2 [ _class "text-xl font-bold mb-2" ] [ str "End Date" ]
+                    p [ _class "text-lg" ] [ str (hike.EndPoint.Name) ]
+                ]
             ]
             a [ _href "/plan"; _class "inline-flex items-center justify-center px-4 py-2 text-sm font-mono font-bold uppercase border border-black bg-neutral-100 hover:bg-black hover:text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer mt-4" ] [ str "Back to Plans" ]
         ]

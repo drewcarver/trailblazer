@@ -79,50 +79,24 @@ let saveHike (trail: string) (startDate: DateTime) (endDate: DateTime) (startPoi
         return toInt64 result
     }
 
-let getSavedHikes =
-    app {
-        let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
-        
-        use! conn = 
-          try
-              let connection = new SqliteConnection(connStr)
-              connection.Open() |> ignore
-              ensureTable connection
-              App.succeed connection
-          with ex ->
-              App.fail (DatabaseError "Couldn't open database")
+let withReader (command: SqliteCommand) (f: SqliteDataReader -> 'b) : App<'a, TrailblazerError, 'b> =
+    try 
+        app {
+                use! sqliteReader = command.ExecuteReaderAsync()
+                let! canRead = sqliteReader.ReadAsync()
+                if canRead then
+                    let results = f sqliteReader 
 
-        use cmd = conn.CreateCommand()
-        cmd.CommandText <- "SELECT id, trail, start_date, end_date, start_point_id, end_point_id FROM hike ORDER BY id;"
+                    let! _ = sqliteReader.CloseAsync()
+                    
+                    return! App.succeed results
+                else
+                    let! _ = sqliteReader.CloseAsync()
+                    return! App.fail (NotFound "No rows found.")
+        }
+    with exn -> App.fail (DatabaseError "Couldn't connect to database.")
 
-        return! try
-                use rdr = cmd.ExecuteReader()
-                let results =
-                    [ while rdr.Read() do
-                        let id = toInt64 (rdr.GetValue 0)
-                        let trail = rdr.GetString 1
-                        let startDate = DateTime.Parse(rdr.GetString 2)
-                        let endDate = DateTime.Parse(rdr.GetString 3)
-                        let startPointId = toInt64 (rdr.GetValue 4)
-                        let endPointId = if rdr.IsDBNull 5 then -1L else toInt64 (rdr.GetValue 5)
-
-                        yield { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate; StartPointId = startPointId; EndPointId = endPointId } ]
-                App.succeed results 
-        with ex ->
-            App.fail (DatabaseError (sprintf "Error retrieving hikes: %s" ex.Message)) 
-    }
-
-let withReader (command: SqliteCommand) f : App<'a, TrailblazerError, 'b> =
-    try
-        use sqliteReader = command.ExecuteReader()
-        if sqliteReader.Read() then
-            f sqliteReader |> App.succeed
-        else
-            App.fail (NotFound "No rows found.")
-    with ex ->
-        App.fail (DatabaseError (sprintf "Error reading from SQLite: %s" ex.Message))
-
-let getHikeByName (trailName: string) : App<ConnectionString, TrailblazerError, Hike> =
+let getHikeByTrailName (trailName: string) : App<ConnectionString, TrailblazerError, Hike> =
     app {
         let! ConnectionString connStr = App.ask
 
@@ -184,12 +158,12 @@ let getTrailPointOfInterestById (id: int64) =
         let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
 
         use conn = new SqliteConnection(connStr)
-        conn.Open() |> ignore
+        let! _ = conn.OpenAsync() 
         ensureTable conn
 
         use cmd = conn.CreateCommand()
-        cmd.CommandText <- "SELECT id, trail_name, trail_mile, name FROM TrailPointsOfInterest WHERE id = @id LIMIT 1;"
-        cmd.Parameters.AddWithValue("@id", id) |> ignore
+        cmd.CommandText <- "SELECT Id, TrailName, TrailMile, Name FROM TrailPointsOfInterest WHERE Id = $id ORDER BY TrailMile; LIMIT 1;"
+        cmd.Parameters.AddWithValue("$id", id) |> ignore
 
         return! withReader cmd (fun rdr ->
             let id = toInt64 (rdr.GetValue 0)
@@ -199,6 +173,21 @@ let getTrailPointOfInterestById (id: int64) =
 
             { Id = id; TrailName = trailName; TrailMile = trailMile; Name = name }
         )
+    }
+
+let withPoints hike = 
+    app {
+        let! startPoint = getTrailPointOfInterestById hike.StartPointId
+        and! endPoint   = getTrailPointOfInterestById hike.EndPointId
+
+        return {
+            Id = hike.Id; 
+            Trail = hike.Trail; 
+            StartDate = hike.StartDate; 
+            EndDate = hike.EndDate; 
+            StartPoint = startPoint; 
+            EndPoint = endPoint; 
+        }
     }
 
 let getHikeById (id: int64) =
@@ -224,15 +213,31 @@ let getHikeById (id: int64) =
             { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate; StartPointId = startPointId; EndPointId = endPointId }
         )
 
-        let! startPoint = getTrailPointOfInterestById hike.StartPointId
-        and! endPoint   = getTrailPointOfInterestById hike.EndPointId
-
-        return {
-            Id = id; 
-            Trail = hike.Trail; 
-            StartDate = hike.StartDate; 
-            EndDate = hike.EndDate; 
-            StartPoint = startPoint; 
-            EndPoint = endPoint; 
-        }
+        return! withPoints hike
     } 
+
+let getHikes =
+    app {
+        let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
+        
+        use conn = new SqliteConnection(connStr)
+        conn.Open() |> ignore
+        ensureTable conn
+
+        use cmd = conn.CreateCommand()
+        cmd.CommandText <- "SELECT id, trail, start_date, end_date, start_point_id, end_point_id FROM hike ORDER BY id;"
+
+        let! hikes = withReader cmd (fun rdr ->
+                [ while rdr.Read() do
+                    let id = toInt64 (rdr.GetValue 0)
+                    let trail = rdr.GetString 1
+                    let startDate = DateTime.Parse(rdr.GetString 2)
+                    let endDate = DateTime.Parse(rdr.GetString 3)
+                    let startPointId = toInt64 (rdr.GetValue 4)
+                    let endPointId = if rdr.IsDBNull 5 then -1L else toInt64 (rdr.GetValue 5)
+
+                    yield { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate; StartPointId = startPointId; EndPointId = endPointId } ]
+        ) 
+
+        return! (hikes |> List.map withPoints)
+    }

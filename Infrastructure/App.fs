@@ -273,6 +273,9 @@ type AppBuilder() =
 
     member _.Source(async: Async<'a>) =
         App.ofAsync async
+    member this.Source (task: Task) : App<'env, 'err, unit> =
+        let asyncWorkflow = Async.AwaitTask task
+        App.ofAsync(asyncWorkflow) 
 
     member _.MergeSources(m1, m2) =
         App.zip m1 m2 
@@ -280,10 +283,21 @@ type AppBuilder() =
     member _.BindReturn(m, f) = 
         App.map f m
 
+    member _.Source (nested: App<'env, 'err, 'a> list) : App<'env, 'err, 'a list> =
+        let rec loop acc remaining =
+            match remaining with
+            | [] -> App.succeed (List.rev acc)
+            | headApp :: tailApps ->
+                App.bind (fun value -> 
+                    loop (value :: acc) tailApps
+                ) headApp
+        loop [] nested
+
 [<AutoOpen>]
 module AppExtensions =
     type AppBuilder with
         member _.Source(task: Task<'a>) : App<'env, 'err, 'a> =
             App.ofTask task
+
 
     let app = AppBuilder()
