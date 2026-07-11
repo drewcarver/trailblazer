@@ -19,7 +19,7 @@ let planView (trailPointsOfInterest: Result<TrailPointOfInterest list, Trailblaz
         div [] [
             div [ _id "map"; _class "w-[90vw] h-[400px]" ] []
             form [ _class "max-w-3xl mx-auto mt-8 p-6 bg-white rounded-3xl shadow-md border border-[#D4C3A8]"; attr "hx-post" "/plan" ] [
-                textInput "hike-name" "hikeName" "Hike Name"
+                textInput "hike-name" "hikeName" "Hike Name" true
                 datePicker "start-date" "startDate" "Start Date" (Some "
                     on change or load
                         set #end-date.min to my value
