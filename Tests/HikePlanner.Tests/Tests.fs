@@ -6,7 +6,6 @@ open System.Net
 open System.Net.Http
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.TestHost
-open Microsoft.Data.Sqlite
 open Giraffe.EndpointRouting
 open Xunit
 open HikePlanner.Core
@@ -55,5 +54,4 @@ let ``POST /plan saves a hike through the route and SQLite`` () =
     let getHikesRepsonse = client.GetAsync("/plan").Result
     let content = getHikesRepsonse.Content.ReadAsStringAsync().Result
 
-    Console.WriteLine content
     Assert.Contains(formToSave.HikeName, content, StringComparison.OrdinalIgnoreCase)
