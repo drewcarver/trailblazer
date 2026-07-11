@@ -80,22 +80,25 @@ let saveHike (trail: string) (startDate: DateTime) (endDate: DateTime) (startPoi
     }
 
 let withReader (command: SqliteCommand) (f: SqliteDataReader -> 'b) : App<'a, TrailblazerError, 'b> =
-    try 
-        app {
+    app {
+        try
             use! sqliteReader = command.ExecuteReaderAsync()
             let! canRead = sqliteReader.ReadAsync()
+            failwith "test"
+
             if canRead then
                 let results = f sqliteReader 
-
                 return! App.succeed results
             else
                 return! App.fail (NotFound "No rows found.")
-        }
-    with exn -> App.fail (DatabaseError "Couldn't connect to database.")
+        with exn -> 
+            return! App.fail (DatabaseError "Couldn't read from database.")
+    }
 
-let getHikeByTrailName (trailName: string) : App<ConnectionString, TrailblazerError, Hike> =
+
+let getHikeByTrailName (trailName: string) =
     app {
-        let! ConnectionString connStr = App.ask
+        let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
 
         use conn = new SqliteConnection(connStr)
         conn.Open() |> ignore

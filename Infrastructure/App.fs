@@ -193,6 +193,14 @@ module App =
                     return Error(handler ex)
             })
 
+    let withCaughtException exnHandler app =
+        bind(fun a ->
+            try
+                app
+            with ex ->
+                fail (exnHandler ex)
+        ) app
+
     let catch (handler: exn -> 'err) (operation: unit -> 'a) =
         App(fun _ ->
             task {
@@ -243,11 +251,11 @@ type AppBuilder() =
                         resource.Dispose()
             })
 
-    member _.TryWith(body: unit -> App<'env, 'err, 'a>, handler: exn -> App<'env, 'err, 'a>) =
+    member _.TryWith(body: App<'T, 'Error, 'State>, handler: exn -> App<'T, 'Error, 'State>) = 
         App(fun env ->
             task {
                 try
-                    return! App.run env (body ())
+                    return! App.run env (body)
                 with ex ->
                     return! App.run env (handler ex)
             })
