@@ -38,6 +38,8 @@ let main _ =
 
     let app = builder.Build()
 
+    app.UseStaticFiles() |> ignore
+
     let env = {
         ConnectionString = defaultConnectionString
     }

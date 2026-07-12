@@ -17,6 +17,43 @@ let planView (trailPointsOfInterest: Result<TrailPointOfInterest list, Trailblaz
             |> Seq.map (fun poi -> { Label = poi |> toOptionLabel; Value = string poi.Id; Attributes = [ ("data-mile", poi.TrailMile.ToString())] })
 
         div [] [
+            script [] [
+                rawText """
+                const trailStyle = {
+                    color: "#ff3300",  // Bright red-orange line
+                    weight: 4,         // Thickness of the line
+                    opacity: 0.85,     // Transparency
+                    lineJoin: 'round'  // Smooth intersections
+                };
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    var map = L.map('map').setView([34.628, -84.193], 13); // Springer Mountain, Georgia
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }).addTo(map);
+
+                    fetch('/trails/AppalachianTrail.json')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log(data)
+                            const trailLayer = L.geoJSON(data, {
+                                style: trailStyle
+                            }).addTo(map);
+
+                            map.fitBounds(trailLayer.getBounds());
+                        })
+                        .catch(error => {
+                            console.error('Error loading the trail GeoJSON:', error);
+                        });
+                });
+                """
+            ]
             div [ _id "map"; _class "w-[90vw] h-[400px]" ] []
             form [ _class "max-w-3xl mx-auto mt-8 p-6 bg-white rounded-3xl shadow-md border border-[#D4C3A8]"; attr "hx-post" "/plan" ] [
                 textInput "hike-name" "hikeName" "Hike Name" true

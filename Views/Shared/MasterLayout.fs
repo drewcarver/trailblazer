@@ -42,17 +42,6 @@ let withMasterLayout bodyContent =
                 }
                 """
             ]
-            script [] [
-                rawText """
-                document.addEventListener('DOMContentLoaded', function () {
-                    var map = L.map('map').setView([34.628, -84.193], 13); // Springer Mountain, Georgia
-
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    }).addTo(map);
-                });
-                """
-            ]
         ]
         body [ _class "bg-[#EDE4D5] text-gray-800" ] [
             nav [ _class "bg-[#2E5A3D] text-white sticky top-0 z-50 shadow-md" ] [
