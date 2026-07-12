@@ -5,6 +5,7 @@ open HikePlanner.Views.MasterLayout
 open HikePlanner.Repositories.HikeRepo
 open HikePlanner.Views.Components.Table
 open HikePlanner.Core
+open HikePlanner.Core
 
 let myHikesTable = 
   trailblazerTable 
@@ -39,5 +40,6 @@ let listPlans hikesResult =
 
     match hikesResult with 
     | Ok hikes  -> renderTable hikes
-    | Error _   -> noHikesAvailableTable 
+    | Error (NotFound _) -> renderTable []
+    | Error (DatabaseError e | FormValidationError e) -> noHikesAvailableTable
     |> withMasterLayout

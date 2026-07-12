@@ -13,15 +13,17 @@
       in
       {
         devShells.default = pkgs.mkShell {
-          packages = with pkgs; [
-            # .NET SDK
-            dotnet-sdk_10
+          buildInputs = [
+            (pkgs.python3.withPackages (ps: with ps; [
+              pandas
+            ]))
+          ];
 
-            # F# tooling
+          packages = with pkgs; [
+            dotnet-sdk_10
+            python3
             fsautocomplete
             fantomas
-
-            # useful CLI tools
             git
             curl
             jq
