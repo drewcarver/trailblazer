@@ -6,45 +6,83 @@ const trailStyle = {
 };
 
 let trailGeoJSONData, activeMileMarker, map;
+let hikeLayer;
 
-function drawPath(startPoint, endPoint) {
-    const pathLine = turf.lineString([
-        startPoint,
-        endPoint
-    ]);
-    
-    // Add the line to the map
-    L.geoJSON(pathLine, {
-        style: {
-            color: '#FFD700',  // Yellow color for path
-            weight: 4,
-            opacity: 0.8
-        }
-    }).addTo(map);
-}
-
-
-function getPointAlongMultiLine(trailJson, targetDistance, options = { units: 'miles' }) {
-  const flattened = turf.flatten(trailJson);
-  const segments = flattened.features;
-
-  let accumulatedDistance = 0;
-
-  for (const segment of segments) {
-    const segmentLength = turf.length(segment, options);
-
-    if (accumulatedDistance + segmentLength >= targetDistance) {
-      const remainingDistanceNeeded = targetDistance - accumulatedDistance;
-      
-      return turf.along(segment, remainingDistanceNeeded, options);
+// FIXED: Slices the trail exactly along its geometry using Turf's slice tools
+function drawPath(startMile, endMile) {
+    if (!trailGeoJSONData) {
+        console.error("Trail data hasn't loaded yet!");
+        return;
     }
 
-    accumulatedDistance += segmentLength;
-  }
+    if (hikeLayer) {
+        map.removeLayer(hikeLayer)
+    }
 
-  const lastSegment = segments[segments.length - 1];
-  const lastCoords = lastSegment.geometry.coordinates;
-  return turf.point(lastCoords[lastCoords.length - 1]);
+    try {
+        // Flatten the geometry down to a single LineString if it's a MultiLineString
+        const flattened = turf.flatten(trailGeoJSONData);
+        let pathLine;
+
+        if (flattened.features.length === 1) {
+            // Standard single continuous line
+            pathLine = turf.lineSliceAlong(flattened.features[0], startMile, endMile, { units: 'miles' });
+        } else {
+            // Complex trail network: fallback to step-by-step feature merging
+            let accumulatedDistance = 0;
+            let pathCoordinates = [];
+
+            for (const segment of flattened.features) {
+                const segmentLength = turf.length(segment, { units: 'miles' });
+                const nextDistance = accumulatedDistance + segmentLength;
+
+                // Check if our slicing window falls inside this specific segment
+                if (nextDistance >= startMile && accumulatedDistance <= endMile) {
+                    const localStart = Math.max(0, startMile - accumulatedDistance);
+                    const localEnd = Math.min(segmentLength, endMile - accumulatedDistance);
+                    
+                    const slicedSegment = turf.lineSliceAlong(segment, localStart, localEnd, { units: 'miles' });
+                    pathCoordinates.push(...slicedSegment.geometry.coordinates);
+                }
+                accumulatedDistance = nextDistance;
+            }
+            pathLine = turf.lineString(pathCoordinates);
+        }
+
+        // Add the slice to the map
+        hikeLayer = L.geoJSON(pathLine, {
+            style: {
+                color: '#FFD700',  // High-visibility gold/yellow
+                weight: 6,         // Thick enough to overlap the trail base
+                opacity: 0.9,
+                lineJoin: 'round'
+            }
+        }).addTo(map);
+
+        map.fitBounds(hikeLayer.getBounds());
+    } catch (error) {
+        console.error("Error slicing or drawing the path line:", error);
+    }
+}
+
+function getPointAlongMultiLine(trailJson, targetDistance, options = { units: 'miles' }) {
+    const flattened = turf.flatten(trailJson);
+    const segments = flattened.features;
+    let accumulatedDistance = 0;
+
+    for (const segment of segments) {
+        const segmentLength = turf.length(segment, options);
+
+        if (accumulatedDistance + segmentLength >= targetDistance) {
+            const remainingDistanceNeeded = targetDistance - accumulatedDistance;
+            return turf.along(segment, remainingDistanceNeeded, options);
+        }
+        accumulatedDistance += segmentLength;
+    }
+
+    const lastSegment = segments[segments.length - 1];
+    const lastCoords = lastSegment.geometry.coordinates;
+    return turf.point(lastCoords[lastCoords.length - 1]);
 }
 
 function addMileMarker(miles) {
@@ -57,39 +95,31 @@ function addMileMarker(miles) {
         map.removeLayer(activeMileMarker);
     }
 
-    const totalDistance = turf.length(trailGeoJSONData, { units: 'miles' });
-    console.log(`Trail length: ${totalDistance} miles`);
-
     try {
-        const targetPoint = getPointAlongMultiLine(trailGeoJSONData, miles)
-        
+        const targetPoint = getPointAlongMultiLine(trailGeoJSONData, miles);
         const coords = targetPoint.geometry.coordinates;
+        
+        // Correct Leaflet coordinate parsing order [lat, lng]
         const leafletLatLng = [coords[1], coords[0]];
 
-        activeMileMarker = L.marker(leafletLatLng)
-            .addTo(map)
-            .bindPopup(`<b>Mile Marker: ${miles}</b><br>Appalachian Trail Path Location`)
-            .openPopup();
-
-        map.panTo(leafletLatLng);
-
-        return leafletLatLng
+        activeMileMarker = L.marker(leafletLatLng).addTo(map);
     } catch (error) {
-        console.error("Could not calculate mile marker. Check your GeoJSON structure:", error);
+        console.error("Error creating mile marker:", error);
     }
 }
+
 
 
 document.addEventListener('DOMContentLoaded', function () {
     const startPointSelect = document.querySelector('#start-point-select')
     const endPointSelect = document.querySelector('#end-point-select')
     
-    let startPoint, endPoint;
+    let startPoint = 5, endPoint = 7;
 
     startPointSelect.addEventListener('change', e => {
         const selectedOption = startPointSelect.querySelector('option:checked');
         console.log(selectedOption.dataset.mile)
-        startPoint = addMileMarker(selectedOption.dataset.mile)
+        startPoint = selectedOption.dataset.mile
         
         if (endPoint) {
             drawPath(startPoint, endPoint);
@@ -99,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
     endPointSelect.addEventListener('change', e => {
         const selectedOption = endPointSelect.querySelector('option:checked');
         console.log(selectedOption.dataset.mile)
-        endPoint = addMileMarker(selectedOption.dataset.mile)
+        endPoint = selectedOption.dataset.mile
         
         if (startPoint) {
             drawPath(startPoint, endPoint);
@@ -121,13 +151,13 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(data => {
             trailGeoJSONData = data
-            const trailLayer = L.geoJSON(data, {
-                style: trailStyle
-            }).addTo(map);
+            // const trailLayer = L.geoJSON(data, {
+            //     style: trailStyle
+            // }).addTo(map);
 
-            map.fitBounds(trailLayer.getBounds());
+            // map.fitBounds(trailLayer.getBounds());
         })
         .catch(error => {
             console.error('Error loading the trail GeoJSON:', error);
-        });
+        }).then(() => { drawPath(1, 7)});
 });
