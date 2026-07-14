@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const startPointSelect = document.querySelector('#start-point-select')
     const endPointSelect = document.querySelector('#end-point-select')
     
-    let startPoint = 5, endPoint = 7;
+    let startPoint, endPoint;
 
     startPointSelect.addEventListener('change', e => {
         const selectedOption = startPointSelect.querySelector('option:checked');

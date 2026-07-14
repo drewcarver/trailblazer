@@ -8,6 +8,7 @@ open HikePlanner.Views.Components.Select
 open HikePlanner.Views.MasterLayout
 open HikePlanner.Repositories.HikeRepo
 open HikePlanner.Core
+open HikePlanner.Views.Components.Button
 
 let planView (trailPointsOfInterest: Result<TrailPointOfInterest list, TrailblazerError>) =
         let toOptionLabel poi = sprintf "%s - Mile %.2f" poi.Name poi.TrailMile
@@ -18,10 +19,10 @@ let planView (trailPointsOfInterest: Result<TrailPointOfInterest list, Trailblaz
 
         div [] [
             script [ _src "/js/trailmap.js"] []
-            div [ _class "p-6 bg-white rounded-3xl shadow-md border border-[#D4C3A8] mx-2"] [
+            div [ _class "p-6 border border-black rounded-lg bg-white p-4 font-sans selection:bg-neutral-200 m-2"] [
                 h1 [] [ str "Create New Hike" ]
                 div [ _class "flex items-center gap-1" ] [
-                    form [ _class "mx-auto mt-8 "; attr "hx-post" "/plan" ] [
+                    form [ _class "font-mono mx-auto mt-8 transition-[width] duration-500 ease-in-out"; attr "hx-post" "/plan" ] [
                         textInput "hike-name" "hikeName" "Hike Name" true
                         datePicker "start-date" "startDate" "Start Date" (Some "
                             on change or load
@@ -79,9 +80,15 @@ let planView (trailPointsOfInterest: Result<TrailPointOfInterest list, Trailblaz
                                     | FormValidationError error -> str error
                                     | _ -> str "An error has occurred"
                             ]
-                        button [ _type "submit"; _class "bg-[#4A7043] hover:bg-[#2E5A3D] text-white px-6 py-2 rounded-full font-medium transition-colors" ] [ str "Submit Plan" ]
+                        trailblazerButton "Add Point" "Add Point" "button" (Some
+                            """on click
+                                set $clone to #end-point-select.cloneNode(true) 
+                                then remove @id from $clone 
+                                then put $clone after #end-point-select
+                            """)
+                        trailblazerButton "Submit Plan" "Submit Plan" "submit" None
                     ]
-                    div [ _id "map"; _class "w-[90vw] h-[400px]" ] []
+                    div [ _id "map"; _class "w-[50vw] h-[400px]" ] []
                 ]
             ]
         ] |> withMasterLayout
