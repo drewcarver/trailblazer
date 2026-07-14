@@ -5,6 +5,7 @@ open Microsoft.Data.Sqlite
 open HikePlanner.Infrastructure
 open System.Threading.Tasks
 open HikePlanner.Core
+open System
 
 type Hike = { 
     Id           : int64
@@ -36,13 +37,10 @@ let private ensureTable (conn: SqliteConnection) =
     cmd.CommandText <- """
 CREATE TABLE IF NOT EXISTS hike (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    trail TEXT NOT NULL,
-    start_date TEXT NOT NULL,
-    end_date TEXT,
-    start_point_id INT,
-    end_point_id INT
-);"""
-    cmd.ExecuteNonQuery() |> ignore
+    details TEXT NOT NULL
+);
+"""
+    cmd.ExecuteNonQueryAsync() 
 
 let private toInt64 (value: obj) =
     if isNull value then
@@ -55,28 +53,33 @@ let private toInt64 (value: obj) =
         | :? string as s -> Int64.Parse s
         | _ -> -1L
 
-let saveHike (trail: string) (startDate: DateTime) (endDate: DateTime) (startPointId: int64) (endPointId: int64) =
+let private toHikeJson (trail: string) (startDate: DateTime) (endDate: DateTime) (startPointId: int64) (endPointId: int64) =
+    {| Trail = trail
+       StartDate = startDate
+       EndDate = endDate
+       StartPointId = startPointId
+       EndPointId = endPointId |} 
+    |> System.Text.Json.JsonSerializer.Serialize
+
+let saveHike (trail: string) (startDate: DateTime) (endDate: DateTime) (startPointId: int64) (endPointId: int64) : App<EnvironmentWithContext<AppEnv>, TrailblazerError, unit> =
     app {
-        let! { Environment = { ConnectionString = ConnectionString connStr }} = App.ask
+        let! { Environment = { ConnectionString = ConnectionString connStr }} = App.ask |> App.local (fun a -> { 
+            Environment = { ConnectionString = ConnectionString "hikes.db" }
+            Context = a.Context }) 
 
         use conn = new SqliteConnection(connStr)
-        conn.Open() |> ignore
-        ensureTable conn
+        let! _ = conn.OpenAsync() 
+        let! _ = ensureTable conn
+
+        let hikeDetails = toHikeJson trail startDate endDate startPointId endPointId
 
         use cmd = conn.CreateCommand()
-        cmd.CommandText <- "INSERT INTO hike (trail, start_date, end_date, start_point_id, end_point_id) VALUES ($trail, $start_date, $end_date, $start_point_id, $end_point_id); SELECT last_insert_rowid();"
-        cmd.Parameters.AddWithValue("$trail", trail) |> ignore
-        cmd.Parameters.AddWithValue("$start_date", startDate) |> ignore
-        cmd.Parameters.AddWithValue("$end_date", endDate) |> ignore
-        cmd.Parameters.AddWithValue("$start_point_id", startPointId) |> ignore
-        cmd.Parameters.AddWithValue("$end_point_id", endPointId) |> ignore
+        cmd.CommandText <- "INSERT INTO hike (details) VALUES ($details); SELECT last_insert_rowid();"
+        cmd.Parameters.AddWithValue("$details", hikeDetails) |> ignore
 
-        let! result = 
-            App.catch 
-                (fun ex -> DatabaseError (sprintf "Error saving hike: %s" ex.Message)) 
-                (fun () -> cmd.ExecuteScalar() |> toInt64 |> Task.FromResult)
-
-        return toInt64 result
+        try
+            return! App.succeed (cmd.ExecuteNonQueryAsync() |> ignore)
+        with ex -> return! App.fail (DatabaseError (sprintf "Error saving hike: %s" ex.Message))
     }
 
 let withReader (command: SqliteCommand) (f: SqliteDataReader -> 'b) : App<'a, TrailblazerError, 'b> =
@@ -104,25 +107,14 @@ let getHikeByTrailName (trailName: string) =
         ensureTable conn
 
         use cmd = conn.CreateCommand()
-        cmd.CommandText <- "SELECT id, trail, start_date, end_date, start FROM hike WHERE trail = $trail LIMIT 1;"
+        cmd.CommandText <- "SELECT id, details FROM hike WHERE trail = $trail LIMIT 1;"
         cmd.Parameters.AddWithValue("$trail", trailName) |> ignore
 
         return! withReader cmd (fun rdr ->
             let id = toInt64 (rdr.GetValue 0)
-            let trail = rdr.GetString 1
-            let startDate = DateTime.Parse(rdr.GetString 2)
-            let endDate = DateTime.Parse(rdr.GetString 3)
-            let startPointId = toInt64 (rdr.GetValue 4)
-            let endPointId = toInt64 (rdr.GetValue 5)
-
-            { 
-                Id = id; 
-                Trail = trail; 
-                StartDate = startDate; 
-                EndDate = endDate;
-                StartPointId = startPointId;
-                EndPointId = endPointId;
-            }
+            let details = rdr.GetString 1
+            let parsed = System.Text.Json.JsonSerializer.Deserialize<Hike>(details)
+            { parsed with Id = id }
         )
     }
 
@@ -198,18 +190,14 @@ let getHikeById (id: int64) =
         ensureTable conn
 
         use cmd = conn.CreateCommand()
-        cmd.CommandText <- "SELECT id, trail, start_date, end_date, start_point_id, end_point_id FROM hike WHERE id = $id LIMIT 1;"
+        cmd.CommandText <- "SELECT id, details FROM hike WHERE id = $id LIMIT 1;"
         cmd.Parameters.AddWithValue("$id", id) |> ignore
 
         let! hike = withReader cmd (fun rdr ->
             let id = toInt64 (rdr.GetValue 0)
-            let trail = rdr.GetString 1
-            let startDate = DateTime.Parse(rdr.GetString 2)
-            let endDate = DateTime.Parse(rdr.GetString 3)
-            let startPointId = toInt64 (rdr.GetValue 4)
-            let endPointId = toInt64 (rdr.GetValue 5)
-
-            { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate; StartPointId = startPointId; EndPointId = endPointId }
+            let details = rdr.GetString 1
+            let parsed = System.Text.Json.JsonSerializer.Deserialize<Hike>(details)
+            { parsed with Id = id }
         )
 
         return! withPoints hike
@@ -224,19 +212,15 @@ let getHikes =
         ensureTable conn
 
         use cmd = conn.CreateCommand()
-        cmd.CommandText <- "SELECT id, trail, start_date, end_date, start_point_id, end_point_id FROM hike ORDER BY id;"
+        cmd.CommandText <- "SELECT id, details FROM hike ORDER BY id;"
 
         let! hikes = withReader cmd (fun rdr ->
                 [ while rdr.Read() do
                     let id = toInt64 (rdr.GetValue 0)
-                    let trail = rdr.GetString 1
-                    let startDate = DateTime.Parse(rdr.GetString 2)
-                    let endDate = DateTime.Parse(rdr.GetString 3)
-                    let startPointId = toInt64 (rdr.GetValue 4)
-                    let endPointId = if rdr.IsDBNull 5 then -1L else toInt64 (rdr.GetValue 5)
-
-                    yield { Id = id; Trail = trail; StartDate = startDate; EndDate = endDate; StartPointId = startPointId; EndPointId = endPointId } ]
+                    let details = rdr.GetString 1
+                    let parsed = System.Text.Json.JsonSerializer.Deserialize<Hike>(details)
+                    yield { parsed with Id = id } ]
         ) 
 
-        return! (hikes |> List.map withPoints)
+        return! hikes |> List.map withPoints
     }

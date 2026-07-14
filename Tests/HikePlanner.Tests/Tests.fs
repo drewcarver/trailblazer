@@ -51,5 +51,10 @@ let ``POST /plan saves a hike through the route and SQLite`` () =
         let! response = client.PostAsync("/plan", form)
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode)
-        Assert.Equal("/plan", response.Headers.GetValues("HX-Location") |> Seq.head)
+        Assert.Equal("/plan", response.Headers.GetValues "HX-Location" |> Seq.head)
+
+        let! getHikesResponse = client.GetAsync "/plan"
+        let! content = getHikesResponse.Content.ReadAsStringAsync()
+
+        Assert.Contains(formToSave.HikeName, content)
     }
