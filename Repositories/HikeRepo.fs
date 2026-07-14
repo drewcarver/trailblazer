@@ -61,11 +61,9 @@ let private toHikeJson (trail: string) (startDate: DateTime) (endDate: DateTime)
        EndPointId = endPointId |} 
     |> System.Text.Json.JsonSerializer.Serialize
 
-let saveHike (trail: string) (startDate: DateTime) (endDate: DateTime) (startPointId: int64) (endPointId: int64) : App<EnvironmentWithContext<AppEnv>, TrailblazerError, unit> =
+let saveHike (trail: string) (startDate: DateTime) (endDate: DateTime) (startPointId: int64) (endPointId: int64) =
     app {
-        let! { Environment = { ConnectionString = ConnectionString connStr }} = App.ask |> App.local (fun a -> { 
-            Environment = { ConnectionString = ConnectionString "hikes.db" }
-            Context = a.Context }) 
+        let! ConnectionString connStr = App.asks(fun env -> env.Environment.ConnectionString) 
 
         use conn = new SqliteConnection(connStr)
         let! _ = conn.OpenAsync() 

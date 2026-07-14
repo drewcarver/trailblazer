@@ -32,7 +32,7 @@ module Handlers =
 
     let saveHikePlan : TrailblazerEndpoint<_> =
         app {
-            let! { Context = ctx } = App.ask
+            let! ctx = App.asks(fun env -> env.Context)
 
             let! form: SaveHikeForm = getFormHelper ctx 
 
