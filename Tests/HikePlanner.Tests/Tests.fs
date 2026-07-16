@@ -11,11 +11,28 @@ open Xunit
 open HikePlanner.Core
 open Program
 open HikePlanner.Handlers.Handlers
+open Microsoft.Data.Sqlite
+open System.Threading.Tasks
 
 [<Fact>]
 let ``POST /plan saves a hike through the route and SQLite`` () =
     task {
         let (ConnectionString connectionString) = ConnectionString "Data Source=file:plan-test?mode=memory&cache=shared"
+        use conn = new SqliteConnection(connectionString)
+
+        let cmd = conn.CreateCommand()
+        conn.Open()
+        cmd.CommandText <- """
+            CREATE TABLE IF NOT EXISTS TrailPointsOfInterest (
+                ID INTEGER PRIMARY KEY,
+                Name TEXT NOT NULL,
+                TrailName TEXT NOT NULL,
+                TrailMile REAL NOT NULL
+            );
+
+            INSERT INTO TrailPointsOfInterest (TrailName, TrailMile, Name) VALUES ('Appalachian Trail', 1, "Test Point");
+        """
+        cmd.ExecuteNonQuery() |> ignore
 
         let builder = WebApplication.CreateBuilder()
         builder.WebHost.UseTestServer() |> ignore
@@ -36,7 +53,7 @@ let ``POST /plan saves a hike through the route and SQLite`` () =
             StartDate    = DateTime.Now
             EndDate      = DateTime.Now.AddDays(2)
             StartPointId = 1
-            EndPointId   = 2
+            EndPointId   = 1
         }
 
         let form =
@@ -52,9 +69,13 @@ let ``POST /plan saves a hike through the route and SQLite`` () =
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode)
         Assert.Equal("/plan", response.Headers.GetValues "HX-Location" |> Seq.head)
+        Assert.Equal("1", response.Headers.GetValues "x-hike-id" |> Seq.head)
+
+        do! Task.Delay(50) 
 
         let! getHikesResponse = client.GetAsync "/plan"
         let! content = getHikesResponse.Content.ReadAsStringAsync()
 
+        printfn "%s" content
         Assert.Contains(formToSave.HikeName, content)
     }

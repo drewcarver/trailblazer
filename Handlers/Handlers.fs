@@ -36,9 +36,10 @@ module Handlers =
 
             let! form: SaveHikeForm = getFormHelper ctx 
 
-            let! _ =  saveHike form.HikeName form.StartDate form.EndDate form.StartPointId form.EndPointId
+            let! id =  saveHike form.HikeName form.StartDate form.EndDate form.StartPointId form.EndPointId
 
             return! App.succeed (
+                setHttpHeader "x-hike-id" id >=>
                 setHttpHeader "HX-Location" "/plan" >=> setStatusCode 204
             )
         } 

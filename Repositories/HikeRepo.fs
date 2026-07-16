@@ -3,9 +3,7 @@ module HikePlanner.Repositories.HikeRepo
 open System
 open Microsoft.Data.Sqlite
 open HikePlanner.Infrastructure
-open System.Threading.Tasks
 open HikePlanner.Core
-open System
 
 type Hike = { 
     Id           : int64
@@ -40,7 +38,7 @@ CREATE TABLE IF NOT EXISTS hike (
     details TEXT NOT NULL
 );
 """
-    cmd.ExecuteNonQueryAsync() 
+    cmd.ExecuteNonQuery() |> ignore 
 
 let private toInt64 (value: obj) =
     if isNull value then
@@ -67,7 +65,7 @@ let saveHike (trail: string) (startDate: DateTime) (endDate: DateTime) (startPoi
 
         use conn = new SqliteConnection(connStr)
         let! _ = conn.OpenAsync() 
-        let! _ = ensureTable conn
+        ensureTable conn
 
         let hikeDetails = toHikeJson trail startDate endDate startPointId endPointId
 
@@ -76,22 +74,23 @@ let saveHike (trail: string) (startDate: DateTime) (endDate: DateTime) (startPoi
         cmd.Parameters.AddWithValue("$details", hikeDetails) |> ignore
 
         try
-            return! App.succeed (cmd.ExecuteNonQueryAsync() |> ignore)
+            let id = cmd.ExecuteScalar() 
+            return! App.succeed id
         with ex -> return! App.fail (DatabaseError (sprintf "Error saving hike: %s" ex.Message))
     }
 
-let withReader (command: SqliteCommand) (f: SqliteDataReader -> 'b) : App<'a, TrailblazerError, 'b> =
+let withReader (command: SqliteCommand) (f: SqliteDataReader -> 'b) =
     app {
         try
-            use! sqliteReader = command.ExecuteReaderAsync()
-            let! canRead = sqliteReader.ReadAsync()
+            use sqliteReader = command.ExecuteReader()
+            let canRead = sqliteReader.Read()
 
             if canRead then
                 let results = f sqliteReader 
                 return! App.succeed results
             else
                 return! App.fail (NotFound "No rows found.")
-        with exn -> 
+        with _ -> 
             return! App.fail (DatabaseError "Couldn't read from database.")
     }
 
@@ -212,13 +211,16 @@ let getHikes =
         use cmd = conn.CreateCommand()
         cmd.CommandText <- "SELECT id, details FROM hike ORDER BY id;"
 
-        let! hikes = withReader cmd (fun rdr ->
-                [ while rdr.Read() do
-                    let id = toInt64 (rdr.GetValue 0)
-                    let details = rdr.GetString 1
-                    let parsed = System.Text.Json.JsonSerializer.Deserialize<Hike>(details)
-                    yield { parsed with Id = id } ]
-        ) 
+        let rec readAllHikes hikes (rdr: SqliteDataReader) =
+            let id = toInt64 (rdr.GetValue 0)
+            let details = rdr.GetString 1
+            let parsed = System.Text.Json.JsonSerializer.Deserialize<Hike>(details)
+            let hike = { parsed with Id = id } 
+            
+            if rdr.Read() then readAllHikes (hike::hikes) rdr else hike::hikes
+
+        let! hikes = withReader cmd (readAllHikes [])
+        printfn "Found %d hikes" hikes.Length
 
         return! hikes |> List.map withPoints
     }
