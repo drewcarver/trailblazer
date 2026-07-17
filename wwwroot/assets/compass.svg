@@ -1,0 +1,104 @@
+<svg xmlns="http://w3.org" viewBox="0 0 500 500" width="100%" height="100%">
+  <!-- Definitions for the soft grunge textures and filters matching the reference image -->
+  <defs>
+    <!-- Radial gradient simulating the warm, vintage aged-paper glow in the center of the emblem -->
+    <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#EADFC9" />
+      <stop offset="75%" stop-color="#DCD0B4" />
+      <stop offset="100%" stop-color="#CBB998" />
+    </radialGradient>
+  </defs>
+
+  <!-- Base layer applying the organic paper filter texture -->
+  <g>
+    
+    <!-- Outer Bleed/Outline ring separating the badge from the dark green header background -->
+    <circle cx="250" cy="250" r="195" fill="none" stroke="#FAF6F0" stroke-width="4" opacity="0.6" />
+
+    <!-- Main Outer Compass Ring Container (Warm, faded parchment tan) -->
+    <circle cx="250" cy="250" r="185" fill="url(#centerGlow)" stroke="#322C26" stroke-width="4.5" />
+    
+    <!-- Inner Concentric Frame Track Layer -->
+    <circle cx="250" cy="250" r="172" fill="none" stroke="#322C26" stroke-width="1.5" />
+    <circle cx="250" cy="250" r="165" fill="none" stroke="#4A3F35" stroke-width="1" stroke-dasharray="4, 3" opacity="0.8" />
+    <circle cx="250" cy="250" r="132" fill="none" stroke="#4A3F35" stroke-width="1.5" stroke-dasharray="10, 5" opacity="0.5" />
+
+    <!-- Vintage Minute Navigation Hash Marks -->
+    <g stroke="#322C26" stroke-width="1.5" opacity="0.7">
+      <line x1="250" y1="65" x2="250" y2="77" />
+      <line x1="250" y1="423" x2="250" y2="435" />
+      <line x1="65" y1="250" x2="77" y2="250" />
+      <line x1="423" y1="250" x2="435" y2="250" />
+      <line x1="119" y1="119" x2="128" y2="128" />
+      <line x1="372" y1="372" x2="381" y2="381" />
+      <line x1="372" y1="119" x2="381" y2="128" />
+      <line x1="119" y1="372" x2="128" y2="381" />
+    </g>
+
+    <!-- Detailed Mountain Silhouette Horizon Line (Deep Charcoal Charcoal/Sepia Tone) -->
+    <g id="sketched-mountains">
+      <!-- Background Left Ridge Line Component -->
+      <polygon points="105,250 165,178 225,250" fill="#423930" opacity="0.3" stroke="#322C26" stroke-width="1.5" />
+      <polygon points="165,178 165,250 225,250" fill="#221C17" opacity="0.2" />
+
+      <!-- Background Right Ridge Line Component -->
+      <polygon points="275,250 335,178 395,250" fill="#423930" opacity="0.3" stroke="#322C26" stroke-width="1.5" />
+      <polygon points="335,178 335,250 395,250" fill="#221C17" opacity="0.2" />
+
+      <!-- Main Left Foreground Peak Element -->
+      <polygon points="130,250 205,142 265,250" fill="#3D342C" stroke="#221C17" stroke-width="2.5" />
+      <!-- Sharp Linear Topographical Shadow Work -->
+      <polygon points="205,142 205,250 265,250" fill="#1C1612" opacity="0.45" />
+
+      <!-- Main Right Foreground Peak Element -->
+      <polygon points="235,250 295,142 370,250" fill="#3D342C" stroke="#221C17" stroke-width="2.5" />
+      <polygon points="295,142 295,250 370,250" fill="#1C1612" opacity="0.45" />
+      
+      <!-- Horizontal Terrain Line base balancing out the mountains -->
+      <line x1="100" y1="250" x2="400" y2="250" stroke="#322C26" stroke-width="2" opacity="0.4" />
+    </g>
+
+    <!-- Hand-Drawn Primary Cardinal Compass Array -->
+    <g id="vintage-star">
+      <!-- North Diamond Point -->
+      <polygon points="250,250 222,238 250,22" fill="#EAE0C8" stroke="#322C26" stroke-width="2.5" />
+      <polygon points="250,250 278,238 250,22" fill="#322C26" stroke="#322C26" stroke-width="2.5" />
+
+      <!-- South Diamond Point -->
+      <polygon points="250,250 278,262 250,478" fill="#EAE0C8" stroke="#322C26" stroke-width="2.5" />
+      <polygon points="250,250 222,262 250,478" fill="#322C26" stroke="#322C26" stroke-width="2.5" />
+
+      <!-- East Diamond Point -->
+      <polygon points="250,250 262,222 478,250" fill="#EAE0C8" stroke="#322C26" stroke-width="2.5" />
+      <polygon points="250,250 262,278 478,250" fill="#322C26" stroke="#322C26" stroke-width="2.5" />
+
+      <!-- West Diamond Point -->
+      <polygon points="250,250 238,278 22,250" fill="#EAE0C8" stroke="#322C26" stroke-width="2.5" />
+      <polygon points="250,250 238,222 22,250" fill="#322C26" stroke="#322C26" stroke-width="2.5" />
+    </g>
+
+    <!-- Shorter Intermediate Arrowheads (NW, NE, SE, SW) -->
+    <g id="diagonal-facets" opacity="0.95">
+      <!-- North East Point Variant -->
+      <polygon points="250,250 265,240 380,120" fill="#EADFC9" stroke="#322C26" stroke-width="1.5" />
+      <polygon points="250,250 240,265 380,120" fill="#423930" stroke="#322C26" stroke-width="1.5" />
+
+      <!-- North West Point Variant -->
+      <polygon points="250,250 240,240 120,120" fill="#EADFC9" stroke="#322C26" stroke-width="1.5" />
+      <polygon points="250,250 265,265 120,120" fill="#423930" stroke="#322C26" stroke-width="1.5" />
+
+      <!-- South East Point Variant -->
+      <polygon points="250,250 265,265 380,380" fill="#EADFC9" stroke="#322C26" stroke-width="1.5" />
+      <polygon points="250,250 240,240 380,380" fill="#423930" stroke="#322C26" stroke-width="1.5" />
+
+      <!-- South West Point Variant -->
+      <polygon points="250,250 240,265 120,380" fill="#EADFC9" stroke="#322C26" stroke-width="1.5" />
+      <polygon points="250,250 265,240 120,380" fill="#423930" stroke="#322C26" stroke-width="1.5" />
+    </g>
+
+    <!-- Core Focal Hub Cap Assembly -->
+    <circle cx="250" cy="250" r="14" fill="#DCD0B4" stroke="#322C26" stroke-width="3" />
+    <circle cx="250" cy="250" r="6" fill="#322C26" />
+    <circle cx="250" cy="250" r="2" fill="#FAF6F0" />
+  </g>
+</svg>

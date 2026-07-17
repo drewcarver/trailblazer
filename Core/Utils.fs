@@ -23,3 +23,10 @@ module Utils =
     let collapse (result: Result<'a, 'a>): 'a =
         match result with
         | Ok v | Error v -> v
+
+    let always x _ = x
+
+    let tryParseInt (str: string) =
+        match System.Int32.TryParse str with
+        | true, value -> Ok value
+        | false, _    -> Error $"Could not parse '{str}' as an integer"

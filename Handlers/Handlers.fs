@@ -16,8 +16,7 @@ module Handlers =
         HikeName: string
         StartDate: DateTime
         EndDate: DateTime
-        StartPointId: int
-        EndPointId: int
+        CampPoints: string list
     }
 
     let listPlansHandler: TrailblazerEndpoint<_> =
@@ -36,7 +35,10 @@ module Handlers =
 
             let! form: SaveHikeForm = getFormHelper ctx 
 
-            let! id =  saveHike form.HikeName form.StartDate form.EndDate form.StartPointId form.EndPointId
+            let! campPoints = form.CampPoints |> List.map (
+                tryParseInt >> Result.mapError (always FormValidationError "Not an int") >> App.ofResult)
+
+            let! id =  saveHike form.HikeName form.StartDate form.EndDate campPoints
 
             return! App.succeed (
                 setHttpHeader "x-hike-id" id >=>

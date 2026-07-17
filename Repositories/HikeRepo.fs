@@ -51,15 +51,14 @@ let private toInt64 (value: obj) =
         | :? string as s -> Int64.Parse s
         | _ -> -1L
 
-let private toHikeJson (trail: string) (startDate: DateTime) (endDate: DateTime) (startPointId: int64) (endPointId: int64) =
+let private toHikeJson (trail: string) (startDate: DateTime) (endDate: DateTime) (campPoints: int list)=
     {| Trail = trail
        StartDate = startDate
        EndDate = endDate
-       StartPointId = startPointId
-       EndPointId = endPointId |} 
+       campPoints = campPoints |} 
     |> System.Text.Json.JsonSerializer.Serialize
 
-let saveHike (trail: string) (startDate: DateTime) (endDate: DateTime) (startPointId: int64) (endPointId: int64) =
+let saveHike (trail: string) (startDate: DateTime) (endDate: DateTime) (campPoints: int list)=
     app {
         let! ConnectionString connStr = App.asks(fun env -> env.Environment.ConnectionString) 
 
@@ -67,7 +66,7 @@ let saveHike (trail: string) (startDate: DateTime) (endDate: DateTime) (startPoi
         let! _ = conn.OpenAsync() 
         ensureTable conn
 
-        let hikeDetails = toHikeJson trail startDate endDate startPointId endPointId
+        let hikeDetails = toHikeJson trail startDate endDate campPoints
 
         use cmd = conn.CreateCommand()
         cmd.CommandText <- "INSERT INTO hike (details) VALUES ($details); SELECT last_insert_rowid();"
@@ -220,7 +219,6 @@ let getHikes =
             if rdr.Read() then readAllHikes (hike::hikes) rdr else hike::hikes
 
         let! hikes = withReader cmd (readAllHikes [])
-        printfn "Found %d hikes" hikes.Length
 
         return! hikes |> List.map withPoints
     }
