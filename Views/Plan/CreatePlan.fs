@@ -20,7 +20,7 @@ let planView userName (trailPointsOfInterest: Result<TrailPointOfInterest list, 
         div [] [
             div [ _class "p-6 border border-black rounded-lg bg-white p-4 font-sans selection:bg-neutral-200 m-2"] [
                 h1 [] [ str "Create New Hike" ]
-                div [ _class "flex items-center gap-1" ] [
+                div [ _class "flex items-center gap-4" ] [
                     form [ _class "font-mono mx-auto mt-8 transition-[width] duration-500 ease-in-out"; 
                         attr "_" "install ListenForSelectChange";
                         attr "hx-post" "/plan"; attr "hx-swap" "outerHTML" ] [
@@ -28,11 +28,13 @@ let planView userName (trailPointsOfInterest: Result<TrailPointOfInterest list, 
                         datePicker "start-date" "startDate" "Start Date" (Some DateTime.Now) Required []
                         trailblazerSelect "camp-point-select-day-1" "campPoints" "Day 1" Required pointsOfInterestOptions [ "_", "install SelectPoint"; "data-day", "1" ]
                         trailblazerSelect "camp-point-select-day-2" "campPoints" "Day 2" Required pointsOfInterestOptions [ "_", "install SelectPoint"; "data-day", "2" ]
-                        trailblazerButton (Some "add-point") "Add Point" "Add Point" "button" (Some "install AddPoint")
-                        trailblazerButton (Some "remove-point") "Remove Point" "Remove Point" "button" (Some "install RemovePoint")
-                        trailblazerButton (Some "submit-plan") "Submit Plan" "Submit Plan" "submit" None
+                        div [ _class "flex gap-2 mt-4" ] [
+                            trailblazerButton (Some "add-point") "Add Point" "Add Point" "button" [ "_", "install AddPoint"; "disabled", "true" ]
+                            trailblazerButton (Some "remove-point") "Remove Point" "Remove Point" "button" [ "_", "install RemovePoint" ]
+                            trailblazerButton (Some "submit-plan") "Submit Plan" "Submit Plan" "submit" []
+                        ]
                     ]
-                    div [ _id "map"; _class "w-[50vw] h-[400px]"; attr "_" "on load call initializeMap(me)" ] []
+                    div [ _id "map"; _class "w-[60vw] h-[400px]"; attr "_" "on load call initializeMap(me)" ] []
                     match trailPointsOfInterest with
                         | Ok _ -> emptyText
                         | Error e -> span [] [ 

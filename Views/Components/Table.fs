@@ -3,10 +3,11 @@ module HikePlanner.Views.Components.Table
 open Giraffe.ViewEngine
 open FSharp.Core
 open Button
+open LinkButton
 
 let trailblazerTableButton label text = 
   td [ _class "px-4 py-3 text-center whitespace-nowrap" ] [
-    trailblazerButton None label text "Button" None
+    trailblazerButton None label text "Button" []
   ]
 
 type ColumnValue =
@@ -29,8 +30,11 @@ let trailblazerTableHeader headers =
 
 let trailblazerTable title header rows  =
   div [ _class "w-full overflow-x-auto border border-black rounded-lg bg-white p-4 font-sans selection:bg-neutral-200" ] [
-        div [ _class "text-[10px] font-mono tracking-widest text-neutral-500 uppercase mb-2 pl-1" ] [
-            str title
+        div [ _class "flex items-center justify-between mb-2" ] [
+          div [ _class "text-[24px] font-mono tracking-widest text-neutral-500 uppercase mb-2 pl-1" ] [
+              str title
+          ]
+          trailblazerLinkButton "/plan/create" "Create New Plan" None
         ]
         table [ _class "w-full min-w-[600px] border-collapse text-left text-sm text-neutral-900 font-mono" ] [
           header

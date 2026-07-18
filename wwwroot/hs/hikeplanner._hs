@@ -10,11 +10,21 @@ def isValidNumber(numericValue)
     return numericValue is a Number and not Number.isNaN(numericValue)
 end
 
+def areAllPointsSelected()
+    for select in <select[name="campPoints"]/>
+        if not select's selectedOptions[0].value then
+            return false
+        end
+        log not select's selectedOptions[0].value
+    end
+    return true
+end
+
 def filterByMileRange(selectElement, minMile, maxMile)
     for option in selectElement's options
         set optionMile to option's dataset.mile as Float
         if isValidNumber(optionMile) and isValidNumber(minMile) and isValidNumber(maxMile) then
-            if optionMile < minMile or optionMile > maxMile then
+            if optionMile < minMile or optionMile > maxMile or option's @disabled is not empty then
                 add @disabled to option
             else
                 remove @disabled from option
@@ -78,7 +88,7 @@ behavior AddPoint()
         set @for of <label/> in clone to "camp-point-select-day-" + $campCounter
         set innerHTML of <label/> in clone to "Day " + $campCounter
 
-        put clone before me
+        put clone after currentSelect 
         call refreshMileBoundaries()
     end
 end
@@ -90,6 +100,12 @@ behavior SelectPoint()
             call drawPath(result.startMile, result.endMile, result.dayOfSelect)
         end
         call refreshMileBoundaries()
+
+        if areAllPointsSelected() then
+            remove @disabled from #add-point
+        else
+            add @disabled to #add-point
+        end
     end
 end
 

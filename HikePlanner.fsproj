@@ -13,6 +13,7 @@
     <Compile Include="Views/Components/DatePicker.fs" />
     <Compile Include="Views/Components/TextInput.fs" />
     <Compile Include="Views/Components/Button.fs" />
+    <Compile Include="Views/Components/LinkButton.fs" />
     <Compile Include="Views/Components/Table.fs" />
     <Compile Include="Views/Components/Select.fs" />
     <Compile Include="Views/Shared/MasterLayout.fs" />
