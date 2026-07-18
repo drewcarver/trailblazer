@@ -10,11 +10,11 @@ def isValidNumber(numericValue)
     end
 end
 
-def filterByMileRange(selectElement, startMile)
+def filterByMileRange(selectElement, minMile, maxMile)
     for option in selectElement's options
         set optionMile to option's dataset.mile as Float
-        if isValidNumber(optionMile) and isValidNumber(startMile) then
-            if optionMile < startMile then
+        if isValidNumber(optionMile) and isValidNumber(minMile) and isValidNumber(maxMile) then
+            if optionMile < minMile or optionMile > maxMile then
                 set @disabled of option to true
             else
                 remove @disabled from option
@@ -43,9 +43,29 @@ def getStartAndEndMilesFromSelect(selectElement)
 end
 
 def refreshMileBoundaries()
-    for select in <select[name="campPoints"] />
-        set result to getStartAndEndMilesFromSelect(select)
-        call filterByMileRange(select, result.startMile)
+    set pointSelects to <select[name="campPoints"] />
+    for select in pointSelects
+        set dayOfSelect to select's @data-day as Int
+
+        if (dayOfSelect is 1) then 
+            set nextDay to dayOfSelect + 1
+            set secondPoint to #{"camp-point-select-day-" + nextDay}
+            set endMile to secondPoint.selectedOptions.dataset.mile as Float
+            call filterByMileRange(select, 0, endMile)
+        else if (dayOfSelect is $campCounter) then
+            set prevDay to dayOfSelect - 1
+            set previousPoint to #{"camp-point-select-day-" + prevDay}
+            set startMile to previousPoint.selectedOptions.dataset.mile as Float
+            call filterByMileRange(select, startMile, Infinity)
+        else
+            set nextDay to dayOfSelect + 1
+            set previousDay to dayOfSelect - 1
+            set nextPoint to #{"camp-point-select-day-" + nextDay}
+            set previousPoint to #{"camp-point-select-day-" + previousDay}
+            set startMile to previousPoint.selectedOptions.dataset.mile as Float
+            set endMile to nextPoint.selectedOptions.dataset.mile as Float
+            call filterByMileRange(select, startMile, endMile)
+        end
     end
 end
 
@@ -93,8 +113,7 @@ behavior RemovePoint()
         call removeHikeLayer(removedDay)
         decrement $campCounter
 
-        remove currentSelect
-
+        remove containerDiv
     end
     when $campCounter changes
         if $campCounter is 2 then 
