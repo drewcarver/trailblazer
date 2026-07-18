@@ -48,7 +48,7 @@ let withMasterLayout (userProfile: UserProfile option) hypertext bodyContent =
                 """
             ]
         ]
-        body [ _class "bg-[#EDE4D5] text-gray-800" ] [
+        body [ attr "hx-boost" "true"; _class "bg-[#EDE4D5] text-gray-800" ] [
             nav [ _class "bg-[#2E5A3D] text-white sticky top-0 z-50 shadow-md" ] [
                 div [ _class "max-w-7xl mx-auto px-6 py-4 flex items-center justify-between" ] [
                     div [ _class "flex items-center gap-3" ] [
