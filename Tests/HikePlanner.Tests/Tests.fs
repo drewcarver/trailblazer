@@ -12,7 +12,6 @@ open HikePlanner.Core
 open Program
 open HikePlanner.Handlers.Handlers
 open Microsoft.Data.Sqlite
-open System.Threading.Tasks
 
 [<Fact>]
 let ``POST /plan saves a hike through the route and SQLite`` () =

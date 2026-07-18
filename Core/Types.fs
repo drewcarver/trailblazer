@@ -19,4 +19,8 @@ type EnvironmentWithContext<'env> = {
     Context: HttpContext
 }
 
+type Required =
+    | Required
+    | Optional
+
 type TrailblazerEndpoint<'env> = App<'env, HttpHandler, HttpHandler>

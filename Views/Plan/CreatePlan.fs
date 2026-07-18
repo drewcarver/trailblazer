@@ -23,22 +23,22 @@ let planView (trailPointsOfInterest: Result<TrailPointOfInterest list, Trailblaz
                 h1 [] [ str "Create New Hike" ]
                 div [ _class "flex items-center gap-1" ] [
                     form [ _class "font-mono mx-auto mt-8 transition-[width] duration-500 ease-in-out"; attr "hx-post" "/plan"; attr "hx-swap" "outerHTML" ] [
-                        textInput "hike-name" "hikeName" "Hike Name" true
-                        datePicker "start-date" "startDate" "Start Date" None (Some DateTime.Now)
-                        trailblazerSelect "camp-point-select-day-1" "campPoints" "Day 1" pointsOfInterestOptions (Some "install SelectPoint") [ ("data-day", "1") ]
-                        trailblazerSelect "camp-point-select-day-2" "campPoints" "Day 2" pointsOfInterestOptions (Some "install SelectPoint") [ ("data-day", "2") ]
-                        match trailPointsOfInterest with
-                            | Ok _ -> emptyText
-                            | Error e -> span [] [ 
-                                match e with
-                                    | DatabaseError error -> str "An error ocurred when retrieving points of interest." 
-                                    | FormValidationError e -> str e
-                            ]
+                        textInput "hike-name" "hikeName" "Hike Name" true Required
+                        datePicker "start-date" "startDate" "Start Date" (Some DateTime.Now) Required []
+                        trailblazerSelect "camp-point-select-day-1" "campPoints" "Day 1" Required pointsOfInterestOptions [ "_", "install SelectPoint"; "data-day", "1" ]
+                        trailblazerSelect "camp-point-select-day-2" "campPoints" "Day 2" Required pointsOfInterestOptions [ "_", "install SelectPoint"; "data-day", "2" ]
                         trailblazerButton (Some "add-point") "Add Point" "Add Point" "button" (Some "install AddPoint")
                         trailblazerButton (Some "remove-point") "Remove Point" "Remove Point" "button" (Some "install RemovePoint")
                         trailblazerButton (Some "submit-plan") "Submit Plan" "Submit Plan" "submit" None
                     ]
                     div [ _id "map"; _class "w-[50vw] h-[400px]" ] []
+                    match trailPointsOfInterest with
+                        | Ok _ -> emptyText
+                        | Error e -> span [] [ 
+                            match e with
+                                | DatabaseError error -> str "An error ocurred when retrieving points of interest." 
+                                | FormValidationError e -> str e
+                        ]
                 ]
             ]
         ] |> withMasterLayout (script [ _type "text/hyperscript"; _src "/hs/hikeplanner._hs"] [] |> Some)
