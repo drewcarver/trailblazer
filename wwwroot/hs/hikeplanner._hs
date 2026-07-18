@@ -8,6 +8,54 @@ def isValidNumber(numericValue)
     else
         return false
     end
+end
+
+def filterByMileRange(selectElement, startMile)
+    for option in selectElement's options
+        set optionMile to option's dataset.mile as Float
+        if isValidNumber(optionMile) and isValidNumber(startMile) then
+            if optionMile < startMile then
+                set @disabled of option to true
+            else
+                remove @disabled from option
+            end
+        end
+    end
+end
+
+def getStartAndEndMilesFromSelect(selectElement)
+    set dayOfSelect to selectElement's @data-day as Int
+    set selectedOption to selectElement's selectedOptions
+
+    if (dayOfSelect is 1) then 
+        set nextDay to dayOfSelect + 1
+        set secondPoint to #{"camp-point-select-day-" + nextDay}
+        set startMile to selectedOption.dataset.mile as Float
+        set endMile to secondPoint.selectedOptions.dataset.mile as Float
+    else    
+        set nextDay to dayOfSelect - 1
+        set secondPoint to #{"camp-point-select-day-" + nextDay}
+        set startMile to secondPoint.selectedOptions.dataset.mile as Float
+        set endMile to selectedOption.dataset.mile as Float
+    end
+
+    return {startMile: startMile, endMile: endMile, dayOfSelect: dayOfSelect, nextDay: nextDay}
+end
+
+def refreshMileBoundaries()
+    for select in <select[name="campPoints"] />
+        set result to getStartAndEndMilesFromSelect(select)
+        call filterByMileRange(select, result.startMile)
+    end
+end
+
+behavior ListenForSelectChange()
+    on change
+        if target matches <select /> and target's @name is "campPoints" then
+            call refreshMileBoundaries()
+        end
+    end
+end
 
 behavior AddPoint()
     on click
@@ -22,29 +70,18 @@ behavior AddPoint()
         set innerHTML of <label /> in clone to "Day " + $campCounter
 
         put clone before me
+        call refreshMileBoundaries()
     end
 end
 
 behavior SelectPoint()
     on change 
-        set currentDay to @data-day as Int
-
-        if (currentDay is 1) then 
-            set nextDay to currentDay + 1
-            set secondPoint to #{"camp-point-select-day-" + nextDay}
-            set startMile to my selectedOptions's dataset.mile as Float
-            set endMile to secondPoint's selectedOptions's dataset.mile as Float
-        else    
-            set nextDay to currentDay - 1
-            set secondPoint to #{"camp-point-select-day-" + nextDay}
-            set startMile to secondPoint's selectedOptions's dataset.mile as Float
-            set endMile to my selectedOptions's dataset.mile as Float
+        set result to getStartAndEndMilesFromSelect(target)
+        log result
+        if isValidNumber(result.startMile) and isValidNumber(result.endMile) then
+            call drawPath(result.startMile, result.endMile, `${result.dayOfSelect},${result.nextDay}`) 
         end
-
-        log "Start Mile: " + startMile + ", End Mile: " + endMile + ", Day: " + currentDay
-        if isValidNumber(startMile) and isValidNumber(endMile) then
-            call drawPath(startMile, endMile, `${currentDay},${nextDay}`) 
-        end
+        call refreshMileBoundaries()
     end
 end
 

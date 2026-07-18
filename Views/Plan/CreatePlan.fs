@@ -22,7 +22,9 @@ let planView (trailPointsOfInterest: Result<TrailPointOfInterest list, Trailblaz
             div [ _class "p-6 border border-black rounded-lg bg-white p-4 font-sans selection:bg-neutral-200 m-2"] [
                 h1 [] [ str "Create New Hike" ]
                 div [ _class "flex items-center gap-1" ] [
-                    form [ _class "font-mono mx-auto mt-8 transition-[width] duration-500 ease-in-out"; attr "hx-post" "/plan"; attr "hx-swap" "outerHTML" ] [
+                    form [ _class "font-mono mx-auto mt-8 transition-[width] duration-500 ease-in-out"; 
+                        attr "_" "install ListenForSelectChange";
+                        attr "hx-post" "/plan"; attr "hx-swap" "outerHTML" ] [
                         textInput "hike-name" "hikeName" "Hike Name" true Required
                         datePicker "start-date" "startDate" "Start Date" (Some DateTime.Now) Required []
                         trailblazerSelect "camp-point-select-day-1" "campPoints" "Day 1" Required pointsOfInterestOptions [ "_", "install SelectPoint"; "data-day", "1" ]
