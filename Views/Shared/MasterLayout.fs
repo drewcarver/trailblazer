@@ -10,7 +10,8 @@ let withMasterLayout (userProfile: UserProfile option) bodyContent =
         head [] [
             meta [ _charset "UTF-8" ] 
             meta [ _name "viewport"; _content "width=device-width, initial-scale=1.0" ] 
-            title [] [ str "Trailblazer • Plan. Hike. Remember." ]
+            title [] [ str "Trailblazer ⛰️ Plan Your Next Hike" ]
+            link [ _rel "icon"; _type "image/svg+xml"; _href "/favicon.svg" ] 
             script [ _src "https://cdn.tailwindcss.com" ] []
             link [ _href "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"; _rel "stylesheet" ] 
             link [ _rel "stylesheet"; _href "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"; _integrity "sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="; _crossorigin ""]
