@@ -41,8 +41,7 @@ let noHikesAvailableTable =
 
 let listPlans userName hikesResult = 
     let renderTable hikes = 
-        div [] [
-            
+        div [ _class "p-4" ] [
             hikingTable hikes
         ]
 
