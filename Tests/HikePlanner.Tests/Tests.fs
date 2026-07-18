@@ -31,6 +31,7 @@ let ``POST /plan saves a hike through the route and SQLite`` () =
             );
 
             INSERT INTO TrailPointsOfInterest (TrailName, TrailMile, Name) VALUES ('Appalachian Trail', 1, "Test Point");
+            INSERT INTO TrailPointsOfInterest (TrailName, TrailMile, Name) VALUES ('Appalachian Trail', 2, "Test Point 2");
         """
         cmd.ExecuteNonQuery() |> ignore
 
@@ -51,18 +52,15 @@ let ``POST /plan saves a hike through the route and SQLite`` () =
         let formToSave: SaveHikeForm = {
             HikeName     = "Mossy Peak"
             StartDate    = DateTime.Now
-            EndDate      = DateTime.Now.AddDays(2)
-            StartPointId = 1
-            EndPointId   = 1
+            CampPoints   = ["1"; "2"]
         }
 
         let form =
             new FormUrlEncodedContent(dict [
                 nameof formToSave.HikeName,     formToSave.HikeName;
                 nameof formToSave.StartDate,    formToSave.StartDate.ToString "yyyy-MM-dd";
-                nameof formToSave.EndDate,      formToSave.EndDate.ToString "yyyy-MM-dd";
-                nameof formToSave.StartPointId, formToSave.StartPointId.ToString();
-                nameof formToSave.EndPointId,   formToSave.EndPointId.ToString();
+                nameof formToSave.CampPoints,   formToSave.CampPoints.Head;
+                nameof formToSave.CampPoints,   formToSave.CampPoints.[1];
             ])
 
         let! response = client.PostAsync("/plan", form)
