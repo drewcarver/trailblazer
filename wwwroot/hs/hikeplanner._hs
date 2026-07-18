@@ -46,24 +46,25 @@ def refreshMileBoundaries()
     set pointSelects to <select[name="campPoints"] />
     for select in pointSelects
         set dayOfSelect to select's @data-day as Int
+        set nextDay to dayOfSelect + 1
+        set previousDay to dayOfSelect - 1
 
         if (dayOfSelect is 1) then 
-            set nextDay to dayOfSelect + 1
-            set secondPoint to #{"camp-point-select-day-" + nextDay}
-            set endMile to secondPoint.selectedOptions.dataset.mile as Float
+            set nextPoint to #{"camp-point-select-day-" + nextDay}
+            set endMile to nextPoint.selectedOptions.dataset.mile as Float
+            
             call filterByMileRange(select, 0, endMile)
         else if (dayOfSelect is $campCounter) then
-            set prevDay to dayOfSelect - 1
-            set previousPoint to #{"camp-point-select-day-" + prevDay}
+            set previousPoint to #{"camp-point-select-day-" + previousDay}
             set startMile to previousPoint.selectedOptions.dataset.mile as Float
+
             call filterByMileRange(select, startMile, Infinity)
         else
-            set nextDay to dayOfSelect + 1
-            set previousDay to dayOfSelect - 1
             set nextPoint to #{"camp-point-select-day-" + nextDay}
             set previousPoint to #{"camp-point-select-day-" + previousDay}
             set startMile to previousPoint.selectedOptions.dataset.mile as Float
             set endMile to nextPoint.selectedOptions.dataset.mile as Float
+
             call filterByMileRange(select, startMile, endMile)
         end
     end
