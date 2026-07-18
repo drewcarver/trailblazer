@@ -2,12 +2,12 @@ init
     if $campCounter is undefined set $campCounter to 2 
 end
 
+def getPointSelect(day)
+    return #{"camp-point-select-day-" + day}
+end
+
 def isValidNumber(numericValue)
-    if numericValue is a Number and not Number.isNaN(numericValue)
-        return true
-    else
-        return false
-    end
+    return numericValue is a Number and not Number.isNaN(numericValue)
 end
 
 def filterByMileRange(selectElement, minMile, maxMile)
@@ -15,7 +15,7 @@ def filterByMileRange(selectElement, minMile, maxMile)
         set optionMile to option's dataset.mile as Float
         if isValidNumber(optionMile) and isValidNumber(minMile) and isValidNumber(maxMile) then
             if optionMile < minMile or optionMile > maxMile then
-                set @disabled of option to true
+                add @disabled to option
             else
                 remove @disabled from option
             end
@@ -27,15 +27,13 @@ def getStartAndEndMilesFromSelect(selectElement)
     set dayOfSelect to selectElement's @data-day as Int
     set selectedOption to selectElement's selectedOptions
 
-    if (dayOfSelect is 1) then 
+    if dayOfSelect is 1 then
         set nextDay to dayOfSelect + 1
-        set secondPoint to #{"camp-point-select-day-" + nextDay}
         set startMile to selectedOption.dataset.mile as Float
-        set endMile to secondPoint.selectedOptions.dataset.mile as Float
-    else    
+        set endMile to getPointSelect(nextDay).selectedOptions.dataset.mile as Float
+    else
         set nextDay to dayOfSelect - 1
-        set secondPoint to #{"camp-point-select-day-" + nextDay}
-        set startMile to secondPoint.selectedOptions.dataset.mile as Float
+        set startMile to getPointSelect(nextDay).selectedOptions.dataset.mile as Float
         set endMile to selectedOption.dataset.mile as Float
     end
 
@@ -43,28 +41,18 @@ def getStartAndEndMilesFromSelect(selectElement)
 end
 
 def refreshMileBoundaries()
-    set pointSelects to <select[name="campPoints"] />
-    for select in pointSelects
+    for select in <select[name="campPoints"]/>
         set dayOfSelect to select's @data-day as Int
-        set nextDay to dayOfSelect + 1
-        set previousDay to dayOfSelect - 1
 
-        if (dayOfSelect is 1) then 
-            set nextPoint to #{"camp-point-select-day-" + nextDay}
-            set endMile to nextPoint.selectedOptions.dataset.mile as Float
-            
+        if dayOfSelect is 1 then
+            set endMile to getPointSelect(dayOfSelect + 1).selectedOptions.dataset.mile as Float
             call filterByMileRange(select, 0, endMile)
-        else if (dayOfSelect is $campCounter) then
-            set previousPoint to #{"camp-point-select-day-" + previousDay}
-            set startMile to previousPoint.selectedOptions.dataset.mile as Float
-
+        else if dayOfSelect is $campCounter then
+            set startMile to getPointSelect(dayOfSelect - 1).selectedOptions.dataset.mile as Float
             call filterByMileRange(select, startMile, Infinity)
         else
-            set nextPoint to #{"camp-point-select-day-" + nextDay}
-            set previousPoint to #{"camp-point-select-day-" + previousDay}
-            set startMile to previousPoint.selectedOptions.dataset.mile as Float
-            set endMile to nextPoint.selectedOptions.dataset.mile as Float
-
+            set startMile to getPointSelect(dayOfSelect - 1).selectedOptions.dataset.mile as Float
+            set endMile to getPointSelect(dayOfSelect + 1).selectedOptions.dataset.mile as Float
             call filterByMileRange(select, startMile, endMile)
         end
     end
@@ -80,15 +68,15 @@ end
 
 behavior AddPoint()
     on click
-        set currentSelect to the closest <div /> to #{"camp-point-select-day-" + $campCounter}
-        
+        set currentSelect to the closest <div/> to getPointSelect($campCounter)
+
         set clone to currentSelect.cloneNode(true)
         increment $campCounter
-        
-        set @id of <select /> in clone to "camp-point-select-day-" + $campCounter
-        set @data-day of <select /> in clone to $campCounter
-        set @for of <label /> in clone to "camp-point-select-day-" + $campCounter
-        set innerHTML of <label /> in clone to "Day " + $campCounter
+
+        set @id of <select/> in clone to "camp-point-select-day-" + $campCounter
+        set @data-day of <select/> in clone to $campCounter
+        set @for of <label/> in clone to "camp-point-select-day-" + $campCounter
+        set innerHTML of <label/> in clone to "Day " + $campCounter
 
         put clone before me
         call refreshMileBoundaries()
@@ -96,20 +84,19 @@ behavior AddPoint()
 end
 
 behavior SelectPoint()
-    on change 
+    on change
         set result to getStartAndEndMilesFromSelect(target)
-        log result
         if isValidNumber(result.startMile) and isValidNumber(result.endMile) then
-            call drawPath(result.startMile, result.endMile, result.dayOfSelect) 
+            call drawPath(result.startMile, result.endMile, result.dayOfSelect)
         end
         call refreshMileBoundaries()
     end
 end
 
 behavior RemovePoint()
-    on click 
-        set currentSelect to #{"camp-point-select-day-" + $campCounter}
-        set containerDiv to the closest <div /> to currentSelect
+    on click
+        set currentSelect to getPointSelect($campCounter)
+        set containerDiv to the closest <div/> to currentSelect
         set removedDay to currentSelect's @data-day as Int
         call removeHikeLayer(removedDay)
         decrement $campCounter
@@ -117,9 +104,9 @@ behavior RemovePoint()
         remove containerDiv
     end
     when $campCounter changes
-        if $campCounter is 2 then 
-            add @disabled to me 
-        else 
+        if $campCounter is 2 then
+            add @disabled to me
+        else
             remove @disabled from me
         end
     end
