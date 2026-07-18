@@ -19,25 +19,28 @@ module Handlers =
         CampPoints: string list
     }
 
-    let getUserName =
+    let getUserProfile =
         App.asks (fun env ->
-            env.Context.User.FindFirst(ClaimTypes.Name) |> Option.ofObj |> Option.map (fun c -> c.Value))
+            let findClaim claimType =
+                env.Context.User.FindFirst(claimType: string) |> Option.ofObj |> Option.map (fun c -> c.Value)
+            findClaim ClaimTypes.Name
+            |> Option.map (fun name -> { Name = name; Picture = findClaim "urn:google:picture" }))
 
     let listPlansHandler: TrailblazerEndpoint<_> =
         app {
             let! hikes = getHikes 
-            and! userName = getUserName
+            and! userProfile = getUserProfile
 
-            return htmlView (listPlans userName (Ok hikes))
+            return htmlView (listPlans userProfile (Ok hikes))
         } 
         |> App.mapError (Error >> listPlans None >> htmlView)
 
     let planHandler: TrailblazerEndpoint<_> =
         app {
             let! trailPointsOfInterest = getTrailPointsOfInterest "AppalachianTrail" 
-            and! userName = getUserName
+            and! userProfile = getUserProfile
 
-            return htmlView (Plan.planView userName (Ok trailPointsOfInterest))
+            return htmlView (Plan.planView userProfile (Ok trailPointsOfInterest))
         }
         |> App.mapError (Error >> Plan.planView None >> htmlView) 
 
@@ -60,6 +63,10 @@ module Handlers =
         |> App.mapError (fun err -> Error err |> Plan.planView None |> htmlView) 
 
     let viewHikeHandler hikeId : TrailblazerEndpoint<_> =
-       App.zip getUserName (getHikeById hikeId)
-        |> App.map (fun (userName, hike) -> Ok hike |> hikeDetailView userName |> htmlView)
+        app {
+            let! hike = getHikeById hikeId
+            and! userProfile = getUserProfile
+
+            return htmlView (hikeDetailView userProfile (Ok hike))
+        }
         |> App.mapError (fun err -> Error err |> hikeDetailView None |> htmlView)

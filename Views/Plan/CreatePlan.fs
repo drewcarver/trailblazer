@@ -11,7 +11,7 @@ open HikePlanner.Core
 open HikePlanner.Views.Components.Button
 
 let planView userName (trailPointsOfInterest: Result<TrailPointOfInterest list, TrailblazerError>) =
-        let toOptionLabel poi = sprintf "%s - Mile %.2f" poi.Name poi.TrailMile
+        let toOptionLabel (poi: TrailPointOfInterest) = sprintf "%s - Mile %.2f" poi.Name poi.TrailMile
         let pointsOfInterestOptions = 
             trailPointsOfInterest 
             |> Result.defaultWith (fun _ -> List.empty)

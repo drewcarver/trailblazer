@@ -23,4 +23,9 @@ type Required =
     | Required
     | Optional
 
+type UserProfile = {
+    Name: string
+    Picture: string option
+}
+
 type TrailblazerEndpoint<'env> = App<'env, HttpHandler, HttpHandler>

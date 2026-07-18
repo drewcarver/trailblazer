@@ -1,8 +1,11 @@
 module HikePlanner.Views.MasterLayout
 
 open Giraffe.ViewEngine
+open HikePlanner.Core
 
-let withMasterLayout userName hypertext bodyContent = 
+let withMasterLayout (userProfile: UserProfile option) hypertext bodyContent = 
+    let displayName = userProfile |> Option.map (fun p -> p.Name) |> Option.defaultValue "Guest"
+    let picture = userProfile |> Option.bind (fun p -> p.Picture)
     html [ _lang "en" ] [
         head [] [
             meta [ _charset "UTF-8" ] 
@@ -61,7 +64,12 @@ let withMasterLayout userName hypertext bodyContent =
                     ]
                     div [ _class "flex items-center gap-4" ] [
                         button [ _class "bg-[#8B5A2B] hover:bg-[#A67C5D] px-5 py-2 rounded-full text-sm font-medium transition-colors" ] [ str "Log Hike" ]
-                        div [ _class "px-4 h-9 bg-[#D4C3A8] rounded-full flex items-center justify-center text-[#2E5A3D] font-semibold text-sm whitespace-nowrap" ] [ str (userName |> Option.defaultValue "Guest") ]
+                        div [ _class "flex items-center gap-2 px-2 h-9 bg-[#D4C3A8] rounded-full" ] [
+                            match picture with
+                            | Some src -> img [ _src src; _alt displayName; _class "w-7 h-7 rounded-full object-cover" ]
+                            | None -> emptyText
+                            span [ _class "pr-2 text-[#2E5A3D] font-semibold text-sm whitespace-nowrap" ] [ str displayName ]
+                        ]
                         a [ _href "/logout"; _class "text-sm font-medium hover:text-[#D4C3A8] transition-colors" ] [ str "Log Out" ]
                     ]
                 ]
