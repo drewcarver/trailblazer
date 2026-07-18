@@ -18,7 +18,6 @@ let planView userName (trailPointsOfInterest: Result<TrailPointOfInterest list, 
             |> Seq.map (fun poi -> { Label = poi |> toOptionLabel; Value = string poi.Id; Attributes = [ ("data-mile", poi.TrailMile.ToString())] })
 
         div [] [
-            script [ _src "/js/trailmap.js"] []
             div [ _class "p-6 border border-black rounded-lg bg-white p-4 font-sans selection:bg-neutral-200 m-2"] [
                 h1 [] [ str "Create New Hike" ]
                 div [ _class "flex items-center gap-1" ] [
@@ -33,7 +32,7 @@ let planView userName (trailPointsOfInterest: Result<TrailPointOfInterest list, 
                         trailblazerButton (Some "remove-point") "Remove Point" "Remove Point" "button" (Some "install RemovePoint")
                         trailblazerButton (Some "submit-plan") "Submit Plan" "Submit Plan" "submit" None
                     ]
-                    div [ _id "map"; _class "w-[50vw] h-[400px]" ] []
+                    div [ _id "map"; _class "w-[50vw] h-[400px]"; attr "_" "on load call initializeMap(me)" ] []
                     match trailPointsOfInterest with
                         | Ok _ -> emptyText
                         | Error e -> span [] [ 
@@ -43,4 +42,4 @@ let planView userName (trailPointsOfInterest: Result<TrailPointOfInterest list, 
                         ]
                 ]
             ]
-        ] |> withMasterLayout userName (script [ _type "text/hyperscript"; _src "/hs/hikeplanner._hs"] [] |> Some)
+        ] |> withMasterLayout userName

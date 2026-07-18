@@ -3,7 +3,7 @@ module HikePlanner.Views.MasterLayout
 open Giraffe.ViewEngine
 open HikePlanner.Core
 
-let withMasterLayout (userProfile: UserProfile option) hypertext bodyContent = 
+let withMasterLayout (userProfile: UserProfile option) bodyContent = 
     let displayName = userProfile |> Option.map (fun p -> p.Name) |> Option.defaultValue "Guest"
     let picture = userProfile |> Option.bind (fun p -> p.Picture)
     html [ _lang "en" ] [
@@ -17,7 +17,8 @@ let withMasterLayout (userProfile: UserProfile option) hypertext bodyContent =
             script [ _src "https://cdnjs.cloudflare.com/ajax/libs/htmx/2.0.10/htmx.min.js"; _integrity "sha512-mwXO+qVbheglD8l/LGeVBnqcKl9NtchGWmM9gW/gvAEZBYnsBQCpaneQ+hI+MOlv7Komhd1NqZ5Gv1ElbYgqCA=="; _crossorigin "anonymous"; ] []
             script [ _src ""; _integrity "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="; _crossorigin "" ] []
             script [ _src "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"; _integrity "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="; _crossorigin "" ] []
-            hypertext |> Option.defaultValue emptyText
+            script [ _src "/js/trailmap.js"; attr "defer" ""] []
+            script [ _type "text/hyperscript"; _src "/hs/hikeplanner._hs"; attr "defer" "" ] []
             script [ _src "https://cdn.jsdelivr.net/npm/hyperscript.org@0.9.93/dist/_hyperscript.min.js"; _integrity "sha384-/6HsqTiz02YfFBUhzTwlH/yxe68DhfnkdHiWytM3nxAzs/yvG+3FZY0f4KLnNoov"; _crossorigin "anonymous" ] []
             script [ _src "https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js" ] []
             style [] [

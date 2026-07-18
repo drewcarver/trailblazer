@@ -151,7 +151,7 @@ let indexView =
                     ]
                 ]
             ]
-    ] |> withMasterLayout None None
+    ] |> withMasterLayout None
 
 let homeHandler: HttpHandler =
     htmlView indexView
