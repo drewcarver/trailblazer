@@ -7,6 +7,7 @@ open HikePlanner.Views.Plan
 open HikePlanner.Views.Plan.ListPlans
 open HikePlanner.Views.Plan.HikeDetail
 open System
+open System.Security.Claims
 open Giraffe
 open Utils
 
@@ -18,15 +19,27 @@ module Handlers =
         CampPoints: string list
     }
 
+    let getUserName =
+        App.asks (fun env ->
+            env.Context.User.FindFirst(ClaimTypes.Name) |> Option.ofObj |> Option.map (fun c -> c.Value))
+
     let listPlansHandler: TrailblazerEndpoint<_> =
-        getHikes 
-        |> App.map (Ok >> listPlans >> htmlView)
-        |> App.mapError (Error >> listPlans >> htmlView)
+        app {
+            let! hikes = getHikes 
+            and! userName = getUserName
+
+            return htmlView (listPlans userName (Ok hikes))
+        } 
+        |> App.mapError (Error >> listPlans None >> htmlView)
 
     let planHandler: TrailblazerEndpoint<_> =
-        getTrailPointsOfInterest "AppalachianTrail" 
-        |> App.map (Ok >> Plan.planView >> htmlView)
-        |> App.mapError (Error >> Plan.planView >> htmlView) 
+        app {
+            let! trailPointsOfInterest = getTrailPointsOfInterest "AppalachianTrail" 
+            and! userName = getUserName
+
+            return htmlView (Plan.planView userName (Ok trailPointsOfInterest))
+        }
+        |> App.mapError (Error >> Plan.planView None >> htmlView) 
 
     let saveHikePlan : TrailblazerEndpoint<_> =
         app {
@@ -44,9 +57,9 @@ module Handlers =
                 setHttpHeader "HX-Location" "/plan" >=> setStatusCode 204
             )
         } 
-        |> App.mapError (Error >> Plan.planView >> htmlView) 
+        |> App.mapError (fun err -> Error err |> Plan.planView None |> htmlView) 
 
     let viewHikeHandler hikeId : TrailblazerEndpoint<_> =
-       getHikeById hikeId
-        |> App.map (Ok >> hikeDetailView >> htmlView)
-        |> App.mapError (Error >> hikeDetailView >> htmlView)
+       App.zip getUserName (getHikeById hikeId)
+        |> App.map (fun (userName, hike) -> Ok hike |> hikeDetailView userName |> htmlView)
+        |> App.mapError (fun err -> Error err |> hikeDetailView None |> htmlView)

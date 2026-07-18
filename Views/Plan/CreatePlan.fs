@@ -10,7 +10,7 @@ open HikePlanner.Repositories.HikeRepo
 open HikePlanner.Core
 open HikePlanner.Views.Components.Button
 
-let planView (trailPointsOfInterest: Result<TrailPointOfInterest list, TrailblazerError>) =
+let planView userName (trailPointsOfInterest: Result<TrailPointOfInterest list, TrailblazerError>) =
         let toOptionLabel poi = sprintf "%s - Mile %.2f" poi.Name poi.TrailMile
         let pointsOfInterestOptions = 
             trailPointsOfInterest 
@@ -43,4 +43,4 @@ let planView (trailPointsOfInterest: Result<TrailPointOfInterest list, Trailblaz
                         ]
                 ]
             ]
-        ] |> withMasterLayout (script [ _type "text/hyperscript"; _src "/hs/hikeplanner._hs"] [] |> Some)
+        ] |> withMasterLayout userName (script [ _type "text/hyperscript"; _src "/hs/hikeplanner._hs"] [] |> Some)

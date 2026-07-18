@@ -27,16 +27,14 @@ let withAppHandler (appEnv: 'env) app next ctx =
                     | Error handler -> handler next ctx
         }
 
-// Kick browser to Google sign-in screen
 let loginHandler : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
-            let properties = AuthenticationProperties(RedirectUri = "/account")
+            let properties = AuthenticationProperties(RedirectUri = "/plan")
             do! ctx.ChallengeAsync(GoogleDefaults.AuthenticationScheme, properties)
             return! next ctx
         }
 
-// Clear cookie to end session
 let logoutHandler : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
@@ -49,7 +47,6 @@ let accountHandler : HttpHandler =
         let name = ctx.User.FindFirst(ClaimTypes.Name) |> Option.ofObj |> Option.map (fun c -> c.Value) |> Option.defaultValue "hiker"
         text (sprintf "Welcome, %s!" name) next ctx
 
-// Gate any handler behind login; unauthenticated visitors get redirected to /login
 let requireLogin : HttpHandler =
     requiresAuthentication (redirectTo false "/login")
 
@@ -86,6 +83,7 @@ let main _ =
             options.ClientSecret <- builder.Configuration.["Google:ClientSecret"]
             options.CorrelationCookie.SameSite <- SameSiteMode.Lax
             options.CorrelationCookie.SecurePolicy <- CookieSecurePolicy.SameAsRequest    
+            options.ClaimActions.MapJsonKey("urn:google:picture", "picture")
         )
         |> ignore
 
