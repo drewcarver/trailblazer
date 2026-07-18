@@ -79,7 +79,7 @@ behavior SelectPoint()
         set result to getStartAndEndMilesFromSelect(target)
         log result
         if isValidNumber(result.startMile) and isValidNumber(result.endMile) then
-            call drawPath(result.startMile, result.endMile, `${result.dayOfSelect},${result.nextDay}`) 
+            call drawPath(result.startMile, result.endMile, result.dayOfSelect) 
         end
         call refreshMileBoundaries()
     end
@@ -87,7 +87,10 @@ end
 
 behavior RemovePoint()
     on click 
-        set currentSelect to the closest <div /> to #{"camp-point-select-day-" + $campCounter}
+        set currentSelect to #{"camp-point-select-day-" + $campCounter}
+        set containerDiv to the closest <div /> to currentSelect
+        set removedDay to currentSelect's @data-day as Int
+        call removeHikeLayer(removedDay)
         decrement $campCounter
 
         remove currentSelect

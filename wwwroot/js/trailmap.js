@@ -8,14 +8,21 @@ const trailStyle = {
 let trailGeoJSONData, activeMileMarker, map;
 let hikeLayers = new Map();
 
-function drawPath(startMile, endMile, days) {
+function removeHikeLayer(day) {
+    if (hikeLayers.has(day)) {
+        map.removeLayer(hikeLayers.get(day));
+        hikeLayers.delete(day);
+    }
+}
+
+function drawPath(startMile, endMile, day) {
     if (!trailGeoJSONData) {
         console.error("Trail data hasn't loaded yet!");
         return;
     }
     
-    if (hikeLayers.has(days)) {
-        map.removeLayer(hikeLayers.get(days));
+    if (hikeLayers.has(day)) {
+        map.removeLayer(hikeLayers.get(day));
     }
 
     const pathColor = `#${Math.floor(Math.random()*16777215).toString(16)}`; // Random color for each day's path
@@ -46,7 +53,7 @@ function drawPath(startMile, endMile, days) {
             pathLine = turf.lineString(pathCoordinates);
         }
 
-        hikeLayers.set(days, L.geoJSON(pathLine, {
+        hikeLayers.set(day, L.geoJSON(pathLine, {
             style: {
                 color: pathColor,
                 weight: 6,         
