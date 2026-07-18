@@ -2,6 +2,13 @@ init
     if $campCounter is undefined set $campCounter to 2 
 end
 
+def isValidNumber(numericValue)
+    if numericValue is a Number and not Number.isNaN(numericValue)
+        return true
+    else
+        return false
+    end
+
 behavior AddPoint()
     on click
         set currentSelect to the closest <div /> to #{"camp-point-select-day-" + $campCounter}
@@ -21,12 +28,23 @@ end
 behavior SelectPoint()
     on change 
         set currentDay to @data-day as Int
-        set secondToLastPoint to #{"camp-point-select-day-" + (currentDay - 1)}
 
-        set startMile to secondToLastPoint's selectedOptions's dataset.mile as Float
-        set endMile to my selectedOptions's dataset.mile as Float
+        if (currentDay is 1) then 
+            set nextDay to currentDay + 1
+            set secondPoint to #{"camp-point-select-day-" + nextDay}
+            set startMile to my selectedOptions's dataset.mile as Float
+            set endMile to secondPoint's selectedOptions's dataset.mile as Float
+        else    
+            set nextDay to currentDay - 1
+            set secondPoint to #{"camp-point-select-day-" + nextDay}
+            set startMile to secondPoint's selectedOptions's dataset.mile as Float
+            set endMile to my selectedOptions's dataset.mile as Float
+        end
 
-        if startMile and endMile then call drawPath(startMile, endMile) end
+        log "Start Mile: " + startMile + ", End Mile: " + endMile + ", Day: " + currentDay
+        if isValidNumber(startMile) and isValidNumber(endMile) then
+            call drawPath(startMile, endMile, `${currentDay},${nextDay}`) 
+        end
     end
 end
 

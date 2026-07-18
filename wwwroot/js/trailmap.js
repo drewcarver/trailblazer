@@ -6,17 +6,19 @@ const trailStyle = {
 };
 
 let trailGeoJSONData, activeMileMarker, map;
-let hikeLayer;
+let hikeLayers = new Map();
 
-function drawPath(startMile, endMile) {
+function drawPath(startMile, endMile, days) {
     if (!trailGeoJSONData) {
         console.error("Trail data hasn't loaded yet!");
         return;
     }
-
-    if (hikeLayer) {
-        map.removeLayer(hikeLayer)
+    
+    if (hikeLayers.has(days)) {
+        map.removeLayer(hikeLayers.get(days));
     }
+
+    const pathColor = `#${Math.floor(Math.random()*16777215).toString(16)}`; // Random color for each day's path
 
     try {
         const flattened = turf.flatten(trailGeoJSONData);
@@ -44,16 +46,20 @@ function drawPath(startMile, endMile) {
             pathLine = turf.lineString(pathCoordinates);
         }
 
-        hikeLayer = L.geoJSON(pathLine, {
+        hikeLayers.set(days, L.geoJSON(pathLine, {
             style: {
-                color: '#FFD700',  
+                color: pathColor,
                 weight: 6,         
                 opacity: 0.9,
                 lineJoin: 'round'
             }
-        }).addTo(map);
+        }).addTo(map));
 
-        map.fitBounds(hikeLayer.getBounds());
+        const combinedBounds = L.latLngBounds();
+        for (const layer of hikeLayers.values()) {
+            combinedBounds.extend(layer.getBounds());
+        }
+        map.fitBounds(combinedBounds);
     } catch (error) {
         console.error("Error slicing or drawing the path line:", error);
     }
