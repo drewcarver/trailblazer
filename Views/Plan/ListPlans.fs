@@ -45,4 +45,4 @@ let listPlans hikesResult =
     | Ok hikes  -> renderTable hikes
     | Error (NotFound _) -> renderTable []
     | Error (DatabaseError e | FormValidationError e) -> errorOcurredTable e
-    |> withMasterLayout
+    |> withMasterLayout None

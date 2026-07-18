@@ -6,6 +6,7 @@ open Giraffe.EndpointRouting
 open HikePlanner.Infrastructure
 open HikePlanner.Core
 open HikePlanner.Handlers.Handlers
+open Microsoft.AspNetCore.StaticFiles
 
 let private defaultConnectionString = ConnectionString "Data Source=hikes.db"
 
@@ -38,7 +39,10 @@ let main _ =
 
     let app = builder.Build()
 
-    app.UseStaticFiles() |> ignore
+    let provider = FileExtensionContentTypeProvider()
+    provider.Mappings.["._hs"] <- "text/hyperscript"
+    let staticFileOptions = StaticFileOptions(ContentTypeProvider = provider)
+    app.UseStaticFiles staticFileOptions |> ignore
 
     let env = {
         ConnectionString = defaultConnectionString

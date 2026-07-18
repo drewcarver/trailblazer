@@ -1,0 +1,48 @@
+init 
+    if $campCounter is undefined set $campCounter to 2 
+end
+
+behavior AddPoint()
+    on click
+        set currentSelect to the closest <div /> to #{"camp-point-select-day-" + $campCounter}
+        
+        set clone to currentSelect.cloneNode(true)
+        increment $campCounter
+        
+        set @id of <select /> in clone to "camp-point-select-day-" + $campCounter
+        set @data-day of <select /> in clone to $campCounter
+        set @for of <label /> in clone to "camp-point-select-day-" + $campCounter
+        set innerHTML of <label /> in clone to "Day " + $campCounter
+
+        put clone before me
+    end
+end
+
+behavior SelectPoint()
+    on change 
+        set currentDay to @data-day as Int
+        set secondToLastPoint to #{"camp-point-select-day-" + (currentDay - 1)}
+
+        set startMile to secondToLastPoint's selectedOptions's dataset.mile as Float
+        set endMile to my selectedOptions's dataset.mile as Float
+
+        if startMile and endMile then call drawPath(startMile, endMile) end
+    end
+end
+
+behavior RemovePoint()
+    on click 
+        set currentSelect to the closest <div /> to #{"camp-point-select-day-" + $campCounter}
+        decrement $campCounter
+
+        remove currentSelect
+
+    end
+    when $campCounter changes
+        if $campCounter is 2 then 
+            add @disabled to me 
+        else 
+            remove @disabled from me
+        end
+    end
+end

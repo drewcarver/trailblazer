@@ -6,7 +6,7 @@ open Button
 
 let trailblazerTableButton label text = 
   td [ _class "px-4 py-3 text-center whitespace-nowrap" ] [
-    trailblazerButton label text "Button" None
+    trailblazerButton None label text "Button" None
   ]
 
 type ColumnValue =

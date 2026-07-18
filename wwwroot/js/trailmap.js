@@ -105,28 +105,6 @@ function addMileMarker(miles) {
 
 
 document.addEventListener('DOMContentLoaded', function () {
-    const startPointSelect = document.querySelector('#start-point-select')
-    const endPointSelect = document.querySelector('#end-point-select')
-    
-    let startPoint, endPoint;
-
-    startPointSelect.addEventListener('change', e => {
-        const selectedOption = startPointSelect.querySelector('option:checked');
-        startPoint = selectedOption.dataset.mile
-        
-        if (endPoint) {
-            drawPath(startPoint, endPoint);
-        }
-    })
-
-    endPointSelect.addEventListener('change', e => {
-        const selectedOption = endPointSelect.querySelector('option:checked');
-        endPoint = selectedOption.dataset.mile
-        
-        if (startPoint) {
-            drawPath(startPoint, endPoint);
-        }
-    })
 
     map = L.map('map').setView([34.628, -84.193], 13); 
 
@@ -147,4 +125,6 @@ document.addEventListener('DOMContentLoaded', function () {
         .catch(error => {
             console.error('Error loading the trail GeoJSON:', error);
         });
+
+    
 });

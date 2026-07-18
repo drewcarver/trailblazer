@@ -24,27 +24,9 @@ let planView (trailPointsOfInterest: Result<TrailPointOfInterest list, Trailblaz
                 div [ _class "flex items-center gap-1" ] [
                     form [ _class "font-mono mx-auto mt-8 transition-[width] duration-500 ease-in-out"; attr "hx-post" "/plan"; attr "hx-swap" "outerHTML" ] [
                         textInput "hike-name" "hikeName" "Hike Name" true
-                        datePicker "start-date" "startDate" "Start Date" (Some "
-                            on change or load
-                                set #end-date.min to my value
-                        ") (Some DateTime.Now)
-                        trailblazerSelect "camp-point-select-day-1" "campPoints" "Day 1" pointsOfInterestOptions (Some "
-                            on change 
-                                set startMile to parseFloat(my selectedOptions.dataset.mile)
-                
-                                for opt in #end-point-select.options
-                                    set endMile to parseFloat(opt.dataset.mile)
-
-                                    if endMile < startMile
-                                        set opt.disabled to true
-                                    else
-                                        set opt.disabled to false
-                                    end
-                                end
-                
-                                if #end-point-select.selectedOptions[0].disabled
-                                    set #end-point-select.value to ''
-                        ") []
+                        datePicker "start-date" "startDate" "Start Date" None (Some DateTime.Now)
+                        trailblazerSelect "camp-point-select-day-1" "campPoints" "Day 1" pointsOfInterestOptions (Some "install SelectPoint") [ ("data-day", "1") ]
+                        trailblazerSelect "camp-point-select-day-2" "campPoints" "Day 2" pointsOfInterestOptions (Some "install SelectPoint") [ ("data-day", "2") ]
                         match trailPointsOfInterest with
                             | Ok _ -> emptyText
                             | Error e -> span [] [ 
@@ -52,26 +34,11 @@ let planView (trailPointsOfInterest: Result<TrailPointOfInterest list, Trailblaz
                                     | DatabaseError error -> str "An error ocurred when retrieving points of interest." 
                                     | FormValidationError e -> str e
                             ]
-                        trailblazerButton "Add Point" "Add Point" "button" (Some
-                            """on click
-                                if $campCounter is undefined set $campCounter to 1 end
-                                set selector to '#' + 'camp-point-select-day-' + $campCounter
-
-                                increment $campCounter
-
-                                set clone to the closest <div /> to document.querySelector(selector)
-                                set clone to clone.cloneNode(true)
-                                
-                                set newpointid to 'camp-point-select-day-' + $campCounter
-                                set @id of <select /> in clone to newpointid
-                                set @for of <label /> in clone to newpointid
-                                set innerHTML of <label /> in clone to 'Day ' + $campCounter
-
-                                then put clone after the closest <div /> to document.querySelector(selector)
-                            """)
-                        trailblazerButton "Submit Plan" "Submit Plan" "submit" None
+                        trailblazerButton (Some "add-point") "Add Point" "Add Point" "button" (Some "install AddPoint")
+                        trailblazerButton (Some "remove-point") "Remove Point" "Remove Point" "button" (Some "install RemovePoint")
+                        trailblazerButton (Some "submit-plan") "Submit Plan" "Submit Plan" "submit" None
                     ]
                     div [ _id "map"; _class "w-[50vw] h-[400px]" ] []
                 ]
             ]
-        ] |> withMasterLayout
+        ] |> withMasterLayout (script [ _type "text/hyperscript"; _src "/hs/hikeplanner._hs"] [] |> Some)
