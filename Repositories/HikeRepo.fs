@@ -4,14 +4,14 @@ open System
 open Microsoft.Data.Sqlite
 open HikePlanner.Infrastructure
 open HikePlanner.Core
+open HikePlanner.Core.Utils
+open System.Text.Json
 
 type Hike = { 
     Id           : int64
     Trail        : string
     StartDate    : DateTime
-    EndDate      : DateTime
-    StartPointId : int64
-    EndPointId   : int64
+    CampPoints   : int64 list 
  }
 
 type TrailPointOfInterest = { 
@@ -25,9 +25,7 @@ type SavedHike = {
     Id           : int64
     Trail        : string
     StartDate    : DateTime
-    EndDate      : DateTime
-    StartPoint   : TrailPointOfInterest
-    EndPoint     : TrailPointOfInterest
+    CampPoints   : TrailPointOfInterest list
 }
 
 let private ensureTable (conn: SqliteConnection) =
@@ -51,14 +49,13 @@ let private toInt64 (value: obj) =
         | :? string as s -> Int64.Parse s
         | _ -> -1L
 
-let private toHikeJson (trail: string) (startDate: DateTime) (endDate: DateTime) (campPoints: int list)=
+let private toHikeJson (trail: string) (startDate: DateTime) (campPoints: int list) =
     {| Trail = trail
        StartDate = startDate
-       EndDate = endDate
        campPoints = campPoints |} 
     |> System.Text.Json.JsonSerializer.Serialize
 
-let saveHike (trail: string) (startDate: DateTime) (endDate: DateTime) (campPoints: int list)=
+let saveHike (trail: string) (startDate: DateTime) (campPoints: int list)=
     app {
         let! ConnectionString connStr = App.asks(fun env -> env.Environment.ConnectionString) 
 
@@ -66,7 +63,7 @@ let saveHike (trail: string) (startDate: DateTime) (endDate: DateTime) (campPoin
         let! _ = conn.OpenAsync() 
         ensureTable conn
 
-        let hikeDetails = toHikeJson trail startDate endDate campPoints
+        let hikeDetails = toHikeJson trail startDate campPoints
 
         use cmd = conn.CreateCommand()
         cmd.CommandText <- "INSERT INTO hike (details) VALUES ($details); SELECT last_insert_rowid();"
@@ -162,20 +159,17 @@ let getTrailPointOfInterestById (id: int64) =
         )
     }
 
-let withPoints hike = 
+let withPoints (hike: Hike) = 
     app {
-        let! startPoint = getTrailPointOfInterestById hike.StartPointId
-        and! endPoint   = getTrailPointOfInterestById hike.EndPointId
+        let! points = hike.CampPoints |> List.map getTrailPointOfInterestById
 
         return {
             Id = hike.Id; 
             Trail = hike.Trail; 
             StartDate = hike.StartDate; 
-            EndDate = hike.EndDate; 
-            StartPoint = startPoint; 
-            EndPoint = endPoint; 
+            CampPoints = points
         }
-    }
+    } |> App.mapError (DatabaseError "Couldn't map trail points of interest." |> always)
 
 let getHikeById (id: int64) =
     app {
@@ -192,7 +186,8 @@ let getHikeById (id: int64) =
         let! hike = withReader cmd (fun rdr ->
             let id = toInt64 (rdr.GetValue 0)
             let details = rdr.GetString 1
-            let parsed = System.Text.Json.JsonSerializer.Deserialize<Hike>(details)
+            let options = JsonSerializerOptions(PropertyNameCaseInsensitive = true)
+            let parsed = System.Text.Json.JsonSerializer.Deserialize<Hike>(details, options)
             { parsed with Id = id }
         )
 
@@ -213,7 +208,8 @@ let getHikes =
         let rec readAllHikes hikes (rdr: SqliteDataReader) =
             let id = toInt64 (rdr.GetValue 0)
             let details = rdr.GetString 1
-            let parsed = System.Text.Json.JsonSerializer.Deserialize<Hike>(details)
+            let options = JsonSerializerOptions(PropertyNameCaseInsensitive = true)
+            let parsed = System.Text.Json.JsonSerializer.Deserialize<Hike>(details, options)
             let hike = { parsed with Id = id } 
             
             if rdr.Read() then readAllHikes (hike::hikes) rdr else hike::hikes

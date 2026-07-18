@@ -22,7 +22,7 @@ let planView (trailPointsOfInterest: Result<TrailPointOfInterest list, Trailblaz
             div [ _class "p-6 border border-black rounded-lg bg-white p-4 font-sans selection:bg-neutral-200 m-2"] [
                 h1 [] [ str "Create New Hike" ]
                 div [ _class "flex items-center gap-1" ] [
-                    form [ _class "font-mono mx-auto mt-8 transition-[width] duration-500 ease-in-out"; attr "hx-post" "/plan" ] [
+                    form [ _class "font-mono mx-auto mt-8 transition-[width] duration-500 ease-in-out"; attr "hx-post" "/plan"; attr "hx-swap" "outerHTML" ] [
                         textInput "hike-name" "hikeName" "Hike Name" true
                         datePicker "start-date" "startDate" "Start Date" (Some "
                             on change or load
@@ -50,24 +50,21 @@ let planView (trailPointsOfInterest: Result<TrailPointOfInterest list, Trailblaz
                             | Error e -> span [] [ 
                                 match e with
                                     | DatabaseError error -> str "An error ocurred when retrieving points of interest." 
-                                    | _ -> emptyText
+                                    | FormValidationError e -> str e
                             ]
                         trailblazerButton "Add Point" "Add Point" "button" (Some
                             """on click
                                 if $campCounter is undefined set $campCounter to 1 end
-
                                 set selector to '#' + 'camp-point-select-day-' + $campCounter
 
-                                log selector
-                                then increment $campCounter
+                                increment $campCounter
 
                                 set clone to the closest <div /> to document.querySelector(selector)
-                                log clone
                                 set clone to clone.cloneNode(true)
                                 
-                                set @id of <select /> in clone to 'camp-point-select-day-' + $campCounter
-                                set @name of <select /> in clone to 'Day ' + $campCounter
-                                set @for of <label /> in clone to 'camp-point-select-day-' + $campCounter
+                                set newpointid to 'camp-point-select-day-' + $campCounter
+                                set @id of <select /> in clone to newpointid
+                                set @for of <label /> in clone to newpointid
                                 set innerHTML of <label /> in clone to 'Day ' + $campCounter
 
                                 then put clone after the closest <div /> to document.querySelector(selector)
