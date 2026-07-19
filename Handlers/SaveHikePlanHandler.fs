@@ -4,7 +4,7 @@ open Giraffe
 open HikePlanner.Core
 open HikePlanner.Core.Utils
 open HikePlanner.Infrastructure
-open HikePlanner.Repositories.HikeRepo
+open HikePlanner.Repositories.HikeRepoHikes
 open HikePlanner.Views.Hikes.CreateHike
 
 module SaveHikePlanHandler =

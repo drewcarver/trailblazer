@@ -1,4 +1,4 @@
-module HikePlanner.Views.Hikes.CreateHike
+module HikePlanner.Views.Plan.Plan
 
 open System;
 open Giraffe.ViewEngine
@@ -11,7 +11,7 @@ open HikePlanner.Core
 open HikePlanner.Views.Components.Button
 open HikePlanner.Views.Components.Autosuggest
 
-let createHikeView userName (friends: Friend list) (trailPointsOfInterest: Result<TrailPointOfInterest list, TrailblazerError>) =
+let planView userName (friends: Friend list) (trailPointsOfInterest: Result<TrailPointOfInterest list, TrailblazerError>) =
         let toOptionLabel (poi: TrailPointOfInterest) = sprintf "%s - Mile %.2f" poi.Name poi.TrailMile
         let pointsOfInterestOptions = 
             trailPointsOfInterest 
@@ -32,7 +32,7 @@ let createHikeView userName (friends: Friend list) (trailPointsOfInterest: Resul
                 div [ _class "flex items-center gap-4" ] [
                     form [ _class "font-mono mx-auto mt-8 transition-[width] duration-500 ease-in-out"; 
                         attr "_" "install ListenForSelectChange";
-                        attr "hx-post" "/hikes"; attr "hx-swap" "outerHTML" ] [
+                        attr "hx-post" "/plan"; attr "hx-swap" "outerHTML" ] [
                         textInput "hike-name" "hikeName" "Hike Name" true Required
                         datePicker "start-date" "startDate" "Start Date" (Some DateTime.Now) Required []
                         trailblazerAutosuggest "friend-search" "invitees" "Invite Friends" Optional friendOptions [

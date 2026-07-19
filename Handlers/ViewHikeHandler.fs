@@ -3,7 +3,7 @@ namespace HikePlanner.Handlers
 open Giraffe
 open HikePlanner.Core
 open HikePlanner.Infrastructure
-open HikePlanner.Repositories.HikeRepo
+open HikePlanner.Repositories.HikeRepoHikes
 open HikePlanner.Views.Hikes.HikeDetail
 
 module ViewHikeHandler =
