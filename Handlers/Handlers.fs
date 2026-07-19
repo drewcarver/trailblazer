@@ -28,6 +28,16 @@ module Handlers =
         CampPoints: string list
     }
 
+    let private validateSaveHikeForm (form: SaveHikeForm) =
+        let normalizedName = form.HikeName.Trim()
+
+        if String.IsNullOrWhiteSpace normalizedName then
+            Error (FormValidationError "HikeName is required.")
+        elif List.isEmpty form.CampPoints then
+            Error (FormValidationError "At least one camp point is required.")
+        else
+            Ok { form with HikeName = normalizedName }
+
     let getUserProfile: App<_, _, Result<UserProfile, TrailblazerError>> =
         App.asks (fun env ->
             let findClaim claimType =
@@ -46,10 +56,20 @@ module Handlers =
     let accountHandler : TrailblazerEndpoint<_> =
         app {
             let! userProfile = getUserProfile |> App.ofAppResult
-            let! _ = saveUser { Email = userProfile.Email; Picture = userProfile.Picture; Name = userProfile.Name; Friends = [] }
+
+            let! existingFriends =
+                getUser userProfile.Email
+                |> App.map (fun user -> user.Friends)
+                |> App.mapResult (function
+                    | Ok friends -> Ok friends
+                    | Error (NotFound _) -> Ok []
+                    | Error e -> Error e)
+
+            do! saveUser { Email = userProfile.Email; Picture = userProfile.Picture; Name = userProfile.Name; Friends = existingFriends }
 
             return redirectTo false "/plan"
-        } |> App.mapError (sprintf "%A" >> text)
+        }
+        |> App.mapError (fun _ -> setStatusCode 500 >=> text "Unable to complete sign in.")
 
     let listPlansHandler: TrailblazerEndpoint<_> =
         app {
@@ -74,11 +94,16 @@ module Handlers =
             let! ctx = App.asks(fun env -> env.Context)
 
             let! form: SaveHikeForm = getFormHelper ctx 
+            let! validatedForm = validateSaveHikeForm form |> App.ofResult
 
             let! campPoints = form.CampPoints |> List.map (
-                tryParseInt >> Result.mapError (always FormValidationError "Not an int") >> App.ofResult)
+                fun cp ->
+                    cp
+                    |> tryParseInt
+                    |> Result.mapError (fun _ -> FormValidationError ("Invalid camp point: " + cp))
+                    |> App.ofResult)
 
-            let! id =  saveHike form.HikeName form.StartDate campPoints
+            let! id =  saveHike validatedForm.HikeName validatedForm.StartDate campPoints
 
             return! App.succeed (
                 setHttpHeader "x-hike-id" id >=>
@@ -100,12 +125,12 @@ module Handlers =
         app {
             let! ctx = App.asks(fun env -> env.Context)
             let! userProfile = getUserProfile |> App.ofAppResult
-            let! user = getUser userProfile.Name
+            let! user = getUser userProfile.Email
 
             let searchTerm =
                 match ctx.TryGetQueryStringValue "friendSearch" with
                 | Some term -> term.Trim()
-                | _ -> String.Empty
+                | None -> String.Empty
 
             let matchedFriends =
                 if String.IsNullOrWhiteSpace searchTerm then
