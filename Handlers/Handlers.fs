@@ -28,19 +28,25 @@ module Handlers =
         CampPoints: string list
     }
 
-    let getUserProfile =
+    let getUserProfile: App<_, _, Result<UserProfile, TrailblazerError>> =
         App.asks (fun env ->
             let findClaim claimType =
                 env.Context.User.FindFirst(claimType: string) |> Option.ofObj |> Option.map (fun c -> c.Value)
-            findClaim ClaimTypes.Name
-            |> Option.map (fun name -> { Name = name; Picture = findClaim "urn:google:picture" }))
-        |> App.bind (App.ofOption (FormValidationError "User profile not found"))
+
+            let name = findClaim ClaimTypes.Name
+            let email = findClaim ClaimTypes.Email
+            let picture = findClaim "urn:google:picture"
+
+            match name, email, picture with
+            | Some name, Some email, picture -> Ok { Name = name; Picture = picture; Email = email }
+            | _                              -> Error (FormValidationError "User profile is missing required claims.")
+        )
 
 
     let accountHandler : TrailblazerEndpoint<_> =
         app {
-            let! userProfile = getUserProfile
-            let! _ = saveUser { Email = userProfile.Name; Picture = userProfile.Picture; Name = userProfile.Name; Friends = [] }
+            let! userProfile = getUserProfile |> App.ofAppResult
+            let! _ = saveUser { Email = userProfile.Email; Picture = userProfile.Picture; Name = userProfile.Name; Friends = [] }
 
             return redirectTo false "/plan"
         } |> App.mapError (sprintf "%A" >> text)
@@ -48,7 +54,7 @@ module Handlers =
     let listPlansHandler: TrailblazerEndpoint<_> =
         app {
             let! hikes = getHikes 
-            and! userProfile = getUserProfile
+            and! userProfile = getUserProfile |> App.ofAppResult
 
             return htmlView (listPlans (Some userProfile) (Ok hikes))
         } 
@@ -57,7 +63,7 @@ module Handlers =
     let planHandler: TrailblazerEndpoint<_> =
         app {
             let! trailPointsOfInterest = getTrailPointsOfInterest "AppalachianTrail" 
-            and! userProfile = getUserProfile
+            and! userProfile = getUserProfile |> App.ofAppResult
 
             return htmlView (Plan.planView (Some userProfile) (Ok trailPointsOfInterest))
         }
@@ -79,21 +85,21 @@ module Handlers =
                 setHttpHeader "HX-Location" "/plan" >=> setStatusCode 204
             )
         } 
-        |> App.mapError (fun err -> Error err |> Plan.planView None |> htmlView) 
+        |> App.mapError (Error >> Plan.planView None >> htmlView) 
 
     let viewHikeHandler hikeId : TrailblazerEndpoint<_> =
         app {
             let! hike = getHikeById hikeId
-            and! userProfile = getUserProfile
+            and! userProfile = getUserProfile |> App.ofAppResult
 
             return htmlView (hikeDetailView (Some userProfile) (Ok hike))
         }
-        |> App.mapError (fun err -> Error err |> hikeDetailView None |> htmlView)
+        |> App.mapError (Error >> hikeDetailView None >> htmlView)
 
     let listHikersHandler : TrailblazerEndpoint<_> =
         app {
             let! ctx = App.asks(fun env -> env.Context)
-            let! userProfile = getUserProfile
+            let! userProfile = getUserProfile |> App.ofAppResult
             let! user = getUser userProfile.Name
 
             let searchTerm =
@@ -102,11 +108,11 @@ module Handlers =
                 | _ -> String.Empty
 
             let matchedFriends =
-                if String.IsNullOrWhiteSpace(searchTerm) then
+                if String.IsNullOrWhiteSpace searchTerm then
                     []
                 else
                     user.Friends |> List.filter (friendMatchesQuery searchTerm)
 
             return listHikersResultsView searchTerm (Ok matchedFriends) |> htmlView
         }
-        |> App.mapError (fun err -> Error err |> listHikersResultsView String.Empty |> htmlView)
+        |> App.mapError (Error >> listHikersResultsView String.Empty >> htmlView)

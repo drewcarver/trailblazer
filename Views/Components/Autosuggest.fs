@@ -13,6 +13,7 @@ let trailblazerAutosuggest (id: string) (name: string) (labelText: string) (requ
         [
             _id id
             _name name
+            _type "autocomplete"
             _class "w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50 focus:ring-indigo-500 focus:border-indigo-500"
             attr "hx-get" endpoint
             attr "hx-trigger" "keyup changed delay:500ms"

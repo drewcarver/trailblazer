@@ -10,6 +10,7 @@ type BodyContent =
 let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent) =
     let displayName = userProfile |> Option.map (fun p -> p.Name) |> Option.defaultValue "Guest"
     let picture = userProfile |> Option.bind (fun p -> p.Picture)
+
     html [ _lang "en" ] [
         head [] [
             meta [ _charset "UTF-8" ] 

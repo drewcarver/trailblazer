@@ -39,7 +39,7 @@ let noHikesAvailableTable =
         trailblazerTableRow [ span [] [ str "No hikes available." ]]
     ]
 
-let listPlans userName hikesResult = 
+let listPlans userProfile hikesResult = 
     let renderTable hikes = 
         div [ _class "p-4" ] [
             hikingTable hikes
@@ -49,4 +49,4 @@ let listPlans userName hikesResult =
     | Ok hikes  -> renderTable hikes
     | Error (NotFound _) -> renderTable []
     | Error (DatabaseError e | FormValidationError e) -> errorOcurredTable e
-    |> XmlNodeBody |> withMasterLayout userName
+    |> XmlNodeBody |> withMasterLayout userProfile

@@ -24,6 +24,7 @@ type Required =
     | Optional
 
 type UserProfile = {
+    Email: string
     Name: string
     Picture: string option
 }
