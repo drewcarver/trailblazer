@@ -1,11 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <UserSecretsId>05663faf-7fa6-479e-8506-e05fd553114d</UserSecretsId>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup><Compile Include="Tests\HikePlanner.Tests\TestSupport.fs" />
     <Compile Include="Infrastructure/App.fs" />
     <Compile Include="Core/Types.fs" />
     <Compile Include="Core/Utils.fs" />

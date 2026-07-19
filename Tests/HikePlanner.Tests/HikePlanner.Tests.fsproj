@@ -6,7 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Tests.fs" />
+    <Compile Include="TestSupport.fs" />
+    <Compile Include="CommonTests.fs" />
+    <Compile Include="SaveHikePlanRouteTests.fs" />
+    <Compile Include="PlanRoutesTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
