@@ -9,6 +9,7 @@ open HikePlanner.Views.MasterLayout
 open HikePlanner.Repositories.HikeRepo
 open HikePlanner.Core
 open HikePlanner.Views.Components.Button
+open HikePlanner.Views.Components.Autosuggest
 
 let planView userName (trailPointsOfInterest: Result<TrailPointOfInterest list, TrailblazerError>) =
         let toOptionLabel (poi: TrailPointOfInterest) = sprintf "%s - Mile %.2f" poi.Name poi.TrailMile
@@ -26,6 +27,15 @@ let planView userName (trailPointsOfInterest: Result<TrailPointOfInterest list, 
                         attr "hx-post" "/plan"; attr "hx-swap" "outerHTML" ] [
                         textInput "hike-name" "hikeName" "Hike Name" true Required
                         datePicker "start-date" "startDate" "Start Date" (Some DateTime.Now) Required []
+                        trailblazerAutosuggest "friend-search" "friendSearch" "Invite Friends" Optional "/hikers" [
+                            "placeholder", "Type friend name or email"
+                            "autocomplete", "off"
+                            "hx-target", "#friend-search-results"
+                            "hx-swap", "innerHTML"
+                        ]
+                        div [ _id "friend-search-results"; _class "mb-4" ] [
+                            datalist [ _id "friend-search-list" ] []
+                        ]
                         trailblazerSelect "camp-point-select-day-1" "campPoints" "Day 1" Required pointsOfInterestOptions [ "_", "install SelectPoint"; "data-day", "1" ]
                         trailblazerSelect "camp-point-select-day-2" "campPoints" "Day 2" Required pointsOfInterestOptions [ "_", "install SelectPoint"; "data-day", "2" ]
                         div [ _class "flex gap-2 mt-4" ] [
@@ -41,6 +51,7 @@ let planView userName (trailPointsOfInterest: Result<TrailPointOfInterest list, 
                             match e with
                                 | DatabaseError error -> str "An error ocurred when retrieving points of interest." 
                                 | FormValidationError e -> str e
+                                | NotFound e -> str e
                         ]
                 ]
             ]

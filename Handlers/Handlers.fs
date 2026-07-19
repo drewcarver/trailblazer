@@ -13,6 +13,14 @@ open Utils
 
 module Handlers = 
     open HikePlanner.Views.Plan.ListHikersResults
+
+    let private containsIgnoreCase (value: string) (query: string) =
+        value.Contains(query, StringComparison.OrdinalIgnoreCase)
+
+    let private friendMatchesQuery (query: string) (friend: Friend) =
+        containsIgnoreCase friend.Email query
+        || (not (String.IsNullOrWhiteSpace(friend.Name)) && containsIgnoreCase friend.Name query)
+
     [<CLIMutable>]
     type SaveHikeForm = {
         HikeName: string
@@ -84,9 +92,21 @@ module Handlers =
 
     let listHikersHandler : TrailblazerEndpoint<_> =
         app {
+            let! ctx = App.asks(fun env -> env.Context)
             let! userProfile = getUserProfile
             let! user = getUser userProfile.Name
 
-            return listHikersResultsView (Some userProfile) (Ok user) |> htmlView
+            let searchTerm =
+                match ctx.TryGetQueryStringValue "friendSearch" with
+                | Some term -> term.Trim()
+                | _ -> String.Empty
+
+            let matchedFriends =
+                if String.IsNullOrWhiteSpace(searchTerm) then
+                    []
+                else
+                    user.Friends |> List.filter (friendMatchesQuery searchTerm)
+
+            return listHikersResultsView searchTerm (Ok matchedFriends) |> htmlView
         }
-        |> App.mapError (fun err -> Error err |> listHikersResultsView None |> htmlView)
+        |> App.mapError (fun err -> Error err |> listHikersResultsView String.Empty |> htmlView)
