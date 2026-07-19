@@ -11,12 +11,20 @@ open HikePlanner.Core
 open HikePlanner.Views.Components.Button
 open HikePlanner.Views.Components.Autosuggest
 
-let planView userName (trailPointsOfInterest: Result<TrailPointOfInterest list, TrailblazerError>) =
+let planView userName (friends: Friend list) (trailPointsOfInterest: Result<TrailPointOfInterest list, TrailblazerError>) =
         let toOptionLabel (poi: TrailPointOfInterest) = sprintf "%s - Mile %.2f" poi.Name poi.TrailMile
         let pointsOfInterestOptions = 
             trailPointsOfInterest 
             |> Result.defaultWith (fun _ -> List.empty)
             |> Seq.map (fun poi -> { Label = poi |> toOptionLabel; Value = string poi.Id; Attributes = [ ("data-mile", poi.TrailMile.ToString())] })
+
+        let friendOptions =
+            friends
+            |> List.map (fun friend ->
+                let friendName =
+                    if String.IsNullOrWhiteSpace friend.Name then friend.Email else friend.Name
+
+                friend.Email, sprintf "%s (%s)" friendName friend.Email)
 
         div [ _class "p-6 border border-black rounded-lg bg-white p-4 font-sans selection:bg-neutral-200 m-2"] [
             div [ _class "flex gap-4 flex-wrap" ] [
@@ -27,14 +35,9 @@ let planView userName (trailPointsOfInterest: Result<TrailPointOfInterest list, 
                         attr "hx-post" "/plan"; attr "hx-swap" "outerHTML" ] [
                         textInput "hike-name" "hikeName" "Hike Name" true Required
                         datePicker "start-date" "startDate" "Start Date" (Some DateTime.Now) Required []
-                        trailblazerAutosuggest "friend-search" "friendSearch" "Invite Friends" Optional "/hikers" [
+                        trailblazerAutosuggest "friend-search" "friendSearch" "Invite Friends" Optional friendOptions [
                             "placeholder", "Type friend name or email"
                             "autocomplete", "off"
-                            "hx-target", "#friend-search-results"
-                            "hx-swap", "innerHTML"
-                        ]
-                        div [ _id "friend-search-results"; _class "mb-4" ] [
-                            datalist [ _id "friend-search-list" ] []
                         ]
                         trailblazerSelect "camp-point-select-day-1" "campPoints" "Day 1" Required pointsOfInterestOptions [ "_", "install SelectPoint"; "data-day", "1" ]
                         trailblazerSelect "camp-point-select-day-2" "campPoints" "Day 2" Required pointsOfInterestOptions [ "_", "install SelectPoint"; "data-day", "2" ]

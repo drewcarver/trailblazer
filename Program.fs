@@ -57,7 +57,6 @@ let endpoints env =
             route "/plan/create" (requireLogin >=> withAppHandler env planHandler)
             route "/plan" (requireLogin >=> withAppHandler env listPlansHandler)
             routef "/plan/%d:id" (fun id -> requireLogin >=> withAppHandler env (viewHikeHandler id))
-            route "/hikers" (requireLogin >=> withAppHandler env listHikersHandler)
         ]
         POST [
             route "/plan" (requireLogin >=> withAppHandler env saveHikePlan)

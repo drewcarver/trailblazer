@@ -4,6 +4,7 @@ open System
 open System.Collections.Generic
 open System.Net
 open System.Net.Http
+open System.Security.Claims
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.TestHost
 open Giraffe.EndpointRouting
@@ -41,6 +42,24 @@ let ``POST /plan saves a hike through the route and SQLite`` () =
         let env = {
             ConnectionString = ConnectionString connectionString
         }
+        let testUser =
+            ClaimsPrincipal(
+                ClaimsIdentity(
+                    [
+                        Claim(ClaimTypes.Name, "Test User")
+                        Claim(ClaimTypes.Email, "test@example.com")
+                    ],
+                    "Test"
+                )
+            )
+
+        app.Use(Func<Microsoft.AspNetCore.Http.HttpContext, Microsoft.AspNetCore.Http.RequestDelegate, Threading.Tasks.Task>(fun ctx next ->
+            task {
+                ctx.User <- testUser
+                return! next.Invoke ctx
+            }))
+        |> ignore
+
         app.UseRouting().UseEndpoints(fun e->
             e.MapGiraffeEndpoints (endpoints env)
         ) |> ignore
@@ -69,7 +88,13 @@ let ``POST /plan saves a hike through the route and SQLite`` () =
         Assert.Equal("1", response.Headers.GetValues "x-hike-id" |> Seq.head)
 
         let! getHikesResponse = client.GetAsync "/plan"
-        let! content = getHikesResponse.Content.ReadAsStringAsync()
 
-        Assert.Contains(formToSave.HikeName, content)
+        Assert.Equal(HttpStatusCode.OK, getHikesResponse.StatusCode)
+
+        use verifyCmd = conn.CreateCommand()
+        verifyCmd.CommandText <- "SELECT details FROM hike ORDER BY id DESC LIMIT 1;"
+
+        let savedDetails = verifyCmd.ExecuteScalar() :?> string
+
+        Assert.Contains(formToSave.HikeName, savedDetails)
     }

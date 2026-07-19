@@ -262,31 +262,10 @@ let getUser userName =
         use cmd = conn.CreateCommand()
         cmd.CommandText <- 
             """
-            WITH main_hiker AS (
-                SELECT email, details 
-                FROM user
-                WHERE email = $email 
-                LIMIT 1
-            ),
-            friend_details AS (
-                SELECT 
-                    json_object(
-                        'Email', COALESCE(f.email, json_extract(je.value, '$.Email')),
-                        'Name', COALESCE(json_extract(f.details, '$.Name'), json_extract(je.value, '$.Name')),
-                        'Picture', COALESCE(json_extract(f.details, '$.Picture'), json_extract(je.value, '$.Picture'))
-                    ) AS friend_obj
-                FROM main_hiker m
-                CROSS JOIN json_each(m.details, '$.Friends') je
-                LEFT JOIN user f ON f.email = json_extract(je.value, '$.Email')
-            )
-            SELECT 
-                m.email,
-                json_set(m.details, '$.Friends', (
-                    SELECT json_group_array(json(friend_obj)) 
-                    FROM friend_details 
-                    WHERE friend_obj IS NOT NULL
-                )) AS enriched_details
-            FROM main_hiker m;
+            SELECT email, details
+            FROM user
+            WHERE email = $email
+            LIMIT 1;
             """
         cmd.Parameters.AddWithValue("$email", userName) |> ignore
 
