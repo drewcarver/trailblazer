@@ -28,4 +28,17 @@ type UserProfile = {
     Picture: string option
 }
 
+type Friend = {
+    Email     : string
+    Name      : string
+    Picture   : string option
+}
+
+type User = {
+    Email     : string
+    Name      : string
+    Picture   : string option
+    Friends   : Friend list
+}
+
 type TrailblazerEndpoint<'env> = App<'env, HttpHandler, HttpHandler>

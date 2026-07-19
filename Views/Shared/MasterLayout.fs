@@ -3,7 +3,11 @@ module HikePlanner.Views.MasterLayout
 open Giraffe.ViewEngine
 open HikePlanner.Core
 
-let withMasterLayout (userProfile: UserProfile option) bodyContent = 
+type BodyContent = 
+    | XmlNodeList of XmlNode list
+    | XmlNodeBody of XmlNode
+
+let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent) =
     let displayName = userProfile |> Option.map (fun p -> p.Name) |> Option.defaultValue "Guest"
     let picture = userProfile |> Option.bind (fun p -> p.Picture)
     html [ _lang "en" ] [
@@ -76,6 +80,8 @@ let withMasterLayout (userProfile: UserProfile option) bodyContent =
                     ]
                 ]
             ]    
-            bodyContent
+            yield! match bodyContent with
+                   | XmlNodeList nodes -> nodes
+                   | XmlNodeBody node -> [node]
           ]
     ]

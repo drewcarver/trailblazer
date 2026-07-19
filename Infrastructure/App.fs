@@ -32,6 +32,15 @@ module App =
                 return Error err
             })
 
+    let ofOption (err: 'err) (result: Option<'a>) =
+        App(fun _ ->
+            task {
+                return
+                    match result with
+                    | Some x -> Ok x
+                    | None -> Error err
+            })
+
     let ofResult (result: Result<'a, 'err>) =
         App(fun _ ->
             task {

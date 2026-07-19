@@ -12,6 +12,7 @@ open Giraffe
 open Utils
 
 module Handlers = 
+    open HikePlanner.Views.Plan.ListHikersResults
     [<CLIMutable>]
     type SaveHikeForm = {
         HikeName: string
@@ -25,13 +26,23 @@ module Handlers =
                 env.Context.User.FindFirst(claimType: string) |> Option.ofObj |> Option.map (fun c -> c.Value)
             findClaim ClaimTypes.Name
             |> Option.map (fun name -> { Name = name; Picture = findClaim "urn:google:picture" }))
+        |> App.bind (App.ofOption (FormValidationError "User profile not found"))
+
+
+    let accountHandler : TrailblazerEndpoint<_> =
+        app {
+            let! userProfile = getUserProfile
+            let! _ = saveUser { Email = userProfile.Name; Picture = userProfile.Picture; Name = userProfile.Name; Friends = [] }
+
+            return redirectTo false "/plan"
+        } |> App.mapError (sprintf "%A" >> text)
 
     let listPlansHandler: TrailblazerEndpoint<_> =
         app {
             let! hikes = getHikes 
             and! userProfile = getUserProfile
 
-            return htmlView (listPlans userProfile (Ok hikes))
+            return htmlView (listPlans (Some userProfile) (Ok hikes))
         } 
         |> App.mapError (Error >> listPlans None >> htmlView)
 
@@ -40,7 +51,7 @@ module Handlers =
             let! trailPointsOfInterest = getTrailPointsOfInterest "AppalachianTrail" 
             and! userProfile = getUserProfile
 
-            return htmlView (Plan.planView userProfile (Ok trailPointsOfInterest))
+            return htmlView (Plan.planView (Some userProfile) (Ok trailPointsOfInterest))
         }
         |> App.mapError (Error >> Plan.planView None >> htmlView) 
 
@@ -67,6 +78,15 @@ module Handlers =
             let! hike = getHikeById hikeId
             and! userProfile = getUserProfile
 
-            return htmlView (hikeDetailView userProfile (Ok hike))
+            return htmlView (hikeDetailView (Some userProfile) (Ok hike))
         }
         |> App.mapError (fun err -> Error err |> hikeDetailView None |> htmlView)
+
+    let listHikersHandler : TrailblazerEndpoint<_> =
+        app {
+            let! userProfile = getUserProfile
+            let! user = getUser userProfile.Name
+
+            return listHikersResultsView (Some userProfile) (Ok user) |> htmlView
+        }
+        |> App.mapError (fun err -> Error err |> listHikersResultsView None |> htmlView)

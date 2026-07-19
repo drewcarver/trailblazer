@@ -45,4 +45,4 @@ let planView userName (trailPointsOfInterest: Result<TrailPointOfInterest list, 
                 ]
             ]
         ]
-        |> withMasterLayout userName
+        |> XmlNodeBody |> withMasterLayout userName

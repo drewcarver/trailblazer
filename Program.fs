@@ -38,14 +38,9 @@ let loginHandler : HttpHandler =
 let logoutHandler : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
-            do! ctx.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme)
+            do! ctx.SignOutAsync CookieAuthenticationDefaults.AuthenticationScheme
             return! redirectTo false "/" next ctx
         }
-
-let accountHandler : HttpHandler =
-    fun (next: HttpFunc) (ctx: HttpContext) ->
-        let name = ctx.User.FindFirst(ClaimTypes.Name) |> Option.ofObj |> Option.map (fun c -> c.Value) |> Option.defaultValue "hiker"
-        text (sprintf "Welcome, %s!" name) next ctx
 
 let requireLogin : HttpHandler =
     requiresAuthentication (redirectTo false "/login")
@@ -56,10 +51,11 @@ let endpoints env =
             route "/" homeHandler
             route "/login" loginHandler
             route "/logout" logoutHandler
-            route "/account" (requireLogin >=> accountHandler)
+            route "/account" (requireLogin >=> withAppHandler env accountHandler)
             route "/plan/create" (requireLogin >=> withAppHandler env planHandler)
             route "/plan" (requireLogin >=> withAppHandler env listPlansHandler)
             routef "/plan/%d:id" (fun id -> requireLogin >=> withAppHandler env (viewHikeHandler id))
+            route "/hikers" (requireLogin >=> withAppHandler env listHikersHandler)
         ]
         POST [
             route "/plan" (requireLogin >=> withAppHandler env saveHikePlan)
@@ -74,15 +70,10 @@ let main _ =
         .AddAuthentication(fun options ->
             options.DefaultScheme <- CookieAuthenticationDefaults.AuthenticationScheme
             options.DefaultChallengeScheme <- GoogleDefaults.AuthenticationScheme)
-        .AddCookie(fun options ->
-            options.Cookie.Name <- "TrailBlazerAuthCookie"
-            options.Cookie.SameSite <- SameSiteMode.Lax
-            options.Cookie.SecurePolicy <- CookieSecurePolicy.SameAsRequest)
+        .AddCookie()
         .AddGoogle(fun options ->
             options.ClientId <- builder.Configuration.["Google:ClientId"]
             options.ClientSecret <- builder.Configuration.["Google:ClientSecret"]
-            options.CorrelationCookie.SameSite <- SameSiteMode.Lax
-            options.CorrelationCookie.SecurePolicy <- CookieSecurePolicy.SameAsRequest    
             options.ClaimActions.MapJsonKey("urn:google:picture", "picture")
         )
         |> ignore

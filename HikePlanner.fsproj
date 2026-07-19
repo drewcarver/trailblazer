@@ -18,6 +18,7 @@
     <Compile Include="Views/Components/Select.fs" />
     <Compile Include="Views/Shared/MasterLayout.fs" />
     <Compile Include="Views/Home/Index.fs" />
+    <Compile Include="Views/Plan/ListHikersResults.fs" />
     <Compile Include="Views/Plan/ListPlans.fs" />
     <Compile Include="Views/Plan/CreatePlan.fs" />
     <Compile Include="Views/Plan/HikeDetail.fs" />

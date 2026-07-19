@@ -28,6 +28,16 @@ type SavedHike = {
     CampPoints   : TrailPointOfInterest list
 }
 
+let private ensureHikersTable (conn: SqliteConnection) =
+    use cmd = conn.CreateCommand()
+    cmd.CommandText <- """
+CREATE TABLE IF NOT EXISTS user (
+    email TEXT PRIMARY KEY,
+    details TEXT NOT NULL
+);
+"""
+    cmd.ExecuteNonQuery() |> ignore 
+
 let private ensureTable (conn: SqliteConnection) =
     use cmd = conn.CreateCommand()
     cmd.CommandText <- """
@@ -54,6 +64,28 @@ let private toHikeJson (trail: string) (startDate: DateTime) (campPoints: int li
        StartDate = startDate
        campPoints = campPoints |} 
     |> System.Text.Json.JsonSerializer.Serialize
+
+let saveUser (user: User) =
+    app {
+        let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
+
+        use conn = new SqliteConnection(connStr)
+        let! _ = conn.OpenAsync() 
+        ensureHikersTable conn
+
+        use cmd = conn.CreateCommand()
+        cmd.CommandText <- "INSERT OR REPLACE INTO user (email, details) VALUES ($email, $details);"
+        cmd.Parameters.AddWithValue("$email", user.Email) |> ignore
+        cmd.Parameters.AddWithValue("$details", System.Text.Json.JsonSerializer.Serialize user) |> ignore
+
+        try
+            let rowsAffected = cmd.ExecuteNonQuery()
+            if rowsAffected > 0 then
+                return! App.succeed ()
+            else
+                return! App.fail (DatabaseError "No rows were affected when saving the user.")
+        with ex -> return! App.fail (DatabaseError (sprintf "Error saving user: %s" ex.Message))
+    }
 
 let saveHike (trail: string) (startDate: DateTime) (campPoints: int list)=
     app {
@@ -217,4 +249,55 @@ let getHikes =
         let! hikes = withReader cmd (readAllHikes [])
 
         return! hikes |> List.map withPoints
+    }
+
+let getUser userName =
+    app {
+        let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
+        
+        use conn = new SqliteConnection(connStr)
+        conn.Open() |> ignore
+        ensureHikersTable conn
+
+        use cmd = conn.CreateCommand()
+        cmd.CommandText <- 
+            """
+            WITH main_hiker AS (
+                SELECT email, details 
+                FROM hiker 
+                WHERE email = $email 
+                LIMIT 1
+            ),
+            friend_details AS (
+                SELECT 
+                    json_object(
+                        'email', f.email,
+                        'firstName', json_extract(f.details, '$.firstName'),
+                        'lastName', json_extract(f.details, '$.lastName'),
+                        'picture', json_extract(f.details, '$.picture')
+                    ) AS friend_obj
+                FROM main_hiker m
+                CROSS JOIN json_each(m.details, '$.friends') je
+                LEFT JOIN hiker f ON f.email = json_extract(je.value, '$.email')
+            )
+            SELECT 
+                m.email,
+                json_set(m.details, '$.friends', (
+                    SELECT json_group_array(json(friend_obj)) 
+                    FROM friend_details 
+                    WHERE friend_obj IS NOT NULL
+                )) AS enriched_details
+            FROM main_hiker m;
+            """
+        cmd.Parameters.AddWithValue("$email", userName) |> ignore
+
+        let! hiker = withReader cmd (fun rdr ->
+            let email = rdr.GetString 0
+            let hikerJson = rdr.GetString 1
+            let options = JsonSerializerOptions(PropertyNameCaseInsensitive = true)
+            let hiker = System.Text.Json.JsonSerializer.Deserialize<User>(hikerJson, options)
+            { hiker with Email = email }
+        )
+
+        return hiker
     }

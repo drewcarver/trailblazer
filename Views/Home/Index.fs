@@ -5,7 +5,7 @@ open Giraffe
 open MasterLayout
 
 let indexView =
-    div [] [
+    [
             header [ _class "hero-bg h-screen flex items-center text-white" ] [
                 div [ _class "max-w-4xl mx-auto px-6 text-center" ] [
                     h1 [ _class "text-6xl md:text-7xl font-bold leading-tight mb-6" ] [
@@ -151,7 +151,7 @@ let indexView =
                     ]
                 ]
             ]
-    ] |> withMasterLayout None
+    ] |> XmlNodeList |> withMasterLayout None 
 
 let homeHandler: HttpHandler =
     htmlView indexView
