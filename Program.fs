@@ -30,7 +30,7 @@ let withAppHandler (appEnv: 'env) app next ctx =
 let loginHandler : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
-            let properties = AuthenticationProperties(RedirectUri = "/plan")
+            let properties = AuthenticationProperties(RedirectUri = "/account")
             do! ctx.ChallengeAsync(GoogleDefaults.AuthenticationScheme, properties)
             return! next ctx
         }
@@ -38,7 +38,9 @@ let loginHandler : HttpHandler =
 let logoutHandler : HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
+            do! ctx.SignOutAsync()
             do! ctx.SignOutAsync CookieAuthenticationDefaults.AuthenticationScheme
+            ctx.User <- ClaimsPrincipal(ClaimsIdentity())
             return! redirectTo false "/" next ctx
         }
 

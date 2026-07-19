@@ -76,7 +76,7 @@ let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent
                             | None -> emptyText
                             span [ _class "pr-2 text-[#2E5A3D] font-semibold text-sm whitespace-nowrap" ] [ str displayName ]
                         ]
-                        a [ _href "/logout"; _class "text-sm font-medium hover:text-[#D4C3A8] transition-colors" ] [ str "Log Out" ]
+                        a [ _href "/logout"; attr "hx-boost" "false"; _class "text-sm font-medium hover:text-[#D4C3A8] transition-colors" ] [ str "Log Out" ]
                     ]
                 ]
             ]    
