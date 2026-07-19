@@ -27,6 +27,7 @@ let planView userName (friends: Friend list) (trailPointsOfInterest: Result<Trai
                 friend.Email, sprintf "%s (%s)" friendName friend.Email)
 
         div [ _class "p-6 border border-black rounded-lg bg-white p-4 font-sans selection:bg-neutral-200 m-2"] [
+            script [ _src "/js/multiInvitees.js"; _type "module" ] []
             div [ _class "flex gap-4 flex-wrap" ] [
                 h1 [ _class "text-2xl font-mono font-bold mb-4" ] [ str "Create New Hike" ]
                 div [ _class "flex items-center gap-4" ] [
@@ -35,7 +36,7 @@ let planView userName (friends: Friend list) (trailPointsOfInterest: Result<Trai
                         attr "hx-post" "/plan"; attr "hx-swap" "outerHTML" ] [
                         textInput "hike-name" "hikeName" "Hike Name" true Required
                         datePicker "start-date" "startDate" "Start Date" (Some DateTime.Now) Required []
-                        trailblazerAutosuggest "friend-search" "friendSearch" "Invite Friends" Optional friendOptions [
+                        trailblazerAutosuggest "friend-search" "invitees" "Invite Friends" Optional friendOptions [
                             "placeholder", "Type friend name or email"
                             "autocomplete", "off"
                         ]

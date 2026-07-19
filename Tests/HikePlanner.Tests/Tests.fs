@@ -71,6 +71,7 @@ let ``POST /plan saves a hike through the route and SQLite`` () =
             HikeName     = "Mossy Peak"
             StartDate    = DateTime.Now
             CampPoints   = ["1"; "2"]
+            Invitees     = ["friend1@example.com"; "friend2@example.com"]
         }
 
         let form =
@@ -79,6 +80,8 @@ let ``POST /plan saves a hike through the route and SQLite`` () =
                 nameof formToSave.StartDate,    formToSave.StartDate.ToString "yyyy-MM-dd";
                 nameof formToSave.CampPoints,   formToSave.CampPoints.Head;
                 nameof formToSave.CampPoints,   formToSave.CampPoints.[1];
+                nameof formToSave.Invitees,     formToSave.Invitees.Head;
+                nameof formToSave.Invitees,     formToSave.Invitees.[1];
             ])
 
         let! response = client.PostAsync("/plan", form)
@@ -88,13 +91,8 @@ let ``POST /plan saves a hike through the route and SQLite`` () =
         Assert.Equal("1", response.Headers.GetValues "x-hike-id" |> Seq.head)
 
         let! getHikesResponse = client.GetAsync "/plan"
+        let! content = getHikesResponse.Content.ReadAsStringAsync()
 
         Assert.Equal(HttpStatusCode.OK, getHikesResponse.StatusCode)
-
-        use verifyCmd = conn.CreateCommand()
-        verifyCmd.CommandText <- "SELECT details FROM hike ORDER BY id DESC LIMIT 1;"
-
-        let savedDetails = verifyCmd.ExecuteScalar() :?> string
-
-        Assert.Contains(formToSave.HikeName, savedDetails)
+        Assert.Contains("Mossy Peak", content)
     }

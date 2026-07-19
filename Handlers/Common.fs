@@ -11,17 +11,23 @@ module Common =
         HikeName: string
         StartDate: DateTime
         CampPoints: string list
+        Invitees: string list
     }
 
     let validateSaveHikeForm (form: SaveHikeForm) =
         let normalizedName = form.HikeName.Trim()
+        let normalizedInvitees =
+            form.Invitees
+            |> Option.ofObj
+            |> Option.defaultValue []
+            |> List.filter (fun invitee -> not (String.IsNullOrWhiteSpace invitee))
 
         if String.IsNullOrWhiteSpace normalizedName then
             Error (FormValidationError "HikeName is required.")
         elif List.isEmpty form.CampPoints then
             Error (FormValidationError "At least one camp point is required.")
         else
-            Ok { form with HikeName = normalizedName }
+            Ok { form with HikeName = normalizedName; Invitees = normalizedInvitees }
 
     let getUserProfile<'env> : App<EnvironmentWithContext<'env>, TrailblazerError, Result<UserProfile, TrailblazerError>> =
         App.asks (fun env ->
