@@ -21,7 +21,7 @@ let trailblazerAutosuggest (id: string) (name: string) (labelText: string) (requ
             attr "data-field-name" name
             attr "data-list-id" (id + "-list")
             attr "data-badges-id" (id + "-badges")
-            // attr "_" "install MultiInvitees"
+            attr "_" "install Autosuggest"
         ]
         @ requiredAttrs
         @ (attrs |> Seq.map (fun (key, value) -> attr key value) |> Seq.toList)

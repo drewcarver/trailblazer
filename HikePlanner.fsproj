@@ -5,7 +5,7 @@
     <UserSecretsId>05663faf-7fa6-479e-8506-e05fd553114d</UserSecretsId>
   </PropertyGroup>
 
-  <ItemGroup><Compile Include="Tests\HikePlanner.Tests\TestSupport.fs" />
+  <ItemGroup>
     <Compile Include="Infrastructure/App.fs" />
     <Compile Include="Core/Types.fs" />
     <Compile Include="Core/Utils.fs" />
@@ -19,10 +19,10 @@
     <Compile Include="Views/Components/Autosuggest.fs" />
     <Compile Include="Views/Shared/MasterLayout.fs" />
     <Compile Include="Views/Home/Index.fs" />
-    <Compile Include="Views/Plan/ListHikersResults.fs" />
-    <Compile Include="Views/Plan/ListPlans.fs" />
-    <Compile Include="Views/Plan/CreatePlan.fs" />
-    <Compile Include="Views/Plan/HikeDetail.fs" />
+    <Compile Include="Views/Hikes/ListHikersResults.fs" />
+    <Compile Include="Views/Hikes/ListHikes.fs" />
+    <Compile Include="Views/Hikes/CreateHike.fs" />
+    <Compile Include="Views/Hikes/HikeDetail.fs" />
     <Compile Include="Handlers/Common.fs" />
     <Compile Include="Handlers/AccountHandler.fs" />
     <Compile Include="Handlers/ListPlansHandler.fs" />

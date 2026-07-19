@@ -1,4 +1,4 @@
-module HikePlanner.Views.Plan.ListHikersResults
+module HikePlanner.Views.Hikes.ListHikersResults
 
 open System
 open Giraffe.ViewEngine

@@ -4,7 +4,7 @@ open Giraffe
 open HikePlanner.Core
 open HikePlanner.Infrastructure
 open HikePlanner.Repositories.HikeRepo
-open HikePlanner.Views.Plan.ListPlans
+open HikePlanner.Views.Hikes.ListHikes
 
 module ListPlansHandler =
     let listPlansHandler: TrailblazerEndpoint<_> =
@@ -12,6 +12,6 @@ module ListPlansHandler =
             let! hikes = getHikes
             and! userProfile = Common.getUserProfile |> App.ofAppResult
 
-            return htmlView (listPlans (Some userProfile) (Ok hikes))
+            return htmlView (listHikes (Some userProfile) (Ok hikes))
         }
-        |> App.mapError (Error >> listPlans None >> htmlView)
+        |> App.mapError (Error >> listHikes None >> htmlView)

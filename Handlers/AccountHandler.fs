@@ -26,6 +26,6 @@ module AccountHandler =
                     Friends = existingFriends
                 }
 
-            return redirectTo false "/plan"
+            return redirectTo false "/hikes"
         }
         |> App.mapError (fun _ -> setStatusCode 500 >=> text "Unable to complete sign in.")

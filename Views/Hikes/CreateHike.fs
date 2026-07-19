@@ -1,4 +1,4 @@
-module HikePlanner.Views.Plan.Plan
+module HikePlanner.Views.Hikes.CreateHike
 
 open System;
 open Giraffe.ViewEngine
@@ -11,7 +11,7 @@ open HikePlanner.Core
 open HikePlanner.Views.Components.Button
 open HikePlanner.Views.Components.Autosuggest
 
-let planView userName (friends: Friend list) (trailPointsOfInterest: Result<TrailPointOfInterest list, TrailblazerError>) =
+let createHikeView userName (friends: Friend list) (trailPointsOfInterest: Result<TrailPointOfInterest list, TrailblazerError>) =
         let toOptionLabel (poi: TrailPointOfInterest) = sprintf "%s - Mile %.2f" poi.Name poi.TrailMile
         let pointsOfInterestOptions = 
             trailPointsOfInterest 
@@ -27,13 +27,12 @@ let planView userName (friends: Friend list) (trailPointsOfInterest: Result<Trai
                 friend.Email, sprintf "%s (%s)" friendName friend.Email)
 
         div [ _class "p-6 border border-black rounded-lg bg-white p-4 font-sans selection:bg-neutral-200 m-2"] [
-            script [ _src "/js/multiInvitees.js"; _type "module" ] []
             div [ _class "flex gap-4 flex-wrap" ] [
                 h1 [ _class "text-2xl font-mono font-bold mb-4" ] [ str "Create New Hike" ]
                 div [ _class "flex items-center gap-4" ] [
                     form [ _class "font-mono mx-auto mt-8 transition-[width] duration-500 ease-in-out"; 
                         attr "_" "install ListenForSelectChange";
-                        attr "hx-post" "/plan"; attr "hx-swap" "outerHTML" ] [
+                        attr "hx-post" "/hikes"; attr "hx-swap" "outerHTML" ] [
                         textInput "hike-name" "hikeName" "Hike Name" true Required
                         datePicker "start-date" "startDate" "Start Date" (Some DateTime.Now) Required []
                         trailblazerAutosuggest "friend-search" "invitees" "Invite Friends" Optional friendOptions [

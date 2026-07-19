@@ -5,7 +5,7 @@ open HikePlanner.Core
 open HikePlanner.Core.Utils
 open HikePlanner.Infrastructure
 open HikePlanner.Repositories.HikeRepo
-open HikePlanner.Views.Plan
+open HikePlanner.Views.Hikes.CreateHike
 
 module SaveHikePlanHandler =
     let saveHikePlan : TrailblazerEndpoint<_> =
@@ -28,8 +28,8 @@ module SaveHikePlanHandler =
             return!
                 App.succeed (
                     setHttpHeader "x-hike-id" id >=>
-                    setHttpHeader "HX-Location" "/plan" >=>
+                    setHttpHeader "HX-Location" "/hikes" >=>
                     setStatusCode 204
                 )
         }
-        |> App.mapError (Error >> Plan.planView None [] >> htmlView)
+        |> App.mapError (Error >> createHikeView None [] >> htmlView)

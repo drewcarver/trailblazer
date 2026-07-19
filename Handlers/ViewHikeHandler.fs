@@ -4,7 +4,7 @@ open Giraffe
 open HikePlanner.Core
 open HikePlanner.Infrastructure
 open HikePlanner.Repositories.HikeRepo
-open HikePlanner.Views.Plan.HikeDetail
+open HikePlanner.Views.Hikes.HikeDetail
 
 module ViewHikeHandler =
     let viewHikeHandler hikeId : TrailblazerEndpoint<_> =

@@ -1,4 +1,4 @@
-module HikePlanner.Views.Plan.ListPlans
+module HikePlanner.Views.Hikes.ListHikes
 
 open Giraffe.ViewEngine
 open HikePlanner.Views.MasterLayout
@@ -23,7 +23,7 @@ let myHikeRow (hike: SavedHike) =
             )
         )
         td [ _class "px-4 py-3 text-center whitespace-nowrap" ] [
-            a [ _href (sprintf "/plan/%d" hike.Id); _class "inline-flex items-center justify-center px-3 py-1 text-xs font-mono font-bold uppercase border border-black bg-neutral-100 hover:bg-black hover:text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer" ] [ str "View Hike" ]
+            a [ _href (sprintf "/hikes/%d" hike.Id); _class "inline-flex items-center justify-center px-3 py-1 text-xs font-mono font-bold uppercase border border-black bg-neutral-100 hover:bg-black hover:text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer" ] [ str "View Hike" ]
         ]
     ]
 
@@ -39,7 +39,7 @@ let noHikesAvailableTable =
         trailblazerTableRow [ span [] [ str "No hikes available." ]]
     ]
 
-let listPlans userProfile hikesResult = 
+let listHikes userProfile hikesResult = 
     let renderTable hikes = 
         div [ _class "p-4" ] [
             hikingTable hikes

@@ -7,11 +7,11 @@ open HikePlanner.Handlers.Handlers
 
 module PlanRoutesTests =
     [<Fact>]
-    let ``GET plan create returns page with create title`` () =
+    let ``GET hikes create returns page with create title`` () =
         task {
             use! testContext = TestSupport.buildTestContext()
 
-            let! response = testContext.Client.GetAsync("/plan/create")
+            let! response = testContext.Client.GetAsync("/hikes/create")
             let! content = response.Content.ReadAsStringAsync()
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode)
@@ -19,7 +19,7 @@ module PlanRoutesTests =
         }
 
     [<Fact>]
-    let ``GET plan lists saved hikes`` () =
+    let ``GET hikes lists saved hikes`` () =
         task {
             use! testContext = TestSupport.buildTestContext()
 
@@ -31,9 +31,9 @@ module PlanRoutesTests =
             }
 
             use form = TestSupport.buildSaveHikeFormContent formToSave
-            let! _ = testContext.Client.PostAsync("/plan", form)
+            let! _ = testContext.Client.PostAsync("/hikes", form)
 
-            let! response = testContext.Client.GetAsync("/plan")
+            let! response = testContext.Client.GetAsync("/hikes")
             let! content = response.Content.ReadAsStringAsync()
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode)
@@ -41,14 +41,14 @@ module PlanRoutesTests =
         }
 
     [<Fact>]
-    let ``GET plan by unknown id shows error view`` () =
+    let ``GET hikes by unknown id shows error view`` () =
         task {
             use! testContext = TestSupport.buildTestContext()
 
-            let! response = testContext.Client.GetAsync("/plan/999")
+            let! response = testContext.Client.GetAsync("/hikes/999")
             let! content = response.Content.ReadAsStringAsync()
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode)
             Assert.Contains("An error occurred while retrieving the hike details.", content)
-            Assert.Contains("Back to Plans", content)
+            Assert.Contains("Back to Hikes", content)
         }

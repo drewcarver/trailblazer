@@ -34,7 +34,7 @@ let trailblazerTable title header rows  =
           div [ _class "text-[24px] font-mono tracking-widest text-neutral-500 uppercase mb-2 pl-1" ] [
               str title
           ]
-          trailblazerLinkButton "/plan/create" "Create New Plan" None
+          trailblazerLinkButton "/hikes/create" "Create New Hike" None
         ]
         table [ _class "w-full min-w-[600px] border-collapse text-left text-sm text-neutral-900 font-mono" ] [
           header

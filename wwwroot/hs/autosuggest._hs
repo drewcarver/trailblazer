@@ -1,0 +1,79 @@
+def allowedValues(listElement)
+    return (<option /> in listElement) mapped to its value
+end
+
+def badgeValues(badgesContainer)
+    return ([data-value] in badgesContainer) mapped to its dataset.value or ''
+end
+
+def createBadge(input, fieldName, value, badgesContainer)
+    log 'Creating badge for value: ' + value
+    make a <span /> called badge
+    put 'inline-flex items-center rounded-full bg-neutral-200 px-3 py-1 text-sm text-neutral-800' 
+        into badge's className
+    set badge's @data-value to value
+
+    make <input/> called hiddenInput
+    set hiddenInput's type to 'hidden'
+    set hiddenInput's name to fieldName
+    set hiddenInput's value to value
+
+    make a <label /> called label
+    set the label's textContent to value
+    
+    make a <button /> called removeButton
+    set removeButton's type to 'button'
+    set removeButton's className to 'ml-2 text-red-600 hover:text-red-800'
+    set removeButton's textContent to '×'
+    set removeButton's @_ to 'on click remove <span[data-value="' + value + '"] /> from #' + badgesContainer.id + ' then focus #' + input.id
+
+    append hiddenInput to badge
+    append label to badge
+    append removeButton to badge
+
+    append badge to badgesContainer 
+end
+
+behavior Autosuggest
+    on input
+        set value to my value.trim()
+        set listElement to #{my.id + '-list'}
+        set badgesContainer to #{my.id + '-badges'}
+
+        if value is ''
+            return
+        end
+        
+        log allowedValues(listElement)
+        if value is not in allowedValues(listElement)
+            return
+        end
+
+        log badgesContainer
+        if value is in badgeValues(badgesContainer)
+            set my value to ''
+            return
+        end
+
+        call createBadge(me, fieldName, value, badgesContainer)
+        set my value to ''
+        focus me
+    end
+    on load
+        if my dataset.multiInviteesInitialized is true
+            return
+        end
+        
+        set listId to my dataset.listId
+        set badgesId to my dataset.badgesId
+        set fieldName to my dataset.fieldName
+        set listElement to #{listId} 
+        set badgesContainer to #{badgesId}
+
+        if listElement is null or badgesContainer is null or fieldName is null
+            return
+        end
+
+        set my dataset.multiInviteesInitialized to true
+    end
+end

@@ -24,6 +24,7 @@ let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent
             script [ _src ""; _integrity "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="; _crossorigin "" ] []
             script [ _src "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"; _integrity "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="; _crossorigin "" ] []
             script [ _src "/js/trailmap.js"; attr "defer" ""] []
+            script [ _type "text/hyperscript"; _src "/hs/autosuggest._hs"; attr "defer" "" ] []
             script [ _type "text/hyperscript"; _src "/hs/hikeplanner._hs"; attr "defer" "" ] []
             script [ _src "https://cdn.jsdelivr.net/npm/hyperscript.org@0.9.93/dist/_hyperscript.min.js"; _integrity "sha384-/6HsqTiz02YfFBUhzTwlH/yxe68DhfnkdHiWytM3nxAzs/yvG+3FZY0f4KLnNoov"; _crossorigin "anonymous" ] []
             script [ _src "https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js" ] []
@@ -64,7 +65,7 @@ let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent
                     ]
                     div [ _class "hidden md:flex items-center gap-8 text-sm font-medium" ] [
                         a [ _href "#"; _class "hover:text-[#D4C3A8] transition-colors" ] [ str "Discover Trails" ]
-                        a [ _href "/plan"; _class "hover:text-[#D4C3A8] transition-colors" ] [ str "Plan Hike" ]
+                        a [ _href "/hikes"; _class "hover:text-[#D4C3A8] transition-colors" ] [ str "Plan Hike" ]
                         a [ _href "#"; _class "hover:text-[#D4C3A8] transition-colors" ] [ str "My Journal" ]
                         a [ _href "#"; _class "hover:text-[#D4C3A8] transition-colors" ] [ str "Past Hikes" ]
                         a [ _href "#"; _class "hover:text-[#D4C3A8] transition-colors" ] [ str "Community" ]
