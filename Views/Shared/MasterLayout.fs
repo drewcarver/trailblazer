@@ -63,10 +63,10 @@ let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent
                 div [ _class "items-center px-4 py-3 flex justify-between" ] [
                     span [ _class "text-2xl font-bold" ] [ str "[TB] Trailblazer" ]
                     div [ _class "flex items-center gap-6 text-lg" ] [
-                        a [ _href "#"; _class "text-[1.35rem] hover:underline" ] [ str "Find Trails" ]
-                        a [ _href "/hikes"; _class "text-[1.35rem] hover:underline" ] [ str "My Hikes" ]
-                        a [ _href "#"; _class "text-[1.35rem] hover:underline" ] [ str "Create Hike" ]
-                        a [ _href "/login"; attr "hx-boost" "false"; _class "text-[1.35rem] hover:bg-black hover:text-white transition-all" ] [ str "[ Log In ]" ]
+                        a [ _href "#"; _class "tracking-tight text-[1.35rem] hover:underline" ] [ str "Find Trails" ]
+                        a [ _href "/hikes"; _class "tracking-tight text-[1.35rem] hover:underline" ] [ str "My Hikes" ]
+                        a [ _href "#"; _class "tracking-tight text-[1.35rem] hover:underline" ] [ str "Create Hike" ]
+                        a [ _href "/login"; attr "hx-boost" "false"; _class "tracking-tight text-[1.35rem] hover:bg-black hover:text-white transition-all" ] [ str "[ Log In ]" ]
                     ]
                 ]
             ]    
