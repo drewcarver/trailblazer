@@ -14,6 +14,10 @@
     <Compile Include="Repositories/HikeRepo.Users.fs" />
     <Compile Include="Repositories/HikeRepo.TrailPoints.fs" />
     <Compile Include="Repositories/HikeRepo.Hikes.fs" />
+    <Compile Include="Views/Components/Card.fs" />
+    <Compile Include="Views/Components/Heading.fs" />
+    <Compile Include="Views/Components/Icon.fs" />
+    <Compile Include="Views/Components/Description.fs" />
     <Compile Include="Views/Components/DatePicker.fs" />
     <Compile Include="Views/Components/TextInput.fs" />
     <Compile Include="Views/Components/Button.fs" />
