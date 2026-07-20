@@ -32,6 +32,7 @@ let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent
                 str """
                 @import url(https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap);
 
+                
                 :root {
                     --green-dark: #2E5A3D;
                     --green-med: #4A7043;
@@ -39,12 +40,12 @@ let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent
                     --beige: #EDE4D5;
                 }
 
-                body {
-                    font-family: 'Inter', system-ui, sans-serif;
+                * {
+                    font-family: "Courier New", Courier, monospace;
                 }
 
-                .logo-font {
-                    font-family: 'Playfair Display', sans-serif;
+                body {
+                    background-color: var(--beige);
                 }
 
                 .hero-bg {
@@ -56,29 +57,15 @@ let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent
                 """
             ]
         ]
-        body [ attr "hx-boost" "true"; _class "bg-[#EDE4D5] text-gray-800" ] [
-            nav [ _class "bg-[#2E5A3D] text-white sticky top-0 z-50 shadow-md" ] [
-                div [ _class "max-w-7xl mx-auto px-6 py-4 flex items-center justify-between" ] [
-                    div [ _class "flex items-center gap-3" ] [
-                        i [ _class "fa-solid fa-mountain text-3xl text-[#EDE4D5]" ] []
-                        div [ _class "logo-font text-3xl font-bold tracking-tight" ] [ str "TrailBlazer" ]
-                    ]
-                    div [ _class "hidden md:flex items-center gap-8 text-sm font-medium" ] [
-                        a [ _href "#"; _class "hover:text-[#D4C3A8] transition-colors" ] [ str "Discover Trails" ]
-                        a [ _href "/hikes"; _class "hover:text-[#D4C3A8] transition-colors" ] [ str "Plan Hike" ]
-                        a [ _href "#"; _class "hover:text-[#D4C3A8] transition-colors" ] [ str "My Journal" ]
-                        a [ _href "#"; _class "hover:text-[#D4C3A8] transition-colors" ] [ str "Past Hikes" ]
-                        a [ _href "#"; _class "hover:text-[#D4C3A8] transition-colors" ] [ str "Community" ]
-                    ]
-                    div [ _class "flex items-center gap-4" ] [
-                        button [ _class "bg-[#8B5A2B] hover:bg-[#A67C5D] px-5 py-2 rounded-full text-sm font-medium transition-colors" ] [ str "Log Hike" ]
-                        div [ _class "flex items-center gap-2 px-2 h-9 bg-[#D4C3A8] rounded-full" ] [
-                            match picture with
-                            | Some src -> img [ _src src; _alt displayName; _class "w-7 h-7 rounded-full object-cover" ]
-                            | None -> emptyText
-                            span [ _class "pr-2 text-[#2E5A3D] font-semibold text-sm whitespace-nowrap" ] [ str displayName ]
-                        ]
-                        a [ _href "/logout"; attr "hx-boost" "false"; _class "text-sm font-medium hover:text-[#D4C3A8] transition-colors" ] [ str "Log Out" ]
+        body [ attr "hx-boost" "true"; _class "font-mono" ] [
+            nav [ _class "my-2 mx-1 border-2 rounded-md border-black bg-white" ] [
+                div [ _class "items-center px-4 py-2 flex justify-between" ] [
+                    span [ _class "text-2xl font-bold" ] [ str "[TB] Trailblazer" ]
+                    div [ _class "flex items-center gap-4 text-lg" ] [
+                        a [ _href "#"; _class "hover:underline" ] [ str "Find Trails" ]
+                        a [ _href "/hikes"; _class "hover:underline" ] [ str "My Hikes" ]
+                        a [ _href "#"; _class "hover:underline" ] [ str "Create Hike" ]
+                        a [ _href "/login"; attr "hx-boost" "false"; _class "font-bold hover:bg-black hover:text-white transition-all" ] [ str "[ Log In ]" ]
                     ]
                 ]
             ]    
