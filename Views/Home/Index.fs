@@ -11,11 +11,11 @@ open HikePlanner.Views.Components.Button
 
 let indexView =
     [
-        main [ _class "max-w-7xl mx-auto px-6 py-12" ] [
+        main [ _class "w-full" ] [
             div [ _class "mb-16" ] [
                 tbCard "text-center max-w-2xl mx-auto" [
                     tbIcon "🌲"
-                    tbH2 "PLAN YOUR NEXT ADVENTURE TOGETHER"
+                    tbH2 "PLAN YOUR NEXT HIKE"
                     tbDescription "A simple, visual tool built to map out multi-day hikes, track trails, and coordinate coordinates perfectly with friends."
                     div [ _class "mt-8" ] [
                         trailblazerButton None "Start Planning" "START PLANNING" "button" [("onclick", "window.location.href='/create-plan'")]

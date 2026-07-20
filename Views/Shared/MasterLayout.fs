@@ -30,7 +30,8 @@ let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent
             script [ _src "https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js" ] []
             style [] [
                 str """
-                @import url(https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap);
+                @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
 
                 
                 :root {
@@ -41,7 +42,7 @@ let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent
                 }
 
                 * {
-                    font-family: "Courier New", Courier, monospace;
+                    font-family: "IBM Plex Mono", "Courier New", Courier, monospace;
                 }
 
                 body {
@@ -59,13 +60,13 @@ let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent
         ]
         body [ attr "hx-boost" "true"; _class "font-mono" ] [
             nav [ _class "my-2 mx-1 border-2 rounded-md border-black bg-white" ] [
-                div [ _class "items-center px-4 py-2 flex justify-between" ] [
+                div [ _class "items-center px-4 py-3 flex justify-between" ] [
                     span [ _class "text-2xl font-bold" ] [ str "[TB] Trailblazer" ]
-                    div [ _class "flex items-center gap-4 text-lg" ] [
-                        a [ _href "#"; _class "hover:underline" ] [ str "Find Trails" ]
-                        a [ _href "/hikes"; _class "hover:underline" ] [ str "My Hikes" ]
-                        a [ _href "#"; _class "hover:underline" ] [ str "Create Hike" ]
-                        a [ _href "/login"; attr "hx-boost" "false"; _class "font-bold hover:bg-black hover:text-white transition-all" ] [ str "[ Log In ]" ]
+                    div [ _class "flex items-center gap-6 text-lg" ] [
+                        a [ _href "#"; _class "text-[1.35rem] hover:underline" ] [ str "Find Trails" ]
+                        a [ _href "/hikes"; _class "text-[1.35rem] hover:underline" ] [ str "My Hikes" ]
+                        a [ _href "#"; _class "text-[1.35rem] hover:underline" ] [ str "Create Hike" ]
+                        a [ _href "/login"; attr "hx-boost" "false"; _class "text-[1.35rem] hover:bg-black hover:text-white transition-all" ] [ str "[ Log In ]" ]
                     ]
                 ]
             ]    
