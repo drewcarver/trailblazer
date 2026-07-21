@@ -9,7 +9,7 @@ type SelectOption = {
     Attributes: (string * string) seq
 }
 
-let trailblazerSelect (id: string) (name: string) (labelText: string) (required: Required) options attrs =
+let trailblazerSelectWithSelected (id: string) (name: string) (labelText: string) (required: Required) options (selectedValue: string option) attrs =
     div [ _class "mb-4" ] [
         label [ _for id; _class "block text-sm font-medium text-gray-700 mb-1" ] [ str labelText ]
         select [ 
@@ -21,8 +21,21 @@ let trailblazerSelect (id: string) (name: string) (labelText: string) (required:
             | Optional -> ()
             yield! attrs |> Seq.map (fun (key, value) -> attr key value)
         ] [
-            option [ _value ""; attr "disabled" "disabled"; attr "selected" "selected" ] [ str "-- Select an option --" ]
+            option [ 
+                _value ""
+                attr "disabled" "disabled"
+                if selectedValue.IsNone then
+                    attr "selected" "selected"
+            ] [ str "-- Select an option --" ]
             for opt in options do
-                option [ _value opt.Value; yield! opt.Attributes |> Seq.map(fun (key, value) -> attr key value) ] [ str opt.Label ]
+                option [ 
+                    _value opt.Value
+                    if selectedValue = Some opt.Value then
+                        attr "selected" "selected"
+                    yield! opt.Attributes |> Seq.map(fun (key, value) -> attr key value) 
+                ] [ str opt.Label ]
         ]
     ]
+
+let trailblazerSelect (id: string) (name: string) (labelText: string) (required: Required) options attrs =
+    trailblazerSelectWithSelected id name labelText required options None attrs

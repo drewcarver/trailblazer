@@ -14,6 +14,6 @@ module CreatePlanHandler =
             and! userProfile = Common.getUserProfile |> App.ofAppResult
             let! user = getUser userProfile.Email
 
-            return htmlView (createHikeView (Some userProfile) user.Friends (Ok trailPointsOfInterest))
+            return htmlView (createHikeView (Some userProfile) user.Friends (Ok trailPointsOfInterest) Create None)
         }
-        |> App.mapError (Error >> createHikeView None [] >> htmlView)
+        |> App.mapError (fun error -> createHikeView None [] (Error error) Create None |> htmlView)

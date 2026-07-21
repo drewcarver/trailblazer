@@ -60,6 +60,7 @@ let endpoints env =
         ]
         POST [
             route "/hikes" (requireLogin >=> withAppHandler env saveHikePlan)
+            routef "/hikes/%d:id" (fun id -> requireLogin >=> withAppHandler env (updateHikePlan id))
         ]
     ]
 

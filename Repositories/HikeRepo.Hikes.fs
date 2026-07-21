@@ -36,6 +36,32 @@ module HikeRepoHikes =
                 return! App.fail (DatabaseError (sprintf "Error saving hike: %s" ex.Message))
         }
 
+    let updateHike (id: int64) (trail: string) (startDate: DateTime) (campPoints: int list) =
+        app {
+            let! ConnectionString connStr = App.asks (fun env -> env.Environment.ConnectionString)
+
+            use conn = new SqliteConnection(connStr)
+            let! _ = conn.OpenAsync()
+            HikeRepoDb.ensureHikesTable conn
+
+            let hikeDetails = toHikeJson trail startDate campPoints
+
+            use cmd = conn.CreateCommand()
+            cmd.CommandText <- "UPDATE hike SET details = $details WHERE id = $id;"
+            cmd.Parameters.AddWithValue("$details", hikeDetails) |> ignore
+            cmd.Parameters.AddWithValue("$id", id) |> ignore
+
+            try
+                let changes = cmd.ExecuteNonQuery()
+
+                if changes = 0 then
+                    return! App.fail (NotFound (sprintf "Hike with id %d was not found." id))
+                else
+                    return! App.succeed id
+            with ex ->
+                return! App.fail (DatabaseError (sprintf "Error updating hike: %s" ex.Message))
+        }
+
     let private withPoints (hike: Hike) =
         app {
             let! points = hike.CampPoints |> List.map HikeRepoTrailPoints.getTrailPointOfInterestById

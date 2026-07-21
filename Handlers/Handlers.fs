@@ -8,4 +8,5 @@ module Handlers =
     let listPlansHandler = ListPlansHandler.listPlansHandler
     let planHandler = CreatePlanHandler.planHandler
     let saveHikePlan = SaveHikePlanHandler.saveHikePlan
+    let updateHikePlan = SaveHikePlanHandler.updateHikePlan
     let viewHikeHandler = ViewHikeHandler.viewHikeHandler
