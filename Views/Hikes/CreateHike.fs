@@ -30,7 +30,7 @@ let createHikeView userName (friends: Friend list) (trailPointsOfInterest: Resul
             div [ _class "flex gap-4 flex-wrap" ] [
                 h1 [ _class "text-2xl font-mono font-bold mb-4" ] [ str "Create New Hike" ]
                 div [ _class "flex items-center gap-4" ] [
-                    form [ _class "font-mono mx-auto mt-8 transition-[width] duration-500 ease-in-out"; 
+                    form [ _class "font-mono mx-auto transition-[width] duration-500 ease-in-out"; 
                         attr "_" "install ListenForSelectChange";
                         attr "hx-post" "/hikes"; attr "hx-swap" "outerHTML" ] [
                         textInput "hike-name" "hikeName" "Hike Name" true Required

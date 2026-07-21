@@ -13,7 +13,9 @@ let textInput (id: string) (name: string) (labelText: string) (autofocus: bool) 
             match required with
             | Required -> attr "required" "required"
             | Optional -> ()
-            if autofocus then _autofocus; 
-            _class "w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#4A7043]" 
+            _class "peer w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#4A7043]" 
         ] 
+        span [ _class "invisible opacity-0 peer-user-invalid:visible peer-user-invalid:opacity-100 transition-all duration-300 ease-in-out block text-xs text-red-500 mt-1" ] [ 
+            str "Please enter a value." 
+        ]
     ]

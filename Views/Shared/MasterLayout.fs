@@ -18,6 +18,18 @@ let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent
             title [] [ str "Trailblazer ⛰️ Plan Your Next Hike" ]
             link [ _rel "icon"; _type "image/svg+xml"; _href "/favicon.svg" ] 
             script [ _src "https://cdn.tailwindcss.com" ] []
+            script [] [
+                rawText """
+                window.tailwind.config = {
+                    plugins: [
+                    function({ addVariant }) {
+                        addVariant('user-invalid', '&:user-invalid')
+                        addVariant('peer-user-invalid', '.peer:user-invalid ~ &')
+                    }
+                    ]
+                }
+                                """
+            ]
             link [ _href "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"; _rel "stylesheet" ] 
             link [ _rel "stylesheet"; _href "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"; _integrity "sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="; _crossorigin ""]
             script [ _src "https://cdnjs.cloudflare.com/ajax/libs/htmx/2.0.10/htmx.min.js"; _integrity "sha512-mwXO+qVbheglD8l/LGeVBnqcKl9NtchGWmM9gW/gvAEZBYnsBQCpaneQ+hI+MOlv7Komhd1NqZ5Gv1ElbYgqCA=="; _crossorigin "anonymous"; ] []
@@ -55,6 +67,12 @@ let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent
                     background-size: cover;
                     background-position: center;
                 }
+
+                @utility peer-user-invalid {
+                    .peer:user-invalid ~ & {
+                        @apply block; /* or whatever display behavior you prefer */
+                    }
+                }
                 """
             ]
         ]
@@ -65,7 +83,7 @@ let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent
                     div [ _class "flex items-center gap-6 text-lg" ] [
                         a [ _href "#"; _class "tracking-tight text-[1.35rem] hover:underline" ] [ str "Find Trails" ]
                         a [ _href "/hikes"; _class "tracking-tight text-[1.35rem] hover:underline" ] [ str "My Hikes" ]
-                        a [ _href "#"; _class "tracking-tight text-[1.35rem] hover:underline" ] [ str "Create Hike" ]
+                        a [ _href "/hikes/create"; _class "tracking-tight text-[1.35rem] hover:underline" ] [ str "Create Hike" ]
                         a [ _href "/login"; attr "hx-boost" "false"; _class "tracking-tight text-[1.35rem] hover:bg-black hover:text-white transition-all" ] [ str "[ Log In ]" ]
                     ]
                 ]
