@@ -16,8 +16,21 @@ open HikePlanner.Handlers.Handlers
 open Microsoft.AspNetCore.StaticFiles
 
 let private resolveConnectionString () =
+    let withTursoToken (connectionString: string) =
+        let token = Environment.GetEnvironmentVariable("TURSO_AUTH_TOKEN")
+
+        if String.IsNullOrWhiteSpace token then
+            connectionString
+        elif connectionString.Contains("authToken=", StringComparison.OrdinalIgnoreCase) then
+            connectionString
+        elif connectionString.Contains("://") then
+            let separator = if connectionString.Contains("?") then "&" else "?"
+            connectionString + separator + "authToken=" + Uri.EscapeDataString(token)
+        else
+            connectionString + ";AuthToken=" + token
+
     match Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") with
-    | cs when not (String.IsNullOrWhiteSpace cs) -> ConnectionString cs
+    | cs when not (String.IsNullOrWhiteSpace cs) -> ConnectionString (withTursoToken cs)
     | _ -> ConnectionString "Data Source=hikes.db"
 
 let withAppHandler (appEnv: 'env) app next ctx =  
