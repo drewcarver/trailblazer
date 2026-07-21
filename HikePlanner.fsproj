@@ -44,7 +44,7 @@
   <ItemGroup>
     <PackageReference Include="Giraffe" Version="8.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.10" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.0" />
+    <PackageReference Include="Turso.Data.Sqlite" Version="0.7.0-pre.10" />
   </ItemGroup>
 
 </Project>

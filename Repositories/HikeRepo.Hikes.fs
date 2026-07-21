@@ -2,7 +2,7 @@ namespace HikePlanner.Repositories
 
 module HikeRepoHikes =
     open System
-    open Microsoft.Data.Sqlite
+    open Turso.Data.Sqlite
     open HikePlanner.Core
     open HikePlanner.Core.Utils
     open HikePlanner.Infrastructure

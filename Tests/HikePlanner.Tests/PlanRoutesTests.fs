@@ -53,9 +53,10 @@ module PlanRoutesTests =
             }
 
             use form = TestSupport.buildSaveHikeFormContent formToSave
-            let! _ = testContext.Client.PostAsync("/hikes", form)
+            let! saveResponse = testContext.Client.PostAsync("/hikes", form)
+            let savedId = saveResponse.Headers.GetValues("x-hike-id") |> Seq.head
 
-            let! response = testContext.Client.GetAsync("/hikes/1")
+            let! response = testContext.Client.GetAsync(sprintf "/hikes/%s" savedId)
             let! content = response.Content.ReadAsStringAsync()
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode)

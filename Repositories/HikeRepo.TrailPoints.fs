@@ -1,7 +1,7 @@
 namespace HikePlanner.Repositories
 
 module HikeRepoTrailPoints =
-    open Microsoft.Data.Sqlite
+    open Turso.Data.Sqlite
     open HikePlanner.Core
     open HikePlanner.Infrastructure
     open HikePlanner.Repositories.HikeRepoTypes
@@ -47,7 +47,7 @@ module HikeRepoTrailPoints =
             HikeRepoDb.ensureHikesTable conn
 
             use cmd = conn.CreateCommand()
-            cmd.CommandText <- "SELECT Id, TrailName, TrailMile, Name FROM TrailPointsOfInterest WHERE Id = $id ORDER BY TrailMile; LIMIT 1;"
+            cmd.CommandText <- "SELECT Id, TrailName, TrailMile, Name FROM TrailPointsOfInterest WHERE Id = $id ORDER BY TrailMile LIMIT 1;"
             cmd.Parameters.AddWithValue("$id", id) |> ignore
 
             return!

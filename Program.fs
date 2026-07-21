@@ -15,7 +15,10 @@ open HikePlanner.Core
 open HikePlanner.Handlers.Handlers
 open Microsoft.AspNetCore.StaticFiles
 
-let private defaultConnectionString = ConnectionString "Data Source=hikes.db"
+let private resolveConnectionString () =
+    match Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") with
+    | cs when not (String.IsNullOrWhiteSpace cs) -> ConnectionString cs
+    | _ -> ConnectionString "Data Source=hikes.db"
 
 let withAppHandler (appEnv: 'env) app next ctx =  
         task {
@@ -90,7 +93,7 @@ let main _ =
     app.UseStaticFiles staticFileOptions |> ignore
 
     let env = {
-        ConnectionString = defaultConnectionString
+        ConnectionString = resolveConnectionString ()
     }
 
     app.UseHttpsRedirection()

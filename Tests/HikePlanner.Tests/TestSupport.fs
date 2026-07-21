@@ -7,14 +7,14 @@ open System.Security.Claims
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.TestHost
-open Microsoft.Data.Sqlite
+open Turso.Data.Sqlite
 open Giraffe.EndpointRouting
 open HikePlanner.Core
 open Program
 open HikePlanner.Handlers.Handlers
 
 type TestContext = {
-    KeepAliveConnection: SqliteConnection
+    DbPath: string
     App: WebApplication
     Client: HttpClient
 }
@@ -24,11 +24,10 @@ with
             this.App.StopAsync().GetAwaiter().GetResult()
             this.Client.Dispose()
             this.App.DisposeAsync().AsTask().GetAwaiter().GetResult()
-            this.KeepAliveConnection.Dispose()
+            if IO.File.Exists this.DbPath then
+                IO.File.Delete this.DbPath
 
 module TestSupport =
-    let private testConnectionString =
-        ConnectionString "Data Source=file:plan-test?mode=memory&cache=shared"
 
     let private testUser =
         ClaimsPrincipal(
@@ -42,28 +41,31 @@ module TestSupport =
         )
 
     let private seedDatabase (conn: SqliteConnection) =
-        use cmd = conn.CreateCommand()
-        cmd.CommandText <-
-            """
+        let exec sql =
+            use cmd = conn.CreateCommand()
+            cmd.CommandText <- sql
+            cmd.ExecuteNonQuery() |> ignore
+
+        exec """
             CREATE TABLE IF NOT EXISTS TrailPointsOfInterest (
                 ID INTEGER PRIMARY KEY,
                 Name TEXT NOT NULL,
                 TrailName TEXT NOT NULL,
                 TrailMile REAL NOT NULL
-            );
+            );"""
 
-            INSERT INTO TrailPointsOfInterest (TrailName, TrailMile, Name) VALUES ('AppalachianTrail', 1, 'Test Point');
-            INSERT INTO TrailPointsOfInterest (TrailName, TrailMile, Name) VALUES ('AppalachianTrail', 2, 'Test Point 2');
-            INSERT INTO TrailPointsOfInterest (TrailName, TrailMile, Name) VALUES ('AppalachianTrail', 3, 'Test Point 3');
-            """
-        cmd.ExecuteNonQuery() |> ignore
+        exec "INSERT INTO TrailPointsOfInterest (TrailName, TrailMile, Name) VALUES ('AppalachianTrail', 1, 'Test Point');"
+        exec "INSERT INTO TrailPointsOfInterest (TrailName, TrailMile, Name) VALUES ('AppalachianTrail', 2, 'Test Point 2');"
+        exec "INSERT INTO TrailPointsOfInterest (TrailName, TrailMile, Name) VALUES ('AppalachianTrail', 3, 'Test Point 3');"
 
     let buildTestContext () =
         task {
-            let (ConnectionString connectionString) = testConnectionString
-            let keepAliveConnection = new SqliteConnection(connectionString)
-            do! keepAliveConnection.OpenAsync()
-            seedDatabase keepAliveConnection
+            let dbPath = IO.Path.GetTempFileName() + ".db"
+            let connectionString = sprintf "Data Source=%s" dbPath
+
+            use initConn = new SqliteConnection(connectionString)
+            do! initConn.OpenAsync()
+            seedDatabase initConn
 
             let builder = WebApplication.CreateBuilder()
             builder.WebHost.UseTestServer() |> ignore
@@ -84,7 +86,7 @@ module TestSupport =
             do! app.StartAsync()
 
             return {
-                KeepAliveConnection = keepAliveConnection
+                DbPath = dbPath
                 App = app
                 Client = app.GetTestClient()
             }
@@ -101,5 +103,8 @@ module TestSupport =
 
         for invitee in form.Invitees do
             pairs.Add(KeyValuePair(nameof form.Invitees, invitee))
+
+        if form.Invitees.IsEmpty then
+            pairs.Add(KeyValuePair(nameof form.Invitees, ""))
 
         new FormUrlEncodedContent(pairs :> seq<KeyValuePair<string, string>>)
