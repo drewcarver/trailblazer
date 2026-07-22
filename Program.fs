@@ -70,13 +70,13 @@ let endpoints env =
             route "/login" loginHandler
             route "/logout" logoutHandler
             route "/account" (requireLogin >=> withAppHandler env accountHandler)
-            route "/hikes/create" (requireLogin >=> withAppHandler env planHandler)
-            route "/hikes" (requireLogin >=> withAppHandler env listPlansHandler)
+            route "/hikes/create" (requireLogin >=> withAppHandler env createHikeHandler)
+            route "/hikes" (requireLogin >=> withAppHandler env listHikesHandler)
             routef "/hikes/%d:id" (fun id -> requireLogin >=> withAppHandler env (viewHikeHandler id))
         ]
         POST [
-            route "/hikes" (requireLogin >=> withAppHandler env saveHikePlan)
-            routef "/hikes/%d:id" (fun id -> requireLogin >=> withAppHandler env (updateHikePlan id))
+            route "/hikes" (requireLogin >=> withAppHandler env saveHikeHandler)
+            routef "/hikes/%d:id" (fun id -> requireLogin >=> withAppHandler env (updateHikeHandler id))
         ]
     ]
 

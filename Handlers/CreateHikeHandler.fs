@@ -7,8 +7,8 @@ open HikePlanner.Repositories.HikeRepoUsers
 open HikePlanner.Repositories.HikeRepoTrailPoints
 open HikePlanner.Views.Hikes.CreateHike
 
-module CreatePlanHandler =
-    let planHandler: TrailblazerEndpoint<_> =
+module CreateHikeHandler =
+    let createHikeHandler: TrailblazerEndpoint<_> =
         app {
             let! trailPointsOfInterest = getTrailPointsOfInterest "AppalachianTrail"
             and! userProfile = Common.getUserProfile |> App.ofAppResult

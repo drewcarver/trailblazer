@@ -8,8 +8,8 @@
   <ItemGroup>
     <Compile Include="TestSupport.fs" />
     <Compile Include="CommonTests.fs" />
-    <Compile Include="SaveHikePlanRouteTests.fs" />
-    <Compile Include="PlanRoutesTests.fs" />
+    <Compile Include="SaveHikeRouteTests.fs" />
+    <Compile Include="HikeRoutesTests.fs" />
   </ItemGroup>
 
   <ItemGroup>

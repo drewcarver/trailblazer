@@ -7,7 +7,7 @@ open HikePlanner.Infrastructure
 open HikePlanner.Repositories.HikeRepoHikes
 open HikePlanner.Views.Hikes.CreateHike
 
-module SaveHikePlanHandler =
+module SaveHikeHandler =
     let private parseCampPoints (form: Common.SaveHikeForm) =
         form.CampPoints
         |> List.map (fun campPoint ->
@@ -16,7 +16,7 @@ module SaveHikePlanHandler =
             |> Result.mapError (fun _ -> FormValidationError ("Invalid camp point: " + campPoint))
             |> App.ofResult)
 
-    let saveHikePlan : TrailblazerEndpoint<_> =
+    let saveHikeHandler : TrailblazerEndpoint<_> =
         app {
             let! ctx = App.asks (fun env -> env.Context)
 
@@ -36,7 +36,7 @@ module SaveHikePlanHandler =
         }
         |> App.mapError (fun error -> createHikeView None [] (Error error) Create None |> htmlView)
 
-    let updateHikePlan hikeId : TrailblazerEndpoint<_> =
+    let updateHikeHandler hikeId : TrailblazerEndpoint<_> =
         app {
             let! ctx = App.asks (fun env -> env.Context)
 

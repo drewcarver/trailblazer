@@ -5,8 +5,8 @@ module Handlers =
 
     let getUserProfile<'env> = Common.getUserProfile<'env>
     let accountHandler = AccountHandler.accountHandler
-    let listPlansHandler = ListPlansHandler.listPlansHandler
-    let planHandler = CreatePlanHandler.planHandler
-    let saveHikePlan = SaveHikePlanHandler.saveHikePlan
-    let updateHikePlan = SaveHikePlanHandler.updateHikePlan
+    let listHikesHandler = ListHikesHandler.listHikesHandler
+    let createHikeHandler = CreateHikeHandler.createHikeHandler
+    let saveHikeHandler = SaveHikeHandler.saveHikeHandler
+    let updateHikeHandler = SaveHikeHandler.updateHikeHandler
     let viewHikeHandler = ViewHikeHandler.viewHikeHandler

@@ -6,8 +6,8 @@ open HikePlanner.Infrastructure
 open HikePlanner.Repositories.HikeRepoHikes
 open HikePlanner.Views.Hikes.ListHikes
 
-module ListPlansHandler =
-    let listPlansHandler: TrailblazerEndpoint<_> =
+module ListHikesHandler =
+    let listHikesHandler: TrailblazerEndpoint<_> =
         app {
             let! hikes = getHikes
             and! userProfile = Common.getUserProfile |> App.ofAppResult

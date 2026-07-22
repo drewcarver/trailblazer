@@ -5,7 +5,7 @@ open System.Net
 open Xunit
 open HikePlanner.Handlers.Handlers
 
-module SaveHikePlanRouteTests =
+module SaveHikeRouteTests =
     [<Fact>]
     let ``POST hikes saves hike and returns HTMX headers`` () =
         task {

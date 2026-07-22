@@ -5,7 +5,7 @@ open System.Net
 open Xunit
 open HikePlanner.Handlers.Handlers
 
-module PlanRoutesTests =
+module HikeRoutesTests =
     [<Fact>]
     let ``GET hikes create returns page with create title`` () =
         task {
