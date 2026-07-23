@@ -1,0 +1,2 @@
+podman build -t trailblazer .
+podman run --rm -it -p 8080:443 --env-file .env -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORTS=443 -e ASPNETCORE_Kestrel__Certificates__Default__Password="trailblazer" -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/trailblazerapp.pfx -v C:\\Users\\drewc\\.aspnet\https:/https/ trailblazer
