@@ -22,10 +22,11 @@ module SaveHikeHandler =
 
             let! form: Common.SaveHikeForm = getFormHelper ctx
             let! validatedForm = Common.validateSaveHikeForm form |> App.ofResult
+            let! userProfile = Common.getUserProfile |> App.ofAppResult
 
             let! campPoints = parseCampPoints form
 
-            let! id = saveHike validatedForm.HikeName validatedForm.StartDate campPoints
+            let! id = saveHike userProfile.Email validatedForm.HikeName validatedForm.StartDate campPoints
 
             return!
                 App.succeed (
@@ -42,10 +43,11 @@ module SaveHikeHandler =
 
             let! form: Common.SaveHikeForm = getFormHelper ctx
             let! validatedForm = Common.validateSaveHikeForm form |> App.ofResult
+            let! userProfile = Common.getUserProfile |> App.ofAppResult
 
             let! campPoints = parseCampPoints form
 
-            let! id = updateHike hikeId validatedForm.HikeName validatedForm.StartDate campPoints
+            let! id = updateHike hikeId userProfile.Email validatedForm.HikeName validatedForm.StartDate campPoints
 
             return!
                 App.succeed (

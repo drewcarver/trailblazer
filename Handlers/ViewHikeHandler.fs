@@ -10,9 +10,9 @@ open HikePlanner.Views.Hikes.CreateHike
 module ViewHikeHandler =
     let viewHikeHandler hikeId : TrailblazerEndpoint<_> =
         app {
-            let! hike = getHikeById hikeId
+            let! userProfile = Common.getUserProfile |> App.ofAppResult
+            let! hike = getHikeById userProfile.Email hikeId
             let! trailPointsOfInterest = getTrailPointsOfInterest "AppalachianTrail"
-            and! userProfile = Common.getUserProfile |> App.ofAppResult
 
             return htmlView (createHikeView (Some userProfile) [] (Ok trailPointsOfInterest) (Edit hikeId) (Some hike))
         }

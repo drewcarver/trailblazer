@@ -58,11 +58,8 @@ module TestSupport =
         exec "INSERT INTO TrailPointsOfInterest (TrailName, TrailMile, Name) VALUES ('AppalachianTrail', 2, 'Test Point 2');"
         exec "INSERT INTO TrailPointsOfInterest (TrailName, TrailMile, Name) VALUES ('AppalachianTrail', 3, 'Test Point 3');"
 
-    let buildTestContext () =
+    let buildTestContextWithConnectionString (connectionString: string) (user: ClaimsPrincipal option) =
         task {
-            let dbName = sprintf "trailblazer-tests-%s" (Guid.NewGuid().ToString("N"))
-            let connectionString = sprintf "Data Source=file:%s?mode=memory&cache=shared" dbName
-
             let keepAliveConnection = new LibSQLConnection(connectionString)
             do! keepAliveConnection.OpenAsync()
             seedDatabase keepAliveConnection
@@ -72,11 +69,12 @@ module TestSupport =
 
             let app = builder.Build()
             let env = { ConnectionString = ConnectionString connectionString }
+            let authenticatedUser = defaultArg user testUser
 
             app.Use(
                 Func<HttpContext, RequestDelegate, Threading.Tasks.Task>(fun ctx next ->
                     task {
-                        ctx.User <- testUser
+                        ctx.User <- authenticatedUser
                         return! next.Invoke(ctx)
                     })
             )
@@ -91,6 +89,11 @@ module TestSupport =
                 KeepAliveConnection = keepAliveConnection
             }
         }
+
+    let buildTestContext () =
+        let dbName = sprintf "trailblazer-tests-%s" (Guid.NewGuid().ToString("N"))
+        let connectionString = sprintf "Data Source=file:%s?mode=memory&cache=shared" dbName
+        buildTestContextWithConnectionString connectionString None
 
     let buildSaveHikeFormContent (form: SaveHikeForm) =
         let pairs = ResizeArray<KeyValuePair<string, string>>()
