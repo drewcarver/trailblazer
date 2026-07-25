@@ -1,4 +1,4 @@
-namespace HikePlanner.Tests
+namespace Trailblazer.UnitTests
 
 open System
 open Xunit
