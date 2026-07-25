@@ -2,12 +2,12 @@ namespace HikePlanner.Repositories
 
 module HikeRepoHikes =
     open System
-    open Turso.Data.Sqlite
     open HikePlanner.Core
     open HikePlanner.Core.Utils
     open HikePlanner.Infrastructure
     open HikePlanner.Repositories.HikeRepoTypes
     open System.Text.Json
+    open System.Data.Common
 
     let private toHikeJson (trail: string) (startDate: DateTime) (campPoints: int list) =
         {| Trail = trail
@@ -19,9 +19,7 @@ module HikeRepoHikes =
         app {
             let! ConnectionString connStr = App.asks (fun env -> env.Environment.ConnectionString)
 
-            use conn = new SqliteConnection(connStr)
-            let! _ = conn.OpenAsync()
-            HikeRepoDb.ensureHikesTable conn
+            use! conn = HikeRepoDb.openConnection connStr
 
             let hikeDetails = toHikeJson trail startDate campPoints
 
@@ -40,9 +38,7 @@ module HikeRepoHikes =
         app {
             let! ConnectionString connStr = App.asks (fun env -> env.Environment.ConnectionString)
 
-            use conn = new SqliteConnection(connStr)
-            let! _ = conn.OpenAsync()
-            HikeRepoDb.ensureHikesTable conn
+            use! conn = HikeRepoDb.openConnection connStr
 
             let hikeDetails = toHikeJson trail startDate campPoints
 
@@ -80,9 +76,7 @@ module HikeRepoHikes =
         app {
             let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
 
-            use conn = new SqliteConnection(connStr)
-            conn.Open() |> ignore
-            HikeRepoDb.ensureHikesTable conn
+            use! conn = HikeRepoDb.openConnection connStr
 
             use cmd = conn.CreateCommand()
             cmd.CommandText <- "SELECT id, details FROM hike WHERE trail = $trail LIMIT 1;"
@@ -100,9 +94,7 @@ module HikeRepoHikes =
         app {
             let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
 
-            use conn = new SqliteConnection(connStr)
-            conn.Open() |> ignore
-            HikeRepoDb.ensureHikesTable conn
+            use! conn = HikeRepoDb.openConnection connStr
 
             use cmd = conn.CreateCommand()
             cmd.CommandText <- "SELECT id, details FROM hike WHERE id = $id LIMIT 1;"
@@ -123,14 +115,12 @@ module HikeRepoHikes =
         app {
             let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
 
-            use conn = new SqliteConnection(connStr)
-            conn.Open() |> ignore
-            HikeRepoDb.ensureHikesTable conn
+            use! conn = HikeRepoDb.openConnection connStr
 
             use cmd = conn.CreateCommand()
             cmd.CommandText <- "SELECT id, details FROM hike ORDER BY id;"
 
-            let rec readAllHikes hikes (rdr: SqliteDataReader) =
+            let rec readAllHikes hikes (rdr: DbDataReader) =
                 let hikeId = HikeRepoDb.toInt64 (rdr.GetValue 0)
                 let details = rdr.GetString 1
                 let options = JsonSerializerOptions(PropertyNameCaseInsensitive = true)
@@ -142,7 +132,7 @@ module HikeRepoHikes =
                 else
                     hike :: hikes
 
-            let! hikes = HikeRepoDb.withReader cmd (readAllHikes [])
+            let! hikes = HikeRepoDb.withReader cmd (fun rdr -> readAllHikes [] rdr)
 
             return! hikes |> List.map withPoints
         }

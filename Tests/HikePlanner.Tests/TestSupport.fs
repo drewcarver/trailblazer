@@ -7,7 +7,6 @@ open System.Security.Claims
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.TestHost
-open Turso.Data.Sqlite
 open Giraffe.EndpointRouting
 open HikePlanner.Core
 open Program
@@ -28,6 +27,8 @@ with
                 IO.File.Delete this.DbPath
 
 module TestSupport =
+    open System.Data.Common
+    open Microsoft.Data.Sqlite
 
     let private testUser =
         ClaimsPrincipal(
@@ -40,7 +41,7 @@ module TestSupport =
             )
         )
 
-    let private seedDatabase (conn: SqliteConnection) =
+    let private seedDatabase (conn: DbConnection) =
         let exec sql =
             use cmd = conn.CreateCommand()
             cmd.CommandText <- sql
@@ -60,8 +61,7 @@ module TestSupport =
 
     let buildTestContext () =
         task {
-            let dbPath = IO.Path.GetTempFileName() + ".db"
-            let connectionString = sprintf "Data Source=%s" dbPath
+            let connectionString = sprintf "Data Source=:memory:"
 
             use initConn = new SqliteConnection(connectionString)
             do! initConn.OpenAsync()
@@ -86,9 +86,9 @@ module TestSupport =
             do! app.StartAsync()
 
             return {
-                DbPath = dbPath
                 App = app
                 Client = app.GetTestClient()
+                DbPath = ""
             }
         }
 

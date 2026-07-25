@@ -1,7 +1,6 @@
 namespace HikePlanner.Repositories
 
 module HikeRepoTrailPoints =
-    open Turso.Data.Sqlite
     open HikePlanner.Core
     open HikePlanner.Infrastructure
     open HikePlanner.Repositories.HikeRepoTypes
@@ -10,8 +9,7 @@ module HikeRepoTrailPoints =
         app {
             let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
 
-            use conn = new SqliteConnection(connStr)
-            conn.Open() |> ignore
+            use! conn = HikeRepoDb.openConnection connStr
 
             use cmd = conn.CreateCommand()
             cmd.CommandText <- "SELECT Id, TrailName, TrailMile, Name FROM TrailPointsOfInterest WHERE TrailName = $trailName ORDER BY TrailMile;"
@@ -42,9 +40,7 @@ module HikeRepoTrailPoints =
         app {
             let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
 
-            use conn = new SqliteConnection(connStr)
-            let! _ = conn.OpenAsync()
-            HikeRepoDb.ensureHikesTable conn
+            use! conn = HikeRepoDb.openConnection connStr
 
             use cmd = conn.CreateCommand()
             cmd.CommandText <- "SELECT Id, TrailName, TrailMile, Name FROM TrailPointsOfInterest WHERE Id = $id ORDER BY TrailMile LIMIT 1;"

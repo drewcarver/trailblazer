@@ -2,11 +2,13 @@ namespace HikePlanner.Repositories
 
 module HikeRepoDb =
     open System
-    open Turso.Data.Sqlite
     open HikePlanner.Core
     open HikePlanner.Infrastructure
+    open Nelknet.LibSQL.Data
+    open System.Data.Common
 
-    let ensureUsersTable (conn: SqliteConnection) =
+
+    let ensureUsersTable (conn: DbConnection) =
         use cmd = conn.CreateCommand()
         cmd.CommandText <-
             """
@@ -17,7 +19,7 @@ CREATE TABLE IF NOT EXISTS user (
 """
         cmd.ExecuteNonQuery() |> ignore
 
-    let ensureHikesTable (conn: SqliteConnection) =
+    let ensureHikesTable (conn: DbConnection) =
         use cmd = conn.CreateCommand()
         cmd.CommandText <-
             """
@@ -27,6 +29,16 @@ CREATE TABLE IF NOT EXISTS hike (
 );
 """
         cmd.ExecuteNonQuery() |> ignore
+
+    let openConnection connStr = 
+        app {
+            let conn = new LibSQLConnection(connStr)
+            let! _ = conn.OpenAsync()
+            ensureHikesTable conn
+            ensureUsersTable conn
+
+            return conn
+        }
 
     let toInt64 (value: obj) =
         if isNull value then
@@ -39,14 +51,14 @@ CREATE TABLE IF NOT EXISTS hike (
             | :? string as s -> Int64.Parse s
             | _ -> -1L
 
-    let withReader (command: SqliteCommand) (f: SqliteDataReader -> 't) =
+    let withReader (command: DbCommand) (f: DbDataReader -> 't) =
         app {
             try
-                use sqliteReader = command.ExecuteReader()
-                let canRead = sqliteReader.Read()
+                use reader = command.ExecuteReader()
+                let canRead = reader.Read()
 
                 if canRead then
-                    return f sqliteReader
+                    return f reader
                 else
                     return! App.fail (NotFound "No rows found.")
             with _ ->

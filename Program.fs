@@ -15,23 +15,10 @@ open HikePlanner.Core
 open HikePlanner.Handlers.Handlers
 open Microsoft.AspNetCore.StaticFiles
 
-let private resolveConnectionString () =
-    let withTursoToken (connectionString: string) =
-        let token = Environment.GetEnvironmentVariable("TURSO_AUTH_TOKEN")
-
-        if String.IsNullOrWhiteSpace token then
-            connectionString
-        elif connectionString.Contains("authToken=", StringComparison.OrdinalIgnoreCase) then
-            connectionString
-        elif connectionString.Contains("://") then
-            let separator = if connectionString.Contains("?") then "&" else "?"
-            connectionString + separator + "authToken=" + Uri.EscapeDataString(token)
-        else
-            connectionString + ";AuthToken=" + token
-
-    match Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") with
-    | cs when not (String.IsNullOrWhiteSpace cs) -> ConnectionString (withTursoToken cs)
-    | _ -> ConnectionString "Data Source=hikes.db"
+let private resolveConnectionString connectionString authToken =
+    match connectionString, authToken with
+        | connStr, Some authToken -> "Data Source=" + connStr + ";Auth Token=" + authToken
+        | connStr, None -> "Data Source=" + connStr
 
 let withAppHandler (appEnv: 'env) app next ctx =  
         task {
@@ -105,8 +92,10 @@ let main _ =
     let staticFileOptions = StaticFileOptions(ContentTypeProvider = provider)
     app.UseStaticFiles staticFileOptions |> ignore
 
+    let authToken = builder.Configuration.["Turso:AuthToken"] |> Option.ofObj 
+
     let env = {
-        ConnectionString = resolveConnectionString ()
+        ConnectionString = ConnectionString (resolveConnectionString app.Configuration.["Turso:ConnectionString"] authToken)
     }
 
     app.UseHttpsRedirection()

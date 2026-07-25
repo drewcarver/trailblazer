@@ -115,7 +115,7 @@ let createHikeView userName (friends: Friend list) (trailPointsOfInterest: Resul
                         | Ok _ -> emptyText
                         | Error e -> span [] [ 
                             match e with
-                                | DatabaseError error -> str "An error ocurred when retrieving points of interest." 
+                                | DatabaseError error -> str (e.ToString ())
                                 | FormValidationError e -> str e
                                 | NotFound e -> str e
                         ]

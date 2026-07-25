@@ -28,4 +28,4 @@ module AccountHandler =
 
             return redirectTo false "/hikes"
         }
-        |> App.mapError (fun _ -> setStatusCode 500 >=> text "Unable to complete sign in.")
+        |> App.mapError (fun e -> setStatusCode 500 >=> text (e.ToString ()))

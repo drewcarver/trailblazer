@@ -1,7 +1,6 @@
 namespace HikePlanner.Repositories
 
 module HikeRepoUsers =
-    open Turso.Data.Sqlite
     open HikePlanner.Core
     open HikePlanner.Infrastructure
     open System.Text.Json
@@ -10,9 +9,7 @@ module HikeRepoUsers =
         app {
             let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
 
-            use conn = new SqliteConnection(connStr)
-            let! _ = conn.OpenAsync()
-            HikeRepoDb.ensureUsersTable conn
+            use! conn = HikeRepoDb.openConnection connStr
 
             use cmd = conn.CreateCommand()
             cmd.CommandText <- "INSERT OR REPLACE INTO user (email, details) VALUES ($email, $details);"
@@ -33,9 +30,7 @@ module HikeRepoUsers =
         app {
             let! { Environment = { ConnectionString = ConnectionString connStr } } = App.ask
 
-            use conn = new SqliteConnection(connStr)
-            conn.Open() |> ignore
-            HikeRepoDb.ensureUsersTable conn
+            use! conn = HikeRepoDb.openConnection connStr
 
             use cmd = conn.CreateCommand()
             cmd.CommandText <-
