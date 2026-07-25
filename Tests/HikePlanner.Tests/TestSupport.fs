@@ -13,7 +13,7 @@ open Program
 open HikePlanner.Handlers.Handlers
 
 type TestContext = {
-    DbPath: string
+    KeepAliveConnection: System.Data.Common.DbConnection
     App: WebApplication
     Client: HttpClient
 }
@@ -23,12 +23,11 @@ with
             this.App.StopAsync().GetAwaiter().GetResult()
             this.Client.Dispose()
             this.App.DisposeAsync().AsTask().GetAwaiter().GetResult()
-            if IO.File.Exists this.DbPath then
-                IO.File.Delete this.DbPath
+            this.KeepAliveConnection.Dispose()
 
 module TestSupport =
     open System.Data.Common
-    open Microsoft.Data.Sqlite
+    open Nelknet.LibSQL.Data
 
     let private testUser =
         ClaimsPrincipal(
@@ -61,11 +60,12 @@ module TestSupport =
 
     let buildTestContext () =
         task {
-            let connectionString = sprintf "Data Source=:memory:"
+            let dbName = sprintf "trailblazer-tests-%s" (Guid.NewGuid().ToString("N"))
+            let connectionString = sprintf "Data Source=file:%s?mode=memory&cache=shared" dbName
 
-            use initConn = new SqliteConnection(connectionString)
-            do! initConn.OpenAsync()
-            seedDatabase initConn
+            let keepAliveConnection = new LibSQLConnection(connectionString)
+            do! keepAliveConnection.OpenAsync()
+            seedDatabase keepAliveConnection
 
             let builder = WebApplication.CreateBuilder()
             builder.WebHost.UseTestServer() |> ignore
@@ -88,7 +88,7 @@ module TestSupport =
             return {
                 App = app
                 Client = app.GetTestClient()
-                DbPath = ""
+                KeepAliveConnection = keepAliveConnection
             }
         }
 

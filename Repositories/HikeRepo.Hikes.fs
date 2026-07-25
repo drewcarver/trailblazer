@@ -23,13 +23,22 @@ module HikeRepoHikes =
 
             let hikeDetails = toHikeJson trail startDate campPoints
 
-            use cmd = conn.CreateCommand()
-            cmd.CommandText <- "INSERT INTO hike (details) VALUES ($details); SELECT last_insert_rowid();"
-            cmd.Parameters.AddWithValue("$details", hikeDetails) |> ignore
+            use insertCmd = conn.CreateCommand()
+            insertCmd.CommandText <- "INSERT INTO hike (details) VALUES ($details);"
+            insertCmd.Parameters.AddWithValue("$details", hikeDetails) |> ignore
+
+            use idCmd = conn.CreateCommand()
+            idCmd.CommandText <- "SELECT last_insert_rowid();"
 
             try
-                let id = cmd.ExecuteScalar()
-                return! App.succeed id
+                insertCmd.ExecuteNonQuery() |> ignore
+                let idObj = idCmd.ExecuteScalar()
+                let id = HikeRepoDb.toInt64 idObj
+
+                if id < 0L then
+                    return! App.fail (DatabaseError "Error saving hike: failed to retrieve inserted id.")
+                else
+                    return! App.succeed id
             with ex ->
                 return! App.fail (DatabaseError (sprintf "Error saving hike: %s" ex.Message))
         }
