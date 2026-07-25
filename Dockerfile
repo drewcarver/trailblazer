@@ -10,6 +10,11 @@ RUN dotnet publish -c Release -o /app/publish --no-restore
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
+ENV ASPNETCORE_URLS="http://+:80;https://+:443"
+
+EXPOSE 80
+EXPOSE 443
+
 COPY --from=build /app/publish .
 
 ENTRYPOINT ["dotnet", "HikePlanner.dll"]

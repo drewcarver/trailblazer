@@ -13,6 +13,8 @@ obj/
 .vs/
 .vscode/
 .git/
+.env
+docker-run.ps1
 Bruno/
 docs/
 LoadTrail/
