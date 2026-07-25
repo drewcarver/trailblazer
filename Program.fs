@@ -87,6 +87,10 @@ let main _ =
 
     let app = builder.Build()
 
+    let forwardedHeadersOptions = ForwardedHeadersOptions()
+    forwardedHeadersOptions.ForwardedHeaders <- Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor ||| Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+    app.UseForwardedHeaders forwardedHeadersOptions |> ignore
+
     let provider = FileExtensionContentTypeProvider()
     provider.Mappings.["._hs"] <- "text/hyperscript"
     let staticFileOptions = StaticFileOptions(ContentTypeProvider = provider)
