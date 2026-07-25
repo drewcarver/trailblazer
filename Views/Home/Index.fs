@@ -1,10 +1,13 @@
 ﻿module HikePlanner.Views.Home
 
+open System.Security.Claims
 open Giraffe.ViewEngine
 open Giraffe
 open MasterLayout
+open HikePlanner.Core
+open HikePlanner.Infrastructure
 
-let indexView =
+let indexView userProfile =
     [
         main [ _class "w-full px-1" ] [
             div [ _class "mb-16" ] [
@@ -28,7 +31,21 @@ let indexView =
                 ]
             ]
         ]
-    ] |> XmlNodeList |> withMasterLayout None 
+    ] |> XmlNodeList |> withMasterLayout userProfile
 
-let homeHandler: HttpHandler =
-    htmlView indexView
+let homeHandler : TrailblazerEndpoint<_> =
+    app {
+        let! user = App.asks (fun env -> env.Context.User)
+        let findClaim claimType =
+            user.FindFirst(claimType: string)
+            |> Option.ofObj
+            |> Option.map (fun claim -> claim.Value)
+        let userProfileNotFoundError = NotFound "User profile is missing required claims."
+
+        let! name = findClaim ClaimTypes.Name |> App.ofOption userProfileNotFoundError
+        let! email = findClaim ClaimTypes.Email |> App.ofOption userProfileNotFoundError
+        let picture = findClaim "urn:google:picture" 
+
+        return indexView (Some { Name = name; Picture = picture; Email = email }) |> htmlView
+    } 
+    |> App.mapError (fun _ -> indexView None |> htmlView)

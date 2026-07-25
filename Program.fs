@@ -54,7 +54,7 @@ let requireLogin : HttpHandler =
 let endpoints env = 
     [
         GET [
-            route "/" homeHandler
+            route "/" (withAppHandler env homeHandler)
             route "/login" loginHandler
             route "/logout" logoutHandler
             route "/account" (requireLogin >=> withAppHandler env accountHandler)

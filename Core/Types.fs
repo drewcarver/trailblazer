@@ -14,8 +14,8 @@ type AppEnv = {
     ConnectionString: ConnectionString
 }
 
-type EnvironmentWithContext<'env> = {
-    Environment: 'env
+type EnvironmentWithContext = {
+    Environment: AppEnv
     Context: HttpContext
 }
 

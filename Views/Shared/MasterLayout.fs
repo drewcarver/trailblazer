@@ -79,12 +79,21 @@ let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent
         body [ attr "hx-boost" "true"; _class "font-mono" ] [
             nav [ _class "my-2 mx-1 border-2 rounded-md border-black bg-white" ] [
                 div [ _class "items-center px-4 py-3 flex justify-between" ] [
-                    span [ _class "text-2xl font-bold" ] [ str "[TB] Trailblazer" ]
+                    a [ _href "/"; _class "text-2xl font-bold" ] [ str "[TB] Trailblazer" ]
                     div [ _class "flex items-center gap-6 text-lg" ] [
-                        a [ _href "#"; _class "tracking-tight text-[1.35rem] hover:underline" ] [ str "Find Trails" ]
-                        a [ _href "/hikes"; _class "tracking-tight text-[1.35rem] hover:underline" ] [ str "My Hikes" ]
-                        a [ _href "/hikes/create"; _class "tracking-tight text-[1.35rem] hover:underline" ] [ str "Create Hike" ]
-                        a [ _href "/login"; attr "hx-boost" "false"; _class "tracking-tight text-[1.35rem] hover:bg-black hover:text-white transition-all" ] [ str "[ Log In ]" ]
+                        match userProfile with
+                        | Some _ ->
+                            div [ _class "flex items-center gap-3" ] [
+                                match picture with
+                                | Some url ->
+                                    img [ _src url; _class "w-8 h-8 rounded-full" ]
+                                | None -> 
+                                    span [ _class "w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm" ] [ str displayName.[0..0] ]
+                                span [ _class "tracking-tight text-[1.35rem]" ] [ str displayName ]
+                                a [ _href "/logout"; attr "hx-boost" "false"; _class "tracking-tight text-[1.35rem] hover:bg-black hover:text-white transition-all" ] [ str "[ Log Out ]" ]
+                            ]
+                        | None ->
+                            a [ _href "/login"; attr "hx-boost" "false"; _class "tracking-tight text-[1.35rem] hover:bg-black hover:text-white transition-all" ] [ str "[ Log In ]" ]
                     ]
                 ]
             ]    

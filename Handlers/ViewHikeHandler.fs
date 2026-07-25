@@ -8,7 +8,7 @@ open HikePlanner.Repositories.HikeRepoTrailPoints
 open HikePlanner.Views.Hikes.CreateHike
 
 module ViewHikeHandler =
-    let viewHikeHandler hikeId : TrailblazerEndpoint<_> =
+    let viewHikeHandler hikeId =
         app {
             let! userProfile = Common.getUserProfile |> App.ofAppResult
             let! hike = getHikeById userProfile.Email hikeId

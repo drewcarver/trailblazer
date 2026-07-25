@@ -32,11 +32,11 @@ module App =
                 return Error err
             })
 
-    let ofOption (err: 'err) (result: Option<'a>) =
+    let ofOption (err: 'err) (option: Option<'a>) =
         App(fun _ ->
             task {
                 return
-                    match result with
+                    match option with
                     | Some x -> Ok x
                     | None -> Error err
             })

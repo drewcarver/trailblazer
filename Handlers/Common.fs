@@ -29,7 +29,7 @@ module Common =
         else
             Ok { form with HikeName = normalizedName; Invitees = normalizedInvitees }
 
-    let getUserProfile<'env> : App<EnvironmentWithContext<'env>, TrailblazerError, Result<UserProfile, TrailblazerError>> =
+    let getUserProfile<'env> : App<_, TrailblazerError, Result<UserProfile, TrailblazerError>> =
         App.asks (fun env ->
             let findClaim claimType =
                 env.Context.User.FindFirst(claimType: string)
