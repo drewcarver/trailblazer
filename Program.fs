@@ -14,6 +14,7 @@ open HikePlanner.Infrastructure
 open HikePlanner.Core
 open HikePlanner.Handlers.Handlers
 open Microsoft.AspNetCore.StaticFiles
+open System.Threading.Tasks
 
 let private resolveConnectionString connectionString authToken =
     match connectionString, authToken with
@@ -80,6 +81,12 @@ let main _ =
             options.ClientId <- builder.Configuration.["Google:ClientId"]
             options.ClientSecret <- builder.Configuration.["Google:ClientSecret"]
             options.ClaimActions.MapJsonKey("urn:google:picture", "picture")
+
+            options.Events.OnRedirectToAuthorizationEndpoint <- fun context ->
+                if context.RedirectUri.StartsWith("http://", StringComparison.OrdinalIgnoreCase) then
+                    context.RedirectUri <- context.RedirectUri.Replace("http://", "https://", StringComparison.OrdinalIgnoreCase)
+                context.Response.Redirect context.RedirectUri
+                Task.CompletedTask
         )
         |> ignore
 
