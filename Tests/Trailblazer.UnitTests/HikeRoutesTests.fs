@@ -10,7 +10,7 @@ module HikeRoutesTests =
     [<Fact>]
     let ``GET hikes create returns page with create title`` () =
         task {
-            use! testContext = TestSupport.buildTestContext()
+            use! testContext = TestSupport.buildTestContext TestSupport.testUser
 
             let! response = testContext.Client.GetAsync("/hikes/create")
             let! content = response.Content.ReadAsStringAsync()
@@ -22,7 +22,7 @@ module HikeRoutesTests =
     [<Fact>]
     let ``GET hikes lists saved hikes`` () =
         task {
-            use! testContext = TestSupport.buildTestContext()
+            use! testContext = TestSupport.buildTestContext TestSupport.testUser
 
             let formToSave: SaveHikeForm = {
                 HikeName = "Mossy Peak"
@@ -44,7 +44,7 @@ module HikeRoutesTests =
     [<Fact>]
     let ``GET hikes by id shows edit page`` () =
         task {
-            use! testContext = TestSupport.buildTestContext()
+            use! testContext = TestSupport.buildTestContext TestSupport.testUser
 
             let formToSave: SaveHikeForm = {
                 HikeName = "Mossy Peak"
@@ -68,7 +68,7 @@ module HikeRoutesTests =
     [<Fact>]
     let ``GET hikes by unknown id shows edit page with error`` () =
         task {
-            use! testContext = TestSupport.buildTestContext()
+            use! testContext = TestSupport.buildTestContext TestSupport.testUser
 
             let! response = testContext.Client.GetAsync("/hikes/999")
             let! content = response.Content.ReadAsStringAsync()
@@ -105,8 +105,8 @@ module HikeRoutesTests =
                     )
                 )
 
-            use! ownerContext = TestSupport.buildTestContextWithConnectionString sharedConnectionString (Some ownerUser)
-            use! otherContext = TestSupport.buildTestContextWithConnectionString sharedConnectionString (Some otherUser)
+            use! ownerContext = TestSupport.buildTestContext (Some ownerUser)
+            use! otherContext = TestSupport.buildTestContext (Some otherUser)
 
             let formToSave: SaveHikeForm = {
                 HikeName = "Mossy Peak"

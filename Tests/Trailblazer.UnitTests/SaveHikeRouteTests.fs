@@ -9,7 +9,7 @@ module SaveHikeRouteTests =
     [<Fact>]
     let ``POST hikes saves hike and returns HTMX headers`` () =
         task {
-            use! testContext = TestSupport.buildTestContext()
+            use! testContext = TestSupport.buildTestContext TestSupport.testUser
 
             let formToSave: SaveHikeForm = {
                 HikeName = "Mossy Peak"
@@ -29,7 +29,7 @@ module SaveHikeRouteTests =
     [<Fact>]
     let ``POST hikes with blank hike name returns validation message`` () =
         task {
-            use! testContext = TestSupport.buildTestContext()
+            use! testContext = TestSupport.buildTestContext TestSupport.testUser
 
             let invalidForm: SaveHikeForm = {
                 HikeName = "   "
@@ -48,7 +48,7 @@ module SaveHikeRouteTests =
     [<Fact>]
     let ``POST hikes by id updates hike and updated hike appears in hikes table`` () =
         task {
-            use! testContext = TestSupport.buildTestContext()
+            use! testContext = TestSupport.buildTestContext TestSupport.testUser
 
             let originalForm: SaveHikeForm = {
                 HikeName = "Mossy Peak"
