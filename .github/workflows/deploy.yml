@@ -1,4 +1,4 @@
-name: Build and Deploy to Render
+name: Build and Deploy Trailblazer
 
 on:
   push:
@@ -26,13 +26,22 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore Dependencies
-        run: dotnet restore
+        run: dotnet restore ./Tests/HikePlanner.Tests/HikePlanner.Tests.fsproj
 
       - name: Build
         run: dotnet build ./Tests/HikePlanner.Tests/HikePlanner.Tests.fsproj --no-restore
 
       - name: Run Tests
-        run: dotnet test ./Tests/HikePlanner.Tests/HikePlanner.Tests.fsproj --no-build --verbosity normal
+        run: dotnet test ./Tests/HikePlanner.Tests/HikePlanner.Tests.fsproj --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v3
+        if: always() 
+        with:
+          name: .NET Test Results
+          path: "**/test-results.trx"
+          reporter: dotnet-trx
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   build-and-deploy:
     runs-on: ubuntu-latest
