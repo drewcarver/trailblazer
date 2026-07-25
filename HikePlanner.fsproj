@@ -45,6 +45,7 @@
     <PackageReference Include="Giraffe" Version="8.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.10" />
     <PackageReference Include="Nelknet.LibSQL.Data" Version="0.2.11" />
+    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.12" />
   </ItemGroup>
 
 </Project>
