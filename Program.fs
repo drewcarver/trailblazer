@@ -92,10 +92,10 @@ let main _ =
     let staticFileOptions = StaticFileOptions(ContentTypeProvider = provider)
     app.UseStaticFiles staticFileOptions |> ignore
 
-    let authToken = builder.Configuration.["Turso:AuthToken"] |> Option.ofObj 
+    let authToken = builder.Configuration.["Turso__AuthToken"] |> Option.ofObj 
 
     let env = {
-        ConnectionString = ConnectionString (resolveConnectionString app.Configuration.["Turso:ConnectionString"] authToken)
+        ConnectionString = ConnectionString (resolveConnectionString app.Configuration.["Turso__ConnectionString"] authToken)
     }
 
     app.UseHttpsRedirection()
