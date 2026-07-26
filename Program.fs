@@ -7,7 +7,6 @@ open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
-open HikePlanner.Views.Home
 open Giraffe
 open Giraffe.EndpointRouting
 open HikePlanner.Infrastructure
@@ -59,7 +58,7 @@ let endpoints env =
             route "/logout" logoutHandler
             route "/account" (requireLogin >=> withAppHandler env accountHandler)
             route "/hikes/create" (requireLogin >=> withAppHandler env createHikeHandler)
-            route "/hikes" (requireLogin >=> withAppHandler env listHikesHandler)
+            route "/hikes" (requireLogin >=> withAppHandler env listHikesViewHandler)
             routef "/hikes/%d:id" (fun id -> requireLogin >=> withAppHandler env (viewHikeHandler id))
         ]
         POST [

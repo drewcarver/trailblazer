@@ -33,19 +33,3 @@ let indexView userProfile =
         ]
     ] |> XmlNodeList |> withMasterLayout userProfile
 
-let homeHandler : TrailblazerEndpoint<_> =
-    app {
-        let! user = App.asks (fun env -> env.Context.User)
-        let findClaim claimType =
-            user.FindFirst(claimType: string)
-            |> Option.ofObj
-            |> Option.map (fun claim -> claim.Value)
-        let userProfileNotFoundError = NotFound "User profile is missing required claims."
-
-        let! name = findClaim ClaimTypes.Name |> App.ofOption userProfileNotFoundError
-        let! email = findClaim ClaimTypes.Email |> App.ofOption userProfileNotFoundError
-        let picture = findClaim "urn:google:picture" 
-
-        return indexView (Some { Name = name; Picture = picture; Email = email }) |> htmlView
-    } 
-    |> App.mapError (fun _ -> indexView None |> htmlView)

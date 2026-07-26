@@ -3,9 +3,10 @@ namespace HikePlanner.Handlers
 module Handlers =
     type SaveHikeForm = Common.SaveHikeForm
 
-    let getUserProfile<'env> = Common.getUserProfile<'env>
+    let homeHandler = HomeHandler.homeHandler
     let accountHandler = AccountHandler.accountHandler
     let listHikesHandler = ListHikesHandler.listHikesHandler
+    let listHikesViewHandler = ListHikesViewHandler.listHikesViewHandler
     let createHikeHandler = CreateHikeHandler.createHikeHandler
     let saveHikeHandler = SaveHikeHandler.saveHikeHandler
     let updateHikeHandler = SaveHikeHandler.updateHikeHandler

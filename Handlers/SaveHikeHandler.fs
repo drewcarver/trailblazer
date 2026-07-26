@@ -16,13 +16,13 @@ module SaveHikeHandler =
             |> Result.mapError (fun _ -> FormValidationError ("Invalid camp point: " + campPoint))
             |> App.ofResult)
 
-    let saveHikeHandler : TrailblazerEndpoint<_> =
+    let saveHikeHandler : TrailblazerEndpoint =
         app {
             let! ctx = App.asks (fun env -> env.Context)
 
             let! form: Common.SaveHikeForm = getFormHelper ctx
             let! validatedForm = Common.validateSaveHikeForm form |> App.ofResult
-            let! userProfile = Common.getUserProfile |> App.ofAppResult
+            let! userProfile = Common.getUserProfile 
 
             let! campPoints = parseCampPoints form
 
@@ -37,13 +37,13 @@ module SaveHikeHandler =
         }
         |> App.mapError (fun error -> createHikeView None [] (Error error) Create None |> htmlView)
 
-    let updateHikeHandler hikeId : TrailblazerEndpoint<_> =
+    let updateHikeHandler hikeId : TrailblazerEndpoint =
         app {
             let! ctx = App.asks (fun env -> env.Context)
 
             let! form: Common.SaveHikeForm = getFormHelper ctx
             let! validatedForm = Common.validateSaveHikeForm form |> App.ofResult
-            let! userProfile = Common.getUserProfile |> App.ofAppResult
+            let! userProfile = Common.getUserProfile 
 
             let! campPoints = parseCampPoints form
 

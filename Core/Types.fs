@@ -24,6 +24,7 @@ type Required =
     | Optional
 
 type UserProfile = {
+    Id: string
     Email: string
     Name: string
     Picture: string option
@@ -42,4 +43,4 @@ type User = {
     Friends   : Friend list
 }
 
-type TrailblazerEndpoint<'env> = App<'env, HttpHandler, HttpHandler>
+type TrailblazerEndpoint = App<EnvironmentWithContext, HttpHandler, HttpHandler>

@@ -6,9 +6,9 @@ open HikePlanner.Infrastructure
 open HikePlanner.Repositories.HikeRepoUsers
 
 module AccountHandler =
-    let accountHandler : TrailblazerEndpoint<_> =
+    let accountHandler : TrailblazerEndpoint =
         app {
-            let! userProfile = Common.getUserProfile |> App.ofAppResult
+            let! userProfile = Common.getUserProfile 
 
             let! existingFriends =
                 getUser userProfile.Email

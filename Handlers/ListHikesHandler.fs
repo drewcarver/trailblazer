@@ -7,9 +7,9 @@ open HikePlanner.Repositories.HikeRepoHikes
 open HikePlanner.Views.Hikes.ListHikes
 
 module ListHikesHandler =
-    let listHikesHandler: TrailblazerEndpoint<_> =
+    let listHikesHandler: TrailblazerEndpoint =
         app {
-            let! userProfile = Common.getUserProfile |> App.ofAppResult
+            let! userProfile = Common.getUserProfile 
             let! hikes = getHikes userProfile.Email
 
             return htmlView (listHikes (Some userProfile) (Ok hikes))

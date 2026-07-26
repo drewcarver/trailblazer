@@ -41,3 +41,44 @@ let trailblazerTable title header rows  =
           tbody [ _class "divide-y divide-black border-x border-b border-black" ] rows
         ]
   ]
+
+let private skeletonHeaderCell =
+  th [ _scope "col"; _class "px-4 py-3 border-r border-black w-1/5" ] [
+    div [ _class "h-4 w-24 rounded bg-neutral-300 animate-pulse" ] []
+  ]
+
+let private skeletonTableHeader columnCount =
+  thead [] [
+    tr [ _class "border border-black bg-neutral-100" ] [
+      for _ in 1 .. columnCount do
+        skeletonHeaderCell
+    ]
+  ]
+
+let private skeletonTableCell =
+  td [ _class "h-[3rem] px-4 py-3 border-r border-black" ] [
+    div [ _class "h-4 w-full rounded bg-neutral-300 animate-pulse" ] []
+  ]
+
+let private skeletonTableRow columnCount =
+  tr [ _class "hover:bg-neutral-50 transition-colors" ] [
+    for _ in 1 .. columnCount do
+      skeletonTableCell
+  ]
+
+let trailblazerSkeletonTable title columnCount rowCount =
+  div [ _class "w-full overflow-x-auto border border-black rounded-lg bg-white p-4 font-sans selection:bg-neutral-200" ] [
+    div [ _class "flex items-center justify-between mb-2" ] [
+      div [ _class "text-[24px] font-mono tracking-widest text-neutral-500 uppercase mb-2 pl-1" ] [
+        str title
+      ]
+      div [ _class "h-10 w-36 rounded bg-neutral-300 animate-pulse" ] []
+    ]
+    table [ _class "w-full min-w-[600px] border-collapse text-left text-sm text-neutral-900 font-mono" ] [
+      skeletonTableHeader columnCount
+      tbody [ _class "divide-y divide-black border-x border-b border-black" ] [
+        for _ in 1 .. rowCount do
+          skeletonTableRow columnCount
+      ]
+    ]
+  ]

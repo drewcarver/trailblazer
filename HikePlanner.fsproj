@@ -31,9 +31,12 @@
     <Compile Include="Views/Hikes/ListHikes.fs" />
     <Compile Include="Views/Hikes/CreateHike.fs" />
     <Compile Include="Views/Hikes/HikeDetail.fs" />
+    <Compile Include="Views/Hikes/ListHikesView.fs" />
     <Compile Include="Handlers/Common.fs" />
+    <Compile Include="Handlers/HomeHandler.fs" />
     <Compile Include="Handlers/AccountHandler.fs" />
     <Compile Include="Handlers/ListHikesHandler.fs" />
+    <Compile Include="Handlers/ListHikesViewHandler.fs" />
     <Compile Include="Handlers/CreateHikeHandler.fs" />
     <Compile Include="Handlers/SaveHikeHandler.fs" />
     <Compile Include="Handlers/ViewHikeHandler.fs" />

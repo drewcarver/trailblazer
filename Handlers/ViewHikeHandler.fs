@@ -10,7 +10,7 @@ open HikePlanner.Views.Hikes.CreateHike
 module ViewHikeHandler =
     let viewHikeHandler hikeId =
         app {
-            let! userProfile = Common.getUserProfile |> App.ofAppResult
+            let! userProfile = Common.getUserProfile 
             let! hike = getHikeById userProfile.Email hikeId
             let! trailPointsOfInterest = getTrailPointsOfInterest "AppalachianTrail"
 

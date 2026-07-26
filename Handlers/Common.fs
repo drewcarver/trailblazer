@@ -29,20 +29,18 @@ module Common =
         else
             Ok { form with HikeName = normalizedName; Invitees = normalizedInvitees }
 
-    let getUserProfile<'env> : App<_, TrailblazerError, Result<UserProfile, TrailblazerError>> =
-        App.asks (fun env ->
+    let getUserProfile =
+        app {
+            let! user = App.asks (fun env -> env.Context.User)
             let findClaim claimType =
-                env.Context.User.FindFirst(claimType: string)
+                user.FindFirst(claimType: string)
                 |> Option.ofObj
                 |> Option.map (fun claim -> claim.Value)
+            let userProfileNotFoundError = NotFound "User profile is missing required claims."
 
-            let name = findClaim ClaimTypes.Name
-            let email = findClaim ClaimTypes.Email
-            let picture = findClaim "urn:google:picture"
+            let! name = findClaim ClaimTypes.Name |> App.ofOption userProfileNotFoundError
+            let! email = findClaim ClaimTypes.Email |> App.ofOption userProfileNotFoundError
+            let picture = findClaim "urn:google:picture" 
 
-            match name, email, picture with
-            | Some profileName, Some profileEmail, profilePicture ->
-                Ok { Name = profileName; Picture = profilePicture; Email = profileEmail }
-            | _ ->
-                Error (FormValidationError "User profile is missing required claims.")
-        )
+            return { Id = email; Name = name; Picture = picture; Email = email }
+        }
