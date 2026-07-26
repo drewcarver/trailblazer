@@ -14,6 +14,7 @@ open HikePlanner.Core
 open HikePlanner.Handlers.Handlers
 open Microsoft.AspNetCore.StaticFiles
 open System.Threading.Tasks
+open System.IO
 
 let private resolveConnectionString connectionString authToken =
     match connectionString, authToken with
@@ -70,7 +71,10 @@ let endpoints env =
 
 [<EntryPoint>]
 let main _ =
-    let builder = WebApplication.CreateBuilder()
+    let options = WebApplicationOptions(
+        ContentRootPath = Directory.GetCurrentDirectory() 
+    )
+    let builder = WebApplication.CreateBuilder options
 
     builder.Services
         .AddAuthentication(fun options ->
