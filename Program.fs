@@ -21,7 +21,7 @@ let private resolveConnectionString connectionString authToken =
         | connStr, Some authToken -> "Data Source=" + connStr + ";Auth Token=" + authToken
         | connStr, None -> "Data Source=" + connStr
 
-let withAppHandler (appEnv: 'env) app next ctx =  
+let withAppHandler appEnv app next ctx =  
         task {
             let environment = { Environment = appEnv; Context = ctx}
             let! result = App.run environment app

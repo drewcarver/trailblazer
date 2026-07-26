@@ -84,6 +84,7 @@ let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent
                         match userProfile with
                         | Some _ ->
                             div [ _class "flex items-center gap-3" ] [
+                                a [ _href "/hikes"; _class "tracking-tight text-[1.35rem] hover:bg-black hover:text-white transition-all" ] [ str "My Hikes" ]
                                 match picture with
                                 | Some url ->
                                     img [ _src url; _class "w-8 h-8 rounded-full" ]
