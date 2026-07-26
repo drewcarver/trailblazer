@@ -14,7 +14,7 @@ type ColumnValue =
     | StringValue of string
     | XmlNodeValue of XmlNode
 let trailblazerTableColumn (value: ColumnValue) =
-    td [ _class "px-4 py-3 border-r border-black font-sans font-medium truncate max-w-[200px]" ] [ match value with | StringValue s -> str s | XmlNodeValue n -> n ]
+    td [ _class "h-[3rem] px-4 py-3 border-r border-black font-sans font-medium truncate max-w-[200px]" ] [ match value with | StringValue s -> str s | XmlNodeValue n -> n ]
 
 let trailblazerTableRow cols = 
   tr [ _class "hover:bg-neutral-50 transition-colors" ] cols

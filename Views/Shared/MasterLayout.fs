@@ -61,6 +61,25 @@ let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent
                     background-color: var(--beige);
                 }
 
+                #page-loading-overlay {
+                    position: fixed;
+                    inset: 0;
+                    z-index: 50;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(0, 0, 0, 0.25);
+                    backdrop-filter: blur(2px);
+                    opacity: 0;
+                    pointer-events: none;
+                    transition: opacity 150ms ease-in-out;
+                }
+
+                #page-loading-overlay.htmx-request {
+                    opacity: 1;
+                    pointer-events: auto;
+                }
+
                 .hero-bg {
                     background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)),
                                       url(https://picsum.photos/id/1015/2000/1200);
@@ -76,7 +95,13 @@ let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent
                 """
             ]
         ]
-        body [ attr "hx-boost" "true"; _class "font-mono" ] [
+        body [ attr "hx-boost" "true"; attr "hx-indicator" "#page-loading-overlay"; _class "font-mono" ] [
+            div [ _id "page-loading-overlay"; _class "htmx-indicator"; attr "role" "status"; attr "aria-live" "polite"; attr "aria-label" "Loading next page" ] [
+                div [ _class "flex flex-col items-center gap-4 rounded-2xl border-2 border-black bg-white px-8 py-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" ] [
+                    div [ _class "h-12 w-12 animate-spin rounded-full border-4 border-black/20 border-t-black" ] []
+                    span [ _class "text-sm font-bold uppercase tracking-[0.2em]" ] [ str "Loading" ]
+                ]
+            ]
             nav [ _class "my-2 mx-1 border-2 rounded-md border-black bg-white" ] [
                 div [ _class "items-center px-4 py-3 flex justify-between" ] [
                     a [ _href "/"; _class "text-2xl font-bold" ] [ str "[TB] Trailblazer" ]

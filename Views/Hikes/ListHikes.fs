@@ -6,13 +6,14 @@ open HikePlanner.Repositories.HikeRepoTypes
 open HikePlanner.Views.Components.Table
 open HikePlanner.Core
 open HikePlanner.Core
+open HikePlanner.Core.Utils
 
 let myHikesTable = 
   trailblazerTable 
     "My Hikes" 
     (trailblazerTableHeader ["Hike Name"; "Start Date"; "Camp Locations"; "Action"]) 
 
-let myHikeRow (hike: SavedHike) =
+let savedHikeRow (hike: SavedHike) =
     trailblazerTableRow [
         trailblazerTableColumn (StringValue hike.Trail)
         trailblazerTableColumn (StringValue (hike.StartDate.ToString "yyyy-MM-dd"))
@@ -27,7 +28,18 @@ let myHikeRow (hike: SavedHike) =
         ]
     ]
 
-let hikingTable hikes = myHikesTable (hikes |> List.map myHikeRow)
+let emptyHikeRow =
+    trailblazerTableRow [
+        trailblazerTableColumn (StringValue "")
+        trailblazerTableColumn (StringValue "")
+        trailblazerTableColumn (StringValue "")
+        trailblazerTableColumn (StringValue "")
+    ]
+
+let hikingTable hikes = 
+    let populatedHikes = hikes |> List.map savedHikeRow
+    populatedHikes @ List.init (10 - populatedHikes.Length) (always emptyHikeRow)
+        |> myHikesTable 
 
 let errorOcurredTable error = 
     myHikesTable [
@@ -41,9 +53,7 @@ let noHikesAvailableTable =
 
 let listHikes userProfile hikesResult = 
     let renderTable hikes = 
-        div [ _class "p-4" ] [
-            hikingTable hikes
-        ]
+        hikingTable hikes
 
     match hikesResult with 
     | Ok hikes  -> renderTable hikes
