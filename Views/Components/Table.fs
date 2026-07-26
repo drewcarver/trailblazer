@@ -66,8 +66,8 @@ let private skeletonTableRow columnCount =
       skeletonTableCell
   ]
 
-let trailblazerSkeletonTable title columnCount rowCount =
-  div [ _class "w-full overflow-x-auto border border-black rounded-lg bg-white p-4 font-sans selection:bg-neutral-200" ] [
+let trailblazerSkeletonTable title columnCount rowCount attrs =
+  div ( [ _class "htmx-indicator w-full overflow-x-auto border border-black rounded-lg bg-white p-4 font-sans selection:bg-neutral-200" ] @ attrs) [
     div [ _class "flex items-center justify-between mb-2" ] [
       div [ _class "text-[24px] font-mono tracking-widest text-neutral-500 uppercase mb-2 pl-1" ] [
         str title

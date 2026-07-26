@@ -59,4 +59,3 @@ let listHikes userProfile hikesResult =
     | Ok hikes  -> renderTable hikes
     | Error (NotFound _) -> renderTable []
     | Error (DatabaseError e | FormValidationError e) -> errorOcurredTable e
-    |> XmlNodeBody |> withMasterLayout userProfile
