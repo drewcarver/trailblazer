@@ -75,11 +75,11 @@ module SaveHikeRouteTests =
             let! editResponse = testContext.Client.PostAsync(sprintf "/hikes/%s" createdHikeId, editForm)
 
             Assert.True(editResponse.StatusCode = HttpStatusCode.NoContent)
-            let redirectLocation = editResponse.Headers.GetValues("HX-Location") |> Seq.head
+            let redirectLocation = editResponse.Headers.GetValues "HX-Location" |> Seq.head
             Assert.Equal("/hikes", redirectLocation)
-            Assert.Equal(createdHikeId, editResponse.Headers.GetValues("x-hike-id") |> Seq.head)
+            Assert.Equal(createdHikeId, editResponse.Headers.GetValues "x-hike-id" |> Seq.head)
 
-            let! listResponse = testContext.Client.GetAsync(redirectLocation)
+            let! listResponse = testContext.Client.GetAsync "/hikes/list"
             let! listContent = listResponse.Content.ReadAsStringAsync()
 
             Assert.Equal(HttpStatusCode.OK, listResponse.StatusCode)
