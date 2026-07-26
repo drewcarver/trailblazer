@@ -5,7 +5,7 @@ open HikePlanner.Views.Components.Table
 open Giraffe.ViewEngine
 
 let listHikesView userProfile =
-    let table = div[] [
+    let table = main [ _class "m-1" ] [
         div [ 
             _id "hikes-table-container" 
             attr "hx-get" "/hikes/list" 
