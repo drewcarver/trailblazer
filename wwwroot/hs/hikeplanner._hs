@@ -1,14 +1,3 @@
-init 
-    if $campCounter is undefined 
-        set matchingSelects to <select[data-day] /> 
-        set days to []
-        for select in matchingSelects 
-            add select's @data-day as Int to days 
-        end
-        call Math.max.apply(null, days)
-        set $campCounter to the result 
-end
-
 def getPointSelect(day)
     return #{"camp-point-select-day-" + day}
 end
@@ -57,14 +46,14 @@ def getStartAndEndMilesFromSelect(selectElement)
     return {startMile: startMile, endMile: endMile, dayOfSelect: dayOfSelect, nextDay: nextDay}
 end
 
-def refreshMileBoundaries()
+def refreshMileBoundaries(currentDay)
     for select in <select[name="campPoints"]/>
         set dayOfSelect to select's @data-day as Int
 
         if dayOfSelect is 1 then
             set endMile to getPointSelect(dayOfSelect + 1).selectedOptions.dataset.mile as Float
             call filterByMileRange(select, 0, endMile)
-        else if dayOfSelect is $campCounter then
+        else if dayOfSelect is currentDay then
             set startMile to getPointSelect(dayOfSelect - 1).selectedOptions.dataset.mile as Float
             call filterByMileRange(select, startMile, Infinity)
         else
@@ -75,39 +64,32 @@ def refreshMileBoundaries()
     end
 end
 
-behavior ListenForSelectChange()
-    on change
-        if target matches <select /> and target's @name is "campPoints" then
-            call refreshMileBoundaries()
-        end
-    end
-end
-
 behavior AddPoint()
     on click
-        log "Adding a new point. Current campCounter: " + $campCounter
-        set currentSelect to the closest <div/> to getPointSelect($campCounter)
+        log "Adding a new point. Current campCounter: " + ^campCounter
+        set currentSelect to the closest <div/> to getPointSelect(^campCounter)
 
         set clone to currentSelect.cloneNode(true)
-        increment $campCounter
+        increment ^campCounter
 
-        set @id of <select/> in clone to "camp-point-select-day-" + $campCounter
-        set @data-day of <select/> in clone to $campCounter
-        set @for of <label/> in clone to "camp-point-select-day-" + $campCounter
-        set innerHTML of <label/> in clone to "Day " + $campCounter
+        set @id of <select/> in clone to "camp-point-select-day-" + ^campCounter
+        set @data-day of <select/> in clone to ^campCounter
+        set @for of <label/> in clone to "camp-point-select-day-" + ^campCounter
+        set innerHTML of <label/> in clone to "Day " + ^campCounter
 
         put clone after currentSelect 
-        call refreshMileBoundaries()
+        call refreshMileBoundaries(^campCounter)
     end
 end
 
 behavior SelectPoint()
     on change
+        log "Select changed. Current campCounter: " + ^campCounter
         set result to getStartAndEndMilesFromSelect(target)
         if isValidNumber(result.startMile) and isValidNumber(result.endMile) then
             call drawPath(result.startMile, result.endMile, result.dayOfSelect)
         end
-        call refreshMileBoundaries()
+        call refreshMileBoundaries(^campCounter)
 
         if areAllPointsSelected() then
             remove @disabled from #add-point
@@ -119,19 +101,46 @@ end
 
 behavior RemovePoint()
     on click
-        set currentSelect to getPointSelect($campCounter)
+        set currentSelect to getPointSelect(^campCounter)
         set containerDiv to the closest <div/> to currentSelect
         set removedDay to currentSelect's @data-day as Int
         call removeHikeLayer(removedDay)
-        decrement $campCounter
+        decrement ^campCounter
 
         remove containerDiv
     end
-    when $campCounter changes
-        if $campCounter is 2 then
+    when ^campCounter changes
+        if ^campCounter is 2 then
             add @disabled to me
         else
             remove @disabled from me
+        end
+    end
+end
+
+def drawPaths()
+    for select in <select[name="campPoints"]/>
+        set result to getStartAndEndMilesFromSelect(select)
+        if isValidNumber(result.startMile) and isValidNumber(result.endMile) then
+            call drawPath(result.startMile, result.endMile, result.dayOfSelect)
+        end
+    end
+end
+
+behavior InitForm()
+    on load
+        if ^campCounter is undefined 
+            set matchingSelects to <select[data-day] /> 
+            set days to []
+            for select in matchingSelects 
+                add select's @data-day as Int to days 
+            end
+            call Math.max.apply(null, days)
+            set ^campCounter to the result 
+            log "Initialized campCounter to: " + ^campCounter
+
+            wait for 500ms
+            call drawPaths()
         end
     end
 end

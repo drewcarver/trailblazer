@@ -68,7 +68,7 @@ let createHikeView userName (friends: Friend list) (trailPointsOfInterest: Resul
                 h1 [ _class "text-2xl font-mono font-bold mb-4" ] [ str (formHeader mode) ]
                 div [ _class "flex items-center gap-4" ] [
                     form [ _class "font-mono mx-auto transition-[width] duration-500 ease-in-out"; 
-                        attr "_" (sprintf "install ListenForSelectChange");
+                        attr "_" (sprintf "install InitForm");
                         attr "action" (submitPath mode);
                         attr "method" "post";
                         attr "hx-post" (submitPath mode); 
