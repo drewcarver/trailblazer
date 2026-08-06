@@ -25,7 +25,7 @@ function drawPath(startMile, endMile, day) {
         map.removeLayer(hikeLayers.get(day));
     }
 
-    const pathColor = `#${Math.floor(Math.random()*16777215).toString(16)}`; // Random color for each day's path
+    const pathColor = `#${Math.floor(Math.random()*16777215).toString(16)}`; 
 
     try {
         const flattened = turf.flatten(trailGeoJSONData);
@@ -53,14 +53,22 @@ function drawPath(startMile, endMile, day) {
             pathLine = turf.lineString(pathCoordinates);
         }
 
-        hikeLayers.set(day, L.geoJSON(pathLine, {
+        const pathLayer = L.geoJSON(pathLine, {
             style: {
                 color: pathColor,
                 weight: 6,         
                 opacity: 0.9,
                 lineJoin: 'round'
             }
-        }).addTo(map));
+        }).addTo(map);
+
+        pathLayer.bindTooltip(`Day ${day - 1} to ${day}: ${startMile} mi - ${endMile} mi`, {
+            permanent: true,
+            direction: 'center',
+            className: 'trail-tooltip'
+        });
+
+        hikeLayers.set(day, pathLayer);
 
         const combinedBounds = L.latLngBounds();
         for (const layer of hikeLayers.values()) {
@@ -106,7 +114,6 @@ function addMileMarker(miles) {
         const targetPoint = getPointAlongMultiLine(trailGeoJSONData, miles);
         const coords = targetPoint.geometry.coordinates;
         
-        // Correct Leaflet coordinate parsing order [lat, lng]
         const leafletLatLng = [coords[1], coords[0]];
 
         activeMileMarker = L.marker(leafletLatLng).addTo(map);

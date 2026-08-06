@@ -70,3 +70,6 @@ appsettings.Development.json
 # secrets.json
 
 *.db
+*.db-shm
+*.db-wal
+*.md

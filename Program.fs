@@ -16,10 +16,10 @@ open Microsoft.AspNetCore.StaticFiles
 open System.Threading.Tasks
 open System.IO
 
-let private resolveConnectionString connectionString authToken =
-    match connectionString, authToken with
-        | connStr, Some authToken -> "Data Source=" + connStr + ";Auth Token=" + authToken
-        | connStr, None -> "Data Source=" + connStr
+let private resolveConnectionString dbUrl authToken =
+    match dbUrl, authToken with
+        | dbUrl, Some authToken -> "Data Source=" + dbUrl + ";Auth Token=" + authToken
+        | dbUrl, None -> "Data Source=" + dbUrl
 
 let withAppHandler appEnv app next ctx =  
         task {
@@ -107,7 +107,7 @@ let main _ =
     let staticFileOptions = StaticFileOptions(ContentTypeProvider = provider)
     app.UseStaticFiles staticFileOptions |> ignore
 
-    let authToken = app.Configuration.["Turso:AuthToken"] |> Option.ofObj 
+    let authToken = app.Configuration.["Turso:AuthToken"] |> StringUtils.toOption
     let connectionString = app.Configuration.["Turso:ConnectionString"] 
 
     let env = {

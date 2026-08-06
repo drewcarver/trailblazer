@@ -9,6 +9,7 @@
     <Compile Include="Infrastructure/App.fs" />
     <Compile Include="Core/Types.fs" />
     <Compile Include="Core/Utils.fs" />
+    <Compile Include="Core/StringUtils.fs" />
     <Compile Include="Repositories/HikeRepo.Types.fs" />
     <Compile Include="Repositories/HikeRepo.Db.fs" />
     <Compile Include="Repositories/HikeRepo.Users.fs" />

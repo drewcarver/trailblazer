@@ -161,7 +161,8 @@ def process_and_insert(csv_path, db_url, auth_token=None):
 
 if __name__ == "__main__":
     load_dotenv_if_present()
-    raw_db_connection = os.getenv(DB_CONNECTION_ENV)
+    # raw_db_connection = os.getenv(DB_CONNECTION_ENV)
+    raw_db_connection = "file:hikes.db"
     env_auth_token = os.getenv(AUTH_TOKEN_ENV)
     db_connection, auth_token = normalize_connection_settings(raw_db_connection, env_auth_token)
     script_dir = os.path.dirname(os.path.abspath(__file__))
