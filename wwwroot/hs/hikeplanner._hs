@@ -85,6 +85,7 @@ end
 
 behavior AddPoint()
     on click
+        log "Adding a new point. Current campCounter: " + $campCounter
         set currentSelect to the closest <div/> to getPointSelect($campCounter)
 
         set clone to currentSelect.cloneNode(true)

@@ -48,7 +48,7 @@ paket-files/
 ## ==========================================
 # Node / Fable development
 node_modules/
-/artifacts/
+*artifacts/
 
 # Test & Code Coverage
 *.ntvs*

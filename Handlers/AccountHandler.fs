@@ -10,18 +10,33 @@ module AccountHandler =
         app {
             let! userProfile = Common.getUserProfile 
 
-            let! existingFriends =
+            let! existingUser =
                 getUser userProfile.Email
-                |> App.map (fun user -> user.Friends)
+                |> App.map Some
                 |> App.mapResult (function
-                    | Ok friends -> Ok friends
-                    | Error (NotFound _) -> Ok []
+                    | Ok user -> Ok user
+                    | Error (NotFound _) -> Ok None
                     | Error error -> Error error)
+
+            let! picture =
+                match userProfile.Picture with
+                | Some pictureUrl when pictureUrl.StartsWith("data:", System.StringComparison.OrdinalIgnoreCase) ->
+                    App.succeed (Some pictureUrl)
+                | Some pictureUrl ->
+                    Common.tryGetAvatarDataUri pictureUrl
+                    |> App.map (Option.orElseWith (fun () -> existingUser |> Option.bind (fun user -> user.Picture)))
+                | None ->
+                    App.succeed (existingUser |> Option.bind (fun user -> user.Picture))
+
+            let existingFriends =
+                existingUser
+                |> Option.map (fun user -> user.Friends)
+                |> Option.defaultValue []
 
             do!
                 saveUser {
                     Email = userProfile.Email
-                    Picture = userProfile.Picture
+                    Picture = picture
                     Name = userProfile.Name
                     Friends = existingFriends
                 }

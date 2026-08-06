@@ -1,9 +1,14 @@
 namespace Trailblazer.UnitTests
 
 open System
+open System.Security.Claims
+open Microsoft.AspNetCore.Http
+open Nelknet.LibSQL.Data
 open Xunit
 open HikePlanner.Handlers.Common
 open HikePlanner.Core
+open HikePlanner.Infrastructure
+open HikePlanner.Repositories.HikeRepoUsers
 
 module CommonTests =
     [<Fact>]
@@ -54,3 +59,51 @@ module CommonTests =
         | Ok _ -> Assert.Fail("Expected form validation failure.")
         | Error (FormValidationError message) -> Assert.Equal("At least one camp point is required.", message)
         | Error _ -> Assert.Fail("Expected FormValidationError.")
+
+    [<Fact>]
+    let ``getUserProfile prefers stored avatar over Google claim URL`` () =
+        task {
+            let dbName = sprintf "trailblazer-common-tests-%s" (Guid.NewGuid().ToString("N"))
+            let connectionString = sprintf "Data Source=file:%s?mode=memory&cache=shared" dbName
+
+            use keepAliveConnection = new LibSQLConnection(connectionString)
+            do! keepAliveConnection.OpenAsync()
+
+            let storedAvatar = "data:image/png;base64,c3RvcmVkLWF2YXRhcg=="
+            let httpContext = DefaultHttpContext()
+            httpContext.User <-
+                ClaimsPrincipal(
+                    ClaimsIdentity(
+                        [
+                            Claim(ClaimTypes.Name, "Test User")
+                            Claim(ClaimTypes.Email, "test@example.com")
+                            Claim("urn:google:picture", "https://example.com/google-avatar.png")
+                        ],
+                        "Test"
+                    )
+                )
+
+            let env = {
+                Environment = { ConnectionString = ConnectionString connectionString }
+                Context = httpContext
+            }
+
+            let! saveResult =
+                saveUser {
+                    Email = "test@example.com"
+                    Name = "Stored User"
+                    Picture = Some storedAvatar
+                    Friends = []
+                }
+                |> App.run env
+
+            match saveResult with
+            | Error error -> Assert.Fail(sprintf "Expected user save to succeed, got %A" error)
+            | Ok () -> ()
+
+            let! result = getUserProfile |> App.run env
+
+            match result with
+            | Ok profile -> Assert.Equal(Some storedAvatar, profile.Picture)
+            | Error error -> Assert.Fail(sprintf "Expected user profile lookup to succeed, got %A" error)
+        }
