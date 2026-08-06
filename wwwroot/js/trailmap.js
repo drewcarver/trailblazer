@@ -25,7 +25,8 @@ function drawPath(startMile, endMile, day) {
         map.removeLayer(hikeLayers.get(day));
     }
 
-    const pathColor = `#${Math.floor(Math.random()*16777215).toString(16)}`; 
+    const pathColors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"];
+    const pathColor = pathColors[(day - 1) % pathColors.length];
 
     try {
         const flattened = turf.flatten(trailGeoJSONData);
@@ -62,7 +63,7 @@ function drawPath(startMile, endMile, day) {
             }
         }).addTo(map);
 
-        pathLayer.bindTooltip(`Day ${day - 1} to ${day}: ${startMile} mi - ${endMile} mi`, {
+        pathLayer.bindTooltip(`Day ${day - 1} to ${day}: ${endMile - startMile} miles`, {
             permanent: true,
             direction: 'center',
             className: 'trail-tooltip'
