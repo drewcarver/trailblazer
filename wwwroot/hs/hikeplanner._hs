@@ -1,5 +1,12 @@
 init 
-    if $campCounter is undefined set $campCounter to 2 
+    if $campCounter is undefined 
+        set matchingSelects to <select[data-day] /> 
+        set days to []
+        for select in matchingSelects 
+            add select's @data-day as Int to days 
+        end
+        call Math.max.apply(null, days)
+        set $campCounter to the result 
 end
 
 def getPointSelect(day)

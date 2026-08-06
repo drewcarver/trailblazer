@@ -68,47 +68,50 @@ let createHikeView userName (friends: Friend list) (trailPointsOfInterest: Resul
                 h1 [ _class "text-2xl font-mono font-bold mb-4" ] [ str (formHeader mode) ]
                 div [ _class "flex items-center gap-4" ] [
                     form [ _class "font-mono mx-auto transition-[width] duration-500 ease-in-out"; 
-                        attr "_" (sprintf "install ListenForSelectChange on load set $campCounter to %d" totalCampPointDays);
-                        attr "hx-post" (submitPath mode); attr "hx-swap" "outerHTML" ] [
-                        div [ _class "mb-4" ] [
-                            label [ _for "hike-name"; _class "block text-sm font-medium mb-1" ] [ str "Hike Name" ]
-                            input [ 
-                                _type "text"; 
-                                _id "hike-name"; 
-                                _name "hikeName"; 
-                                attr "required" "required"
-                                _value hikeNameValue
-                                _class "peer w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#4A7043]" 
+                        attr "_" (sprintf "install ListenForSelectChange");
+                        attr "action" (submitPath mode);
+                        attr "method" "post";
+                        attr "hx-post" (submitPath mode); 
+                        attr "hx-swap" "outerHTML" ] [
+                            div [ _class "mb-4" ] [
+                                label [ _for "hike-name"; _class "block text-sm font-medium mb-1" ] [ str "Hike Name" ]
+                                input [ 
+                                    _type "text"; 
+                                    _id "hike-name"; 
+                                    _name "hikeName"; 
+                                    attr "required" "required"
+                                    _value hikeNameValue
+                                    _class "peer w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#4A7043]" 
+                                ]
+                                span [ _class "invisible opacity-0 peer-user-invalid:visible peer-user-invalid:opacity-100 transition-all duration-300 ease-in-out block text-xs text-red-500 mt-1" ] [ 
+                                    str "Please enter a value." 
+                                ]
                             ]
-                            span [ _class "invisible opacity-0 peer-user-invalid:visible peer-user-invalid:opacity-100 transition-all duration-300 ease-in-out block text-xs text-red-500 mt-1" ] [ 
-                                str "Please enter a value." 
-                            ]
-                        ]
-                        datePicker
-                            "start-date"
-                            "startDate"
-                            "Start Date"
-                            (match mode with | Create -> Some DateTime.Now | Edit _ -> None)
-                            Required
-                            [ "value", (startDateValue |> Option.defaultValue DateTime.Now).ToString("yyyy-MM-dd") ]
-                        trailblazerAutosuggest "friend-search" "invitees" "Invite Friends" Optional friendOptions [
-                            "placeholder", "Type friend name or email"
-                            "autocomplete", "off"
-                        ]
-                        for day, selectedPoint in campPointValuesByDay |> List.indexed |> List.map (fun (index, value) -> index + 1, value) do
-                            trailblazerSelectWithSelected
-                                (sprintf "camp-point-select-day-%d" day)
-                                "campPoints"
-                                (sprintf "Day %d" day)
+                            datePicker
+                                "start-date"
+                                "startDate"
+                                "Start Date"
+                                (match mode with | Create -> Some DateTime.Now | Edit _ -> None)
                                 Required
-                                pointsOfInterestOptions
-                                selectedPoint
-                                [ "_", "install SelectPoint"; "data-day", string day ]
-                        div [ _class "flex gap-2 mt-4" ] [
-                            trailblazerButton (Some "add-point") "Add Point" "Add Point" "button" ([ "_", "install AddPoint" ] @ if addPointDisabled then [ "disabled", "true" ] else [])
-                            trailblazerButton (Some "remove-point") "Remove Point" "Remove Point" "button" removePointButtonAttrs
-                            trailblazerButton (Some "submit-plan") "Submit Plan" "Submit Plan" "submit" []
-                        ]
+                                [ "value", (startDateValue |> Option.defaultValue DateTime.Now).ToString("yyyy-MM-dd") ]
+                            trailblazerAutosuggest "friend-search" "invitees" "Invite Friends" Optional friendOptions [
+                                "placeholder", "Type friend name or email"
+                                "autocomplete", "off"
+                            ]
+                            for day, selectedPoint in campPointValuesByDay |> List.indexed |> List.map (fun (index, value) -> index + 1, value) do
+                                trailblazerSelectWithSelected
+                                    (sprintf "camp-point-select-day-%d" day)
+                                    "campPoints"
+                                    (sprintf "Day %d" day)
+                                    Required
+                                    pointsOfInterestOptions
+                                    selectedPoint
+                                    [ "_", "install SelectPoint"; "data-day", string day ]
+                            div [ _class "flex gap-2 mt-4" ] [
+                                trailblazerButton (Some "add-point") "Add Point" "Add Point" "button" ([ "_", "install AddPoint" ] @ if addPointDisabled then [ "disabled", "true" ] else [])
+                                trailblazerButton (Some "remove-point") "Remove Point" "Remove Point" "button" removePointButtonAttrs
+                                trailblazerButton (Some "submit-plan") "Submit Plan" "Submit Plan" "submit" []
+                            ]
                     ]
                     div [ _id "map"; _class "w-[60vw] min-w-[300px] h-[400px]"; attr "_" "on load call initializeMap(me)" ] []
                     match trailPointsOfInterest with
