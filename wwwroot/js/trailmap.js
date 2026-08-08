@@ -62,8 +62,9 @@ function drawPath(startMile, endMile, day) {
                 lineJoin: 'round'
             }
         }).addTo(window.$map);
+            const distanceMiles = (endMile - startMile).toFixed(2);
 
-        pathLayer.bindTooltip(`Day ${day - 1} to ${day}: ${endMile - startMile} miles`, {
+            pathLayer.bindTooltip(`Day ${day - 1} to ${day}: ${distanceMiles} miles`, {
             permanent: true,
             direction: 'center',
             className: 'trail-tooltip'

@@ -46,6 +46,8 @@ def getStartAndEndMilesFromSelect(selectElement)
 end
 
 def refreshMileBoundaries(currentDay)
+    set numberOfDays to <select[name="campPoints"]/>'s length
+
     for select in <select[name="campPoints"]/>
         set dayOfSelect to select's @data-day as Int
         set startMile to 0
@@ -56,7 +58,7 @@ def refreshMileBoundaries(currentDay)
             set startMile to previousDaySelect's selectedOptions.dataset.mile as Float
         end
 
-        if dayOfSelect is not currentDay
+        if dayOfSelect is not currentDay and dayOfSelect is not numberOfDays then
             set nextDaySelect to getPointSelect(dayOfSelect + 1)
             set endMile to nextDaySelect's selectedOptions.dataset.mile as Float
         end
@@ -136,7 +138,6 @@ def drawPaths()
 end
 
 def initializeMap(mapElement)  
-    log mapElement
     set $map to L.map(mapElement).setView([34.628, -84.193], 13)
 
     call L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
