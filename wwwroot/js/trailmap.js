@@ -5,31 +5,31 @@ const trailStyle = {
     lineJoin: 'round'  // Smooth intersections
 };
 
-let trailGeoJSONData, activeMileMarker, map;
+let activeMileMarker;
 let hikeLayers = new Map();
 
 function removeHikeLayer(day) {
     if (hikeLayers.has(day)) {
-        map.removeLayer(hikeLayers.get(day));
+        window.$map.removeLayer(hikeLayers.get(day));
         hikeLayers.delete(day);
     }
 }
 
 function drawPath(startMile, endMile, day) {
-    if (!trailGeoJSONData) {
+    if (!window.$trailGeoJSONData) {
         console.error("Trail data hasn't loaded yet!");
         return;
     }
     
     if (hikeLayers.has(day)) {
-        map.removeLayer(hikeLayers.get(day));
+        window.$map.removeLayer(hikeLayers.get(day));
     }
 
     const pathColors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"];
     const pathColor = pathColors[(day - 1) % pathColors.length];
 
     try {
-        const flattened = turf.flatten(trailGeoJSONData);
+        const flattened = turf.flatten(window.$trailGeoJSONData);
         let pathLine;
 
         if (flattened.features.length === 1) {
@@ -61,7 +61,7 @@ function drawPath(startMile, endMile, day) {
                 opacity: 0.9,
                 lineJoin: 'round'
             }
-        }).addTo(map);
+        }).addTo(window.$map);
 
         pathLayer.bindTooltip(`Day ${day - 1} to ${day}: ${endMile - startMile} miles`, {
             permanent: true,
@@ -75,7 +75,7 @@ function drawPath(startMile, endMile, day) {
         for (const layer of hikeLayers.values()) {
             combinedBounds.extend(layer.getBounds());
         }
-        map.fitBounds(combinedBounds);
+        window.$map.fitBounds(combinedBounds);
     } catch (error) {
         console.error("Error slicing or drawing the path line:", error);
     }
@@ -102,47 +102,23 @@ function getPointAlongMultiLine(trailJson, targetDistance, options = { units: 'm
 }
 
 function addMileMarker(miles) {
-    if (!trailGeoJSONData) {
+    if (!window.$trailGeoJSONData) {
         console.error("Trail data hasn't loaded yet!");
         return;
     }
 
     if (activeMileMarker) {
-        map.removeLayer(activeMileMarker);
+        window.$map.removeLayer(activeMileMarker);
     }
 
     try {
-        const targetPoint = getPointAlongMultiLine(trailGeoJSONData, miles);
+        const targetPoint = getPointAlongMultiLine(window.$trailGeoJSONData, miles);
         const coords = targetPoint.geometry.coordinates;
         
         const leafletLatLng = [coords[1], coords[0]];
 
-        activeMileMarker = L.marker(leafletLatLng).addTo(map);
+        activeMileMarker = L.marker(leafletLatLng).addTo(window.$map);
     } catch (error) {
         console.error("Error creating mile marker:", error);
     }
-}
-
-
-
-function initializeMap(mapElement) { 
-    map = L.map(mapElement).setView([34.628, -84.193], 13);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    fetch('/trails/AppalachianTrail2.json')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            trailGeoJSONData = data
-        })
-        .catch(error => {
-            console.error('Error loading the trail GeoJSON:', error);
-        });
 }

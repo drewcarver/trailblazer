@@ -113,7 +113,7 @@ let createHikeView userName (friends: Friend list) (trailPointsOfInterest: Resul
                                 trailblazerButton (Some "submit-plan") "Submit Plan" "Submit Plan" "submit" []
                             ]
                     ]
-                    div [ _id "map"; _class "w-[60vw] min-w-[300px] h-[400px]"; attr "_" "on load call initializeMap(me)" ] []
+                    div [ _id "map"; _class "w-[60vw] min-w-[300px] h-[400px]" ] []
                     match trailPointsOfInterest with
                         | Ok _ -> emptyText
                         | Error e -> span [] [ 

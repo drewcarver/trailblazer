@@ -135,6 +135,22 @@ def drawPaths()
     end
 end
 
+def initializeMap(mapElement)  
+    log mapElement
+    set $map to L.map(mapElement).setView([34.628, -84.193], 13)
+
+    call L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo($map)
+
+    fetch /trails/AppalachianTrail2.json as JSON
+    then
+        set $trailGeoJSONData to it
+        call drawPaths()
+    catch e
+        log "Error loading the trail GeoJSON from /trails/AppalachianTrail2.json: ", e
+end
+
 behavior InitForm()
     on load
         if ^campCounter is undefined 
@@ -146,8 +162,8 @@ behavior InitForm()
             call Math.max.apply(null, days)
             set ^campCounter to the result 
 
-            wait for 500ms
-            call drawPaths()
+            call initializeMap(#map)
         end
     end
 end
+
