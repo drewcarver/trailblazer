@@ -11,7 +11,6 @@ def areAllPointsSelected()
         if not select's selectedOptions[0].value then
             return false
         end
-        log not select's selectedOptions[0].value
     end
     return true
 end
@@ -19,11 +18,11 @@ end
 def filterByMileRange(selectElement, minMile, maxMile)
     for option in selectElement's options
         set optionMile to option's dataset.mile as Float
+        remove @disabled from option
+
         if isValidNumber(optionMile) and isValidNumber(minMile) and isValidNumber(maxMile) then
             if optionMile < minMile or optionMile > maxMile or option's @disabled is not empty then
                 add @disabled to option
-            else
-                remove @disabled from option
             end
         end
     end
@@ -49,24 +48,25 @@ end
 def refreshMileBoundaries(currentDay)
     for select in <select[name="campPoints"]/>
         set dayOfSelect to select's @data-day as Int
+        set startMile to 0
+        set endMile to Infinity
 
-        if dayOfSelect is 1 then
-            set endMile to getPointSelect(dayOfSelect + 1).selectedOptions.dataset.mile as Float
-            call filterByMileRange(select, 0, endMile)
-        else if dayOfSelect is currentDay then
-            set startMile to getPointSelect(dayOfSelect - 1).selectedOptions.dataset.mile as Float
-            call filterByMileRange(select, startMile, Infinity)
-        else
-            set startMile to getPointSelect(dayOfSelect - 1).selectedOptions.dataset.mile as Float
-            set endMile to getPointSelect(dayOfSelect + 1).selectedOptions.dataset.mile as Float
-            call filterByMileRange(select, startMile, endMile)
+        if dayOfSelect is not 1
+            set previousDaySelect to getPointSelect(dayOfSelect - 1)
+            set startMile to previousDaySelect's selectedOptions.dataset.mile as Float
         end
+
+        if dayOfSelect is not currentDay
+            set nextDaySelect to getPointSelect(dayOfSelect + 1)
+            set endMile to nextDaySelect's selectedOptions.dataset.mile as Float
+        end
+
+        call filterByMileRange(select, startMile, endMile)
     end
 end
 
 behavior AddPoint()
     on click
-        log "Adding a new point. Current campCounter: " + ^campCounter
         set currentSelect to the closest <div/> to getPointSelect(^campCounter)
 
         set clone to currentSelect.cloneNode(true)
@@ -79,23 +79,27 @@ behavior AddPoint()
 
         put clone after currentSelect 
         call refreshMileBoundaries(^campCounter)
+
+        send pointAdded(day: ^campCounter) to the <button /> where its textContent is "Remove Point" 
+    end
+    on pointSelected
+        if areAllPointsSelected() then
+            remove @disabled from me
+        else
+            add @disabled to me
+        end
     end
 end
 
 behavior SelectPoint()
     on change
-        log "Select changed. Current campCounter: " + ^campCounter
         set result to getStartAndEndMilesFromSelect(target)
         if isValidNumber(result.startMile) and isValidNumber(result.endMile) then
             call drawPath(result.startMile, result.endMile, result.dayOfSelect)
         end
         call refreshMileBoundaries(^campCounter)
 
-        if areAllPointsSelected() then
-            remove @disabled from #add-point
-        else
-            add @disabled to #add-point
-        end
+        send pointSelected to the <button /> where its textContent is "Add Point"
     end
 end
 
@@ -108,17 +112,21 @@ behavior RemovePoint()
         decrement ^campCounter
 
         remove containerDiv
-    end
-    when ^campCounter changes
-        if ^campCounter is 2 then
+
+        if (^campCounter is 2) then
             add @disabled to me
-        else
-            remove @disabled from me
         end
+
+        call refreshMileBoundaries(^campCounter)
+    end
+    on pointAdded(day)
+        remove @disabled from me
     end
 end
 
 def drawPaths()
+    refreshMileBoundaries(^campCounter)
+
     for select in <select[name="campPoints"]/>
         set result to getStartAndEndMilesFromSelect(select)
         if isValidNumber(result.startMile) and isValidNumber(result.endMile) then
