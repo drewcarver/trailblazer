@@ -16,7 +16,7 @@ let trailblazerAutosuggest (id: string) (name: string) (labelText: string) (requ
         [
             _id id
             _type "text"
-            _class "w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50 focus:ring-indigo-500 focus:border-indigo-500"
+            _class "field__control"
             attr "list" (id + "-list")
             attr "data-field-name" name
             attr "data-list-id" (id + "-list")
@@ -26,10 +26,10 @@ let trailblazerAutosuggest (id: string) (name: string) (labelText: string) (requ
         @ requiredAttrs
         @ (attrs |> Seq.map (fun (key, value) -> attr key value) |> Seq.toList)
 
-    div [ _class "mb-4 multi-select-container" ] [
-        label [ _for id; _class "block text-sm font-medium text-gray-700 mb-1" ] [ str labelText ]
+    div [ _class "field autosuggest__container" ] [
+        label [ _for id; _class "field__label" ] [ str labelText ]
         input [ _type "hidden"; _name name; _value "" ]
         input inputAttrs
-        div [ _id (id + "-badges"); _class "mt-2 flex flex-wrap gap-2" ] []
-        datalist [ _id (id + "-list"); _class "rounded-md border border-gray-300 bg-white text-sm text-gray-700" ] (options |> List.map datalistOption)
+        div [ _id (id + "-badges"); _class "autosuggest__badges" ] []
+        datalist [ _id (id + "-list"); _class "autosuggest__list" ] (options |> List.map datalistOption)
     ]

@@ -63,27 +63,26 @@ let createHikeView userName (friends: Friend list) (trailPointsOfInterest: Resul
 
                 friend.Email, sprintf "%s (%s)" friendName friend.Email)
 
-        div [ _class "p-6 border border-black rounded-lg bg-white p-4 font-sans selection:bg-neutral-200 m-2"] [
-            div [ _class "flex gap-4 flex-wrap" ] [
-                h1 [ _class "text-2xl font-mono font-bold mb-4" ] [ str (formHeader mode) ]
-                div [ _class "flex items-center gap-4" ] [
-                    form [ _class "font-mono mx-auto transition-[width] duration-500 ease-in-out"; 
+        div [ _class "page-section create-hike" ] [
+            h1 [ _class "form-panel__title" ] [ str (formHeader mode) ]
+            div [ _class "create-hike__layout" ] [
+                form [ _class "form-panel"; 
                         attr "_" (sprintf "install InitForm");
                         attr "action" (submitPath mode);
                         attr "method" "post";
                         attr "hx-post" (submitPath mode); 
                         attr "hx-swap" "outerHTML" ] [
-                            div [ _class "mb-4" ] [
-                                label [ _for "hike-name"; _class "block text-sm font-medium mb-1" ] [ str "Hike Name" ]
+                            div [ _class "field" ] [
+                                label [ _for "hike-name"; _class "field__label" ] [ str "Hike Name" ]
                                 input [ 
                                     _type "text"; 
                                     _id "hike-name"; 
                                     _name "hikeName"; 
                                     attr "required" "required"
                                     _value hikeNameValue
-                                    _class "peer w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#4A7043]" 
+                                    _class "field__control" 
                                 ]
-                                span [ _class "invisible opacity-0 peer-user-invalid:visible peer-user-invalid:opacity-100 transition-all duration-300 ease-in-out block text-xs text-red-500 mt-1" ] [ 
+                                span [ _class "field__message" ] [ 
                                     str "Please enter a value." 
                                 ]
                             ]
@@ -107,16 +106,17 @@ let createHikeView userName (friends: Friend list) (trailPointsOfInterest: Resul
                                     pointsOfInterestOptions
                                     selectedPoint
                                     [ "_", "install SelectPoint"; "data-day", string day ]
-                            div [ _class "flex gap-2 mt-4" ] [
+                            div [ _class "button-group" ] [
                                 trailblazerButton (Some "add-point") "Add Point" "Add Point" "button" ([ "_", "install AddPoint" ] @ if addPointDisabled then [ "disabled", "true" ] else [])
                                 trailblazerButton (Some "remove-point") "Remove Point" "Remove Point" "button" removePointButtonAttrs
                                 trailblazerButton (Some "submit-plan") "Submit Plan" "Submit Plan" "submit" []
                             ]
-                    ]
-                    div [ _id "map"; _class "w-[60vw] min-w-[300px] h-[400px]" ] []
+                ]
+                div [ _class "create-hike__sidebar" ] [
+                    div [ _id "map"; _class "map-pane" ] []
                     match trailPointsOfInterest with
                         | Ok _ -> emptyText
-                        | Error e -> span [] [ 
+                        | Error e -> span [ _class "form-panel__error" ] [ 
                             match e with
                                 | DatabaseError error -> str (e.ToString ())
                                 | FormValidationError e -> str e

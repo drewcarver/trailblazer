@@ -10,12 +10,12 @@ type SelectOption = {
 }
 
 let trailblazerSelectWithSelected (id: string) (name: string) (labelText: string) (required: Required) options (selectedValue: string option) attrs =
-    div [ _class "mb-4" ] [
-        label [ _for id; _class "block text-sm font-medium text-gray-700 mb-1" ] [ str labelText ]
+    div [ _class "field" ] [
+        label [ _for id; _class "field__label" ] [ str labelText ]
         select [ 
             _id id; 
             _name name; 
-            _class "w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50 focus:ring-indigo-500 focus:border-indigo-500" 
+            _class "field__control" 
             match required with
             | Required -> attr "required" "required"
             | Optional -> ()

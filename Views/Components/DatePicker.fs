@@ -5,8 +5,8 @@ open System
 open HikePlanner.Core
 
 let datePicker (id: string) (name: string) (labelText: string) (min: DateTime option) (required: Required) (attrs) =
-    div [ _class "mb-4" ] [
-        label [ _for id; _class "block text-sm font-medium mb-1" ] [ str labelText ]
+    div [ _class "field" ] [
+        label [ _for id; _class "field__label" ] [ str labelText ]
         input [ 
             _type "date";
             _id id; 
@@ -14,7 +14,7 @@ let datePicker (id: string) (name: string) (labelText: string) (min: DateTime op
             match required with
             | Required -> attr "required" "required"
             | Optional -> ()
-            _class "w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#4A7043]" 
+            _class "field__control" 
             _min (match min with | Some m -> m.ToString "yyyy-MM-dd" | None -> "")
             yield! attrs |> List.map (fun (key, value) -> attr key value)
         ]
