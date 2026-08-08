@@ -145,7 +145,6 @@ behavior InitForm()
             end
             call Math.max.apply(null, days)
             set ^campCounter to the result 
-            log "Initialized campCounter to: " + ^campCounter
 
             wait for 500ms
             call drawPaths()
