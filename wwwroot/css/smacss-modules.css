@@ -1,7 +1,41 @@
+@import url('./home.modules.css');
+
+.hero {
+    position: relative;
+    max-height: 500px;
+}
+
+.hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    opacity: 0.3;
+}
+
+.hero-title {
+    color: var(--color-ink);
+    font-size: 4rem;
+    font-weight: 700;
+    left: 50%;
+    position: absolute;
+    text-align: center;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+}
+
 .card {
   border: 2px solid var(--color-border);
   border-radius: 0.75rem;
   background: var(--color-surface);
+  padding: 1rem;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-align: center;
 }
 
 .card--hero {
@@ -165,10 +199,4 @@
 
 .form-panel__error {
   color: var(--color-danger);
-}
-
-.hero-card {
-  display: grid;
-  gap: 1rem;
-  justify-items: center;
 }

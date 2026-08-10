@@ -104,6 +104,7 @@ let main _ =
 
     let provider = FileExtensionContentTypeProvider()
     provider.Mappings.["._hs"] <- "text/hyperscript"
+    provider.Mappings.[".svg"] <- "image/svg+xml"
     let staticFileOptions = StaticFileOptions(ContentTypeProvider = provider)
     app.UseStaticFiles staticFileOptions |> ignore
 

@@ -1,0 +1,64 @@
+.hero-card {
+    display: grid;
+    gap: 1rem;
+}
+
+.card-item {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid lightgray;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+}
+
+.calendar-date {
+    background-color: lightgray;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.calendar-date .calendar-date-month {
+    text-transform: uppercase;
+}
+
+.calendar-date .calendar-date-day {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.card-item-content h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.card-item-content .card-item-description,
+.card-item-content .card-item-location {
+    font-size: 0.875rem;
+    color: gray;
+}
+
+.card-header {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+}
+
+.card-header-view-all {
+    font-size: 0.875rem;
+    justify-self: end;
+}
+
+.card-header-title {
+    justify-self: start;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}

@@ -1,28 +1,31 @@
 ﻿module HikePlanner.Views.Home
 
-open System.Security.Claims
 open Giraffe.ViewEngine
-open Giraffe
 open MasterLayout
-open HikePlanner.Core
-open HikePlanner.Infrastructure
-open HikePlanner.Views.Components.LinkButton
+open HikePlanner.Views.Components.Card
 
 let indexView userProfile =
     [
-        main [ _class "site-main" ] [
-            div [ _class "hero" ] [
-                div [ _class "hero__panel card card--hero" ] [
-                    div [ _class "hero__header" ] [
-                        div [ _class "hero__eyebrow" ] [ str "🌲" ]
-                        h2 [ _class "hero__title" ] [ str "Plan Your Next Hike" ]
+        main [ _class "l-site-main" ] [
+            header [ _class "hero" ] [
+                h1 [ _class "hero-title" ] [ str "Plan Your Next Hike" ]
+                img [ _src "/assets/mountains.svg"; _alt "A scenic mountain view"; _class "hero-image" ]
+            ]
+            section [ _class "l-hero-content" ] [
+                tbCard "" [
+                    h2 [ _class "card-title" ] [ str "Upcoming Hikes" ]
+                    div [] [ 
+                        p [] [ str "May 15: Mt. Rainier" ]
                     ]
-                    p [ _class "hero__copy" ] [
-                        str "Trailblazer is a web app that helps you plan your next hiking adventure with friends."
-                    ]
-                    div [] [
-                        trailblazerLinkButton "/hikes" "START PLANNING" (Some "btn--large")
-                    ]
+                    p [ _class "card-text" ] [ str "Explore a variety of trails and plan your next adventure." ]
+                ]
+                tbCard "" [
+                    h2 [ _class "card-title" ] [ str "Popular Trails" ]
+                    p [ _class "card-text" ] [ str "Explore a variety of trails and plan your next adventure." ]
+                ]
+                tbCard "" [
+                    h2 [ _class "card-title" ] [ str "Discover Trails" ]
+                    p [ _class "card-text" ] [ str "Explore a variety of trails and plan your next adventure." ]
                 ]
             ]
         ]
