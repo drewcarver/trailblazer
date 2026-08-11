@@ -1,0 +1,19 @@
+:root {
+  --home-ink: #1f2937;
+  --home-muted: #4b5563;
+  --home-surface: #ffffff;
+  --home-border: #d9e2ea;
+  --home-green: #3a6b48;
+  --home-green-deep: #295339;
+  --home-shadow: 0 18px 40px rgba(20, 28, 40, 0.08);
+  --default-gutter: clamp(1.25rem, 4vw, 3.5rem);
+
+
+  font-size: 62.5%; 
+  --font-body: "Inter", sans-serif;
+  --font-size-sm: clamp(1.2rem, 0.22vw + 1.14rem, 1.35rem);    /* Small captions */
+  --font-size-base: clamp(1.6rem, 0.25vw + 1.5rem, 1.8rem);    /* Body text */
+  --font-size-md: clamp(2.0rem, 0.45vw + 1.85rem, 2.4rem);    /* H3 / Subheadings */
+  --font-size-lg: clamp(2.8rem, 0.8vw + 2.5rem, 3.6rem);      /* H2 Titles */
+  --font-size-xl: clamp(4.0rem, 1.5vw + 3.4rem, 5.4rem);      /* H1 Main Banner */
+}

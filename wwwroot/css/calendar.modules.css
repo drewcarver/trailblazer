@@ -1,0 +1,20 @@
+.calendar {
+    background: #f0f0f0;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    height: 100%;
+}
+
+.calendar-month {
+    text-transform: uppercase;
+    font-size: var(--font-size-base);
+    color: var(--home-green-deep);
+}
+
+.calendar-day {
+    font-size: var(--font-size-lg);
+    color: var(--home-green-deep);
+}

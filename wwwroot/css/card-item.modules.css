@@ -1,0 +1,43 @@
+.card-item-list {
+    list-style: none;
+    padding: 0;
+}
+
+.card-item-list .card-item {
+    border: 1px solid #e6edf3;
+    border-radius: 0.85rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 2rem;
+    align-items: center;
+    height: 100px;
+}
+
+.card-item .card-item-chevron {
+    font-size: var(--font-size-base);
+}
+
+.trail-photo {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 0.85rem;
+}
+
+.friend-photo {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.hike-difficulty {
+    background-color: var(--home-green-deep);
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 1rem;
+    line-height: 1.2;
+    color: #fff;
+}
