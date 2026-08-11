@@ -41,3 +41,23 @@
     line-height: 1.2;
     color: #fff;
 }
+
+.features {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    background: var(--home-surface);
+    box-shadow: var(--home-shadow);
+}
+
+.features article {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 1rem var(--default-gutter);
+}
+
+.features .feature-icon {
+    font-size: var(--font-size-lg);
+    color: var(--home-green-deep);
+}
