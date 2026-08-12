@@ -1,0 +1,8 @@
+.hike-difficulty-chip {
+    background-color: var(--home-green-deep);
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 1rem;
+    line-height: 1.2;
+    color: #fff;
+}
