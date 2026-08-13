@@ -27,3 +27,11 @@
     align-self: center;
     color: var(--home-green-deep);
 }
+
+@media (prefers-reduced-motion: reduce) {
+    .card {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+}

@@ -7,3 +7,37 @@
     z-index: 1;
     margin: 0 var(--default-gutter);
 }
+
+.l-cards .card {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: cardFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.l-cards .card:nth-child(1) { --card-index: 0; }
+.l-cards .card:nth-child(2) { --card-index: 1; }
+.l-cards .card:nth-child(3) { --card-index: 2; }
+
+.l-cards .card {
+    animation-delay: calc(var(--card-index, 0) * 120ms);
+}
+
+@keyframes cardFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .l-cards .card {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+}

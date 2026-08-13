@@ -5,12 +5,12 @@
     flex-direction: column;
     justify-content: center;
     gap: .5rem;
-    padding: var(--default-gutter);
     background:
         linear-gradient(to right, rgba(243, 247, 252, 0.6), rgba(243, 247, 252, 0.6) 30%, rgba(243, 247, 252, 0)),
         url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1800&q=80") center/cover no-repeat;
     box-shadow: var(--home-shadow);
     position: relative;
+    padding: 0 8rem;
 }
 
 
