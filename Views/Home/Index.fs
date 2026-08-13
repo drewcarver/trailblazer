@@ -161,13 +161,6 @@ let indexView userProfile =
                         p [] [ str "Log your hikes and reach new summits." ]
                     ]
                 ]
-                article [] [
-                    i [ _class "feature-icon fa-regular fa-shield-heart" ] []
-                    div [] [
-                        h3 [ _class "feature-title" ] [ str "Stay Safe" ]
-                        p [] [ str "Get trail info and weather updates in real time." ]
-                    ]
-                ]
             ]
         ]
     ] |> XmlNodeList |> withMasterLayout userProfile
