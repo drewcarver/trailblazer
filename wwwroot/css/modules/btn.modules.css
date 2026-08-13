@@ -5,24 +5,24 @@
     font-weight: 600;
     text-align: center;
     text-decoration: none;
-    border-radius: 4px;
+    border-radius: 10px;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.btn.primary {
+.btn-primary {
     background-color: var(--home-green);
     color: var(--home-surface);
 }
 
-.btn.primary:hover {
+.btn-primary:hover {
     background-color: var(--home-green-deep);
 }
 
-.btn.secondary {
+.btn-secondary {
     border: 2px solid var(--home-green);
     color: var(--home-green);
 }
 
-.btn.secondary:hover {
+.btn-secondary:hover {
     background-color: var(--home-surface);
 }

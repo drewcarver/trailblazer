@@ -14,19 +14,19 @@
 }
 
 
-.hero .hero-description {
+.hero-description {
     font-size: 2.0rem;
     max-width: 400px;
     font-weight: 500;
 }
 
-.hero .hero-actions {
+.hero-actions {
     display: flex;
     gap: 1rem;
     font-size: 1.6rem;
 }
 
-.hero .btn.primary {
+.hero .btn-primary {
     min-width: 200px;
     display: flex;
     justify-content: space-between;

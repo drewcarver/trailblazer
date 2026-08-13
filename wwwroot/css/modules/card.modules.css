@@ -5,11 +5,25 @@
     background: var(--home-surface);
     padding: 2rem;
     grid-template-rows: auto 1fr;
-    gap: 0.85rem;
 }
 
 .card-title {
+    font-size: var(--font-size-base);
+    color: black;
     display: grid;
     grid-template-columns: auto 1fr auto;
+    justify-content: center;
     gap: 1rem;
+}
+
+.card-title-icon {
+    font-size: var(--font-size-md);
+    color: var(--home-green-deep);
+}
+
+.card-title-view-all {
+    font-size: var(--font-size-sm);
+    justify-self: end;
+    align-self: center;
+    color: var(--home-green-deep);
 }

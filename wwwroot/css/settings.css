@@ -7,10 +7,9 @@
   --home-green-deep: #295339;
   --home-shadow: 0 10px 10px rgba(37, 37, 37, 0.11);
   --default-gutter: clamp(1.25rem, 4vw, 3.5rem);
-  --default-radius: 1.5rem;
+  --default-radius: 16px;
 
 
-  font-size: 62.5%; 
   --font-body: "Inter", sans-serif;
   --font-size-sm: clamp(1.2rem, 0.22vw + 1.14rem, 1.35rem);    /* Small captions */
   --font-size-base: clamp(1.6rem, 0.25vw + 1.5rem, 1.8rem);    /* Body text */

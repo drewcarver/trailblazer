@@ -27,13 +27,13 @@
             </div>
         </div>
 
-        <nav>
-            <a class="nav-logo" href="/" aria-label="Trailblazer home"><i class="fa-solid fa-mountain-sun"></i> Trailblazer</a>
-            <ul>
+        <nav class="nav">
+            <a class="nav-logo" href="/" aria-label="Trailblazer home"><img src="/assets/mountain-logo.svg" alt="Trailblazer logo"/> Trailblazer</a>
+            <ul class="nav-list">
                 <li><a href="/">Explore</a></li>
                 <li><a href="/hikes">My Hikes</a></li>
             </ul>
-            <a class="nav-logout" href="/logout" hx-boost="false" aria-label="User profile menu"><i class="fa-regular fa-circle-user"></i> User <i class="fa-solid fa-angle-down"></i></a>
+            <a class="nav-logout" href="/logout" hx-boost="false" aria-label="User profile menu"><i class="nav-user-profile fa-regular fa-circle-user"></i> User <i class="nav-user-profile-chevron fa-solid fa-angle-down"></i></a>
         </nav>
 
         <main>
@@ -41,14 +41,14 @@
                     <h1>Plan Your Next Hike</h1>
                     <p class="hero-description">Discover trails, connect with friends, and make every hike your best one yet.</p>
                     <p class="hero-actions">
-                        <a class="btn primary" href="/">Explore Trails <i class="fa-solid fa-arrow-right"></i></a>
-                        <a class="btn secondary" href="/hikes">My Hikes</a>
+                        <a class="btn btn-primary" href="/">Explore Trails <i class="fa-solid fa-arrow-right"></i></a>
+                        <a class="btn btn-secondary" href="/hikes">My Hikes</a>
                     </p>
             </header>
 
             <section class="l-cards" aria-label="Hike highlights">
                 <article class="card">
-                    <h3 class="card-title"><i class="fa-regular fa-calendar"></i> Upcoming Hikes <a href="/hikes">View all <i class="fa-solid fa-angle-right"></i></a></h2>
+                    <h2 class="card-title"><i class="card-title-icon fa-regular fa-calendar"></i> Upcoming Hikes <a class="card-title-view-all" href="/hikes">View all <i class="fa-solid fa-angle-right"></i></a></h2>
                     <ul class="card-item-list">
                         <li >
                             <a class="card-item" href="/hike">
@@ -76,7 +76,7 @@
                 </article>
 
                 <article class="card">
-                    <h3 class="card-title"><i class="fa-solid fa-mountain"></i> Popular Trails <a href="/trails">View all <i class="fa-solid fa-angle-right"></i></a></h2>
+                    <h2 class="card-title"><i class="card-title-icon fa-solid fa-mountain"></i> Popular Trails <a class="card-title-view-all" href="/trails">View all <i class="fa-solid fa-angle-right"></i></a></h2>
                     <ul class="card-item-list">
                         <li>
                             <a class="card-item" href="/trails">
@@ -102,7 +102,7 @@
                 </article>
 
                 <article class="card">
-                    <h3 class="card-title"><i class="fa-solid fa-users"></i> Friend Hikes <a href="/hikes">View all <i class="fa-solid fa-angle-right"></i></a></h2>
+                    <h2 class="card-title"><i class="card-title-icon fa-solid fa-users"></i> Friend Hikes <a class="card-title-view-all" href="/hikes">View all <i class="fa-solid fa-angle-right"></i></a></h2>
                     <ul class="card-item-list">
                         <li>
                             <a class="card-item" href="/hikes">
@@ -132,28 +132,28 @@
                 <article>
                     <i class="feature-icon fa-regular fa-map"></i>
                     <div>
-                        <h4 class="feature-title">Discover Trails</h4>
+                        <h3 class="feature-title">Discover Trails</h3>
                         <p>Find the perfect trail for your next adventure.</p>
                     </div>
                 </article>
                 <article>
                     <i class="feature-icon fa-solid fa-user-group"></i>
                     <div>
-                        <h4 class="feature-title">Plan Together</h4>
+                        <h3 class="feature-title">Plan Together</h3>
                         <p>Coordinate hikes with friends easily.</p>
                     </div>
                 </article>
                 <article>
                     <i class="feature-icon fa-solid fa-mountain-city"></i>
                     <div>
-                        <h4 class="feature-title">Track Progress</h4>
+                        <h3 class="feature-title">Track Progress</h3>
                         <p>Log your hikes and reach new summits.</p>
                     </div>
                 </article>
                 <article>
                     <i class="feature-icon fa-regular fa-shield-heart"></i>
                     <div>
-                        <h4 class="feature-title">Stay Safe</h4>
+                        <h3 class="feature-title">Stay Safe</h3>
                         <p>Get trail info and weather updates in real time.</p>
                     </div>
                 </article>
