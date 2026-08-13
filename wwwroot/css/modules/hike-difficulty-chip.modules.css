@@ -1,8 +1,24 @@
 .hike-difficulty-chip {
     background-color: var(--home-green-deep);
-    padding: 0.5rem 1rem;
-    border-radius: 2rem;
-    font-size: 1rem;
-    line-height: 1.2;
+    padding: 0.25em .5em;
+    border-radius: var(--default-radius);
+    font-size: var(--font-size-sm);
+    line-height: 1.2em;
     color: #fff;
+    height: 1.6em;
+    font-weight: bold;
+}
+
+.hike-difficulty-chip.easy {
+    background-color: var(--home-green);
+}
+
+.hike-difficulty-chip.moderate {
+    background-color: #E5ECF5;
+    color: #1C4D81;
+}
+
+.hike-difficulty-chip.hard {
+    background-color: #EAF2EB; 
+    color: #547B5B;
 }

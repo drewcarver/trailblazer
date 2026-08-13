@@ -18,37 +18,3 @@
 .card-item .card-item-chevron {
     font-size: var(--font-size-base);
 }
-
-.trail-photo {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 0.85rem;
-}
-
-.friend-photo {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 50%;
-}
-
-.features {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    background: var(--home-surface);
-    box-shadow: var(--home-shadow);
-}
-
-.features article {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    padding: 1rem var(--default-gutter);
-}
-
-.features .feature-icon {
-    font-size: var(--font-size-lg);
-    color: var(--home-green-deep);
-}

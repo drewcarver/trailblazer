@@ -1,7 +1,7 @@
 .card {
     display: grid;
-    box-shadow: 0 10px 10px rgba(37, 37, 37, 0.11);
-    border-radius: 1.5rem;
+    box-shadow: var(--home-shadow);
+    border-radius: var(--default-radius);
     background: var(--home-surface);
     padding: 2rem;
     grid-template-rows: auto 1fr;
