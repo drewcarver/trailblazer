@@ -35,44 +35,6 @@
             background: var(--hikes-page-bg);
         }
 
-        .hikes-page {
-            margin: 0 auto;
-            padding: 2.4rem var(--default-gutter);
-        }
-
-        .hikes-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 2rem;
-        }
-
-        .hikes-title {
-            margin: 0 0 .55rem;
-            color: #111817;
-            font-size: clamp(2.8rem, 3vw, 4rem);
-            font-weight: 700;
-            letter-spacing: -.04em;
-        }
-
-        .hikes-description {
-            margin: 0;
-            color: var(--hikes-muted);
-            font-size: 1.45rem;
-        }
-
-        .hikes-toolbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1.4rem;
-        }
-
-        .hikes-tools {
-            display: flex;
-            gap: .9rem;
-        }
-
         .legacy-table,
         #hikes-table-loading-skeleton {
             display: none !important;
@@ -88,15 +50,11 @@
                 display: none;
             }
 
-            .hikes-header,
-            .hikes-toolbar,
+            .l-list-page-header,
+            .table-toolbar,
             .table-footer {
                 align-items: stretch;
                 flex-direction: column;
-            }
-
-            .hikes-tools {
-                width: 100%;
             }
 
         }
@@ -150,25 +108,25 @@
         </ul>
     </nav>
     <main class="l-main">
-        <section class="hikes-page">
+        <section class="l-list-page">
             <div class="card card--data-table">
-                <header class="hikes-header">
+                <header class="l-list-page-header">
                     <div>
-                        <h1 class="hikes-title">My Hikes</h1>
-                        <p class="hikes-description">View, manage, and edit all of your upcoming and past hikes.</p>
+                        <h1 class="page-heading">My Hikes</h1>
+                        <p class="description">View, manage, and edit all of your upcoming and past hikes.</p>
                     </div>
                     <a class="btn btn-primary btn--compact" href="/hikes/new"><i class="fa-solid fa-plus"
                             aria-hidden="true"></i> Add Hike</a>
                 </header>
 
-                <div class="hikes-toolbar">
+                <div class="table-toolbar">
                     <nav class="filter-tabs" aria-label="Hike filters">
                         <a class="filter-tab is-active" href="#all-hikes">All Hikes</a>
                         <a class="filter-tab" href="#upcoming-hikes">Upcoming</a>
                         <a class="filter-tab" href="#past-hikes">Past</a>
                         <a class="filter-tab" href="#friends-hikes">Friends</a>
                     </nav>
-                    <div class="hikes-tools">
+                    <div class="table-tools">
                         <label class="search" for="hike-search">
                             <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                             <input id="hike-search" type="search" placeholder="Search hikes...">
@@ -298,11 +256,11 @@
                 <footer class="table-footer">
                     <span>Showing 1 to 6 of 12 hikes</span>
                     <nav class="table-pagination" aria-label="Hike pages">
-                        <a class="table-pagination__button" href="#previous" aria-label="Previous page"><i
+                        <a class="table-pagination-btn" href="#previous" aria-label="Previous page"><i
                                 class="fa-solid fa-angle-left" aria-hidden="true"></i></a>
-                        <a class="table-pagination__button is-active" href="#page-1" aria-current="page">1</a>
-                        <a class="table-pagination__button" href="#page-2">2</a>
-                        <a class="table-pagination__button" href="#next" aria-label="Next page"><i
+                        <a class="table-pagination-btn is-active" href="#page-1" aria-current="page">1</a>
+                        <a class="table-pagination-btn" href="#page-2">2</a>
+                        <a class="table-pagination-btn" href="#next" aria-label="Next page"><i
                                 class="fa-solid fa-angle-right" aria-hidden="true"></i></a>
                     </nav>
                 </footer>

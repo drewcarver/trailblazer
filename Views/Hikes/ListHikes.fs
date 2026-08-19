@@ -11,20 +11,51 @@ open HikePlanner.Core.Utils
 let myHikesTable = 
   trailblazerTable 
     "My Hikes" 
-    (trailblazerTableHeader ["Hike Name"; "Start Date"; "Camp Locations"; "Action"]) 
+    (trailblazerTableHeader ["Hike Name"; "Date Range"; "Trail"; "Start Location"; "End Location"; "Actions"]) 
+
+let private locationCell (point: TrailPointOfInterest) =
+    XmlNodeValue (
+        span [ _class "table__location" ] [
+            i [ _class "fa-solid fa-location-dot"; attr "aria-hidden" "true" ] []
+            str point.Name
+        ]
+    )
+
+let private hikeNameCell (hike: SavedHike) =
+    XmlNodeValue (
+        div [ _class "table__name" ] [
+            span [] [ str hike.Trail ]
+        ]
+    )
+
+let private trailName (hike: SavedHike) =
+    hike.CampPoints
+    |> List.tryHead
+    |> Option.map (fun point -> point.TrailName)
+    |> Option.defaultValue hike.Trail
 
 let savedHikeRow (hike: SavedHike) =
+    let startPoint, endPoint =
+        match hike.CampPoints with
+        | first :: rest -> first, (rest |> List.rev |> List.tryHead |> Option.defaultValue first)
+        | [] ->
+            let fallback: TrailPointOfInterest =
+                { Id = 0L; Name = "No camp location"; TrailName = hike.Trail; TrailMile = 0.0 }
+            fallback, fallback
+
     trailblazerTableRow [
-        trailblazerTableColumn (StringValue hike.Trail)
-        trailblazerTableColumn (StringValue (hike.StartDate.ToString "yyyy-MM-dd"))
-        trailblazerTableColumn (StringValue (
-            sprintf "%s to %s" 
-                (hike.CampPoints |> List.head |> fun point -> point.Name) 
-                (hike.CampPoints |> List.last |> fun point -> point.Name)
-            )
-        )
-        td [ _class "px-4 py-3 text-center whitespace-nowrap" ] [
-            a [ _href (sprintf "/hikes/%d" hike.Id); _class "inline-flex items-center justify-center px-3 py-1 text-xs font-mono font-bold uppercase border border-black bg-neutral-100 hover:bg-black hover:text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer" ] [ str "Edit Hike" ]
+        trailblazerTableColumn (hikeNameCell hike)
+        trailblazerTableColumn (XmlNodeValue (span [ _class "table__date" ] [
+            i [ _class "fa-regular fa-calendar"; attr "aria-hidden" "true" ] []
+            str (" " + hike.StartDate.ToString "MMM d, yyyy")
+        ]))
+        trailblazerTableColumn (StringValue (trailName hike))
+        trailblazerTableColumn (locationCell startPoint)
+        trailblazerTableColumn (locationCell endPoint)
+        td [ _class "table__action-cell" ] [
+            a [ _href (sprintf "/hikes/%d" hike.Id); _class "table__action"; attr "aria-label" (sprintf "Edit %s" hike.Trail) ] [
+                i [ _class "fa-solid fa-pen"; attr "aria-hidden" "true" ] []
+            ]
         ]
     ]
 
@@ -34,11 +65,13 @@ let emptyHikeRow =
         trailblazerTableColumn (StringValue "")
         trailblazerTableColumn (StringValue "")
         trailblazerTableColumn (StringValue "")
+        trailblazerTableColumn (StringValue "")
+        trailblazerTableColumn (StringValue "")
     ]
 
 let hikingTable hikes = 
     let populatedHikes = hikes |> List.map savedHikeRow
-    populatedHikes @ List.init (10 - populatedHikes.Length) (always emptyHikeRow)
+    populatedHikes @ List.init (max 0 (10 - populatedHikes.Length)) (always emptyHikeRow)
         |> myHikesTable 
 
 let errorOcurredTable error = 

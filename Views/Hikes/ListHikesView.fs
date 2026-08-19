@@ -14,7 +14,7 @@ let listHikesView userProfile =
             attr "hx-target" "#hikes-table-container"
             attr "hx-indicator" "#hikes-table-loading-skeleton"
         ] []
-        trailblazerSkeletonTable "My Hikes" 4 10 [
+        trailblazerSkeletonTable "My Hikes" 6 10 [
             _id "hikes-table-loading-skeleton"
         ]
     ]
