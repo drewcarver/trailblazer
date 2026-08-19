@@ -10,6 +10,12 @@ type BodyContent =
 let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent) =
     let displayName = userProfile |> Option.map (fun p -> p.Name) |> Option.defaultValue "User"
     let picture = userProfile |> Option.bind (fun p -> p.Picture)
+    let profileVisual =
+        match userProfile, picture with
+        | Some _, Some pictureUrl ->
+            img [ _class "nav-user-profile-image"; _src pictureUrl; _alt (displayName + " profile photo") ]
+        | _ ->
+            i [ _class "nav-user-profile fa-regular fa-circle-user" ] []
 
     html [ _lang "en" ] [
         head [] [
@@ -41,32 +47,23 @@ let withMasterLayout (userProfile: UserProfile option) (bodyContent: BodyContent
 
             nav [ _class "nav" ] [
                 a [ _class "nav-logo"; _href "/"; attr "aria-label" "Trailblazer home" ] [
-                    img [ _src "/assets/mountain-logo.svg"; _alt "Trailblazer logo" ] 
+                    img [ _src "/assets/mountain-logo.svg"; _alt "Trailblazer logo" ]
                     str " Trailblazer"
                 ]
                 ul [ _class "nav-list" ] [
                     li [] [ a [ _href "/" ] [ str "Explore" ] ]
                     li [] [ a [ _href "/hikes" ] [ str "My Hikes" ] ]
                 ]
-                match userProfile with
-                | Some _ ->
-                    a [ _class "nav-logout"; _href "/logout"; attr "hx-boost" "false"; attr "aria-label" "User profile menu" ] [
-                        i [ _class "nav-user-profile fa-regular fa-circle-user" ] []
-                        str " "
-                        match picture with
-                        | Some url ->
-                            span [] [ str displayName ]
-                        | None ->
-                            str displayName
-                        str " "
-                        i [ _class "nav-user-profile-chevron fa-solid fa-angle-down" ] []
-                    ]
-                | None ->
-                    a [ _class "nav-logout"; _href "/login"; attr "hx-boost" "false"; attr "aria-label" "User profile menu" ] [
-                        i [ _class "nav-user-profile fa-regular fa-circle-user" ] []
-                        str " User "
-                        i [ _class "nav-user-profile-chevron fa-solid fa-angle-down" ] []
-                    ]
+                input [ _type "checkbox"; _class "nav-menu-checkbox"; _id "user-menu-toggle"; attr "aria-label" "User profile menu" ]
+                label [ _for "user-menu-toggle"; _class "nav-user-menu"; attr "aria-label" "User profile menu" ] [
+                    profileVisual
+                    str displayName
+                    i [ _class "nav-user-profile-chevron fa-solid fa-angle-down" ] []
+                ]
+                label [ _for "user-menu-toggle"; _class "nav-user-menu-backdrop" ] []
+                ul [ _class "nav-user-menu-list" ] [
+                    li [] [ a [ _class "nav-logout"; _href "/logout"; attr "hx-boost" "false" ] [ str "Logout" ] ]
+                ]
             ]
 
             yield! match bodyContent with

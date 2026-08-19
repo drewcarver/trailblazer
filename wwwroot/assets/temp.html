@@ -1,156 +1,315 @@
-<!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Trailblazer - Plan Your Next Hike</title>
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="/css/index.css">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/2.0.10/htmx.min.js" crossorigin="anonymous"></script>
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-        <script src="/js/trailmap.js" defer=""></script>
-        <script type="text/hyperscript" src="/hs/autosuggest._hs" defer=""></script>
-        <script type="text/hyperscript" src="/hs/hikeplanner._hs" defer=""></script>
-        <script src="https://cdn.jsdelivr.net/npm/hyperscript.org@0.9.93/dist/_hyperscript.min.js" integrity="sha384-/6HsqTiz02YfFBUhzTwlH/yxe68DhfnkdHiWytM3nxAzs/yvG+3FZY0f4KLnNoov" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
-    </head>
-    <body hx-boost="true" hx-indicator="#page-loading-overlay">
-        <div id="page-loading-overlay" class="site-loading-overlay" role="status" aria-live="polite" aria-label="Loading next page">
-            <div class="site-loading-overlay__panel">
-                <div class="site-loading-overlay__spinner"></div>
-                <span class="site-loading-overlay__text">Loading</span>
-            </div>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trailblazer - Plan Your Next Hike</title>
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/index.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/2.0.10/htmx.min.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="../js/trailmap.js" defer=""></script>
+    <script type="text/hyperscript" src="../hs/autosuggest._hs" defer=""></script>
+    <script type="text/hyperscript" src="../hs/hikeplanner._hs" defer=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/hyperscript.org@0.9.93/dist/_hyperscript.min.js"
+        integrity="sha384-/6HsqTiz02YfFBUhzTwlH/yxe68DhfnkdHiWytM3nxAzs/yvG+3FZY0f4KLnNoov"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
+    <style>
+        :root {
+            --hikes-page-bg: #f7f8f7;
+            --hikes-line: #e4e8e5;
+            --hikes-muted: #68736d;
+            --hikes-green-soft: #edf4ef;
+        }
+
+        body {
+            background: var(--hikes-page-bg);
+        }
+
+        .hikes-page {
+            margin: 0 auto;
+            padding: 2.4rem var(--default-gutter);
+        }
+
+        .hikes-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .hikes-title {
+            margin: 0 0 .55rem;
+            color: #111817;
+            font-size: clamp(2.8rem, 3vw, 4rem);
+            font-weight: 700;
+            letter-spacing: -.04em;
+        }
+
+        .hikes-description {
+            margin: 0;
+            color: var(--hikes-muted);
+            font-size: 1.45rem;
+        }
+
+        .hikes-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.4rem;
+        }
+
+        .hikes-tools {
+            display: flex;
+            gap: .9rem;
+        }
+
+        .legacy-table,
+        #hikes-table-loading-skeleton {
+            display: none !important;
+        }
+
+        @media (max-width: 720px) {
+            .nav {
+                gap: 1.2rem;
+                padding: 0 1.5rem;
+            }
+
+            .nav-list {
+                display: none;
+            }
+
+            .hikes-header,
+            .hikes-toolbar,
+            .table-footer {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .hikes-tools {
+                width: 100%;
+            }
+
+        }
+
+        .htmx-indicator {
+            opacity: 0;
+            visibility: hidden
+        }
+
+        .htmx-request .htmx-indicator,
+        .htmx-request.htmx-indicator {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 200ms ease-in
+        }
+    </style>
+</head>
+
+<body hx-boost="true" hx-indicator="#page-loading-overlay">
+    <div id="page-loading-overlay" class="site-loading-overlay" role="status" aria-live="polite"
+        aria-label="Loading next page">
+        <div class="site-loading-overlay__panel">
+            <div class="site-loading-overlay__spinner"></div>
+            <span class="site-loading-overlay__text">Loading</span>
         </div>
-
-        <nav class="nav">
-            <a class="nav-logo" href="/" aria-label="Trailblazer home"><img src="/assets/mountain-logo.svg" alt="Trailblazer logo"/> Trailblazer</a>
-            <ul class="nav-list">
-                <li><a href="/">Explore</a></li>
-                <li><a href="/hikes">My Hikes</a></li>
-            </ul>
-            <a class="nav-logout" href="/logout" hx-boost="false" aria-label="User profile menu"><i class="nav-user-profile fa-regular fa-circle-user"></i> User <i class="nav-user-profile-chevron fa-solid fa-angle-down"></i></a>
-        </nav>
-
-        <main>
-            <header class="hero" role="banner">
-                    <h1>Plan Your Next Hike</h1>
-                    <p class="hero-description">Discover trails, connect with friends, and make every hike your best one yet.</p>
-                    <p class="hero-actions">
-                        <a class="btn btn-primary" href="/">Explore Trails <i class="fa-solid fa-arrow-right"></i></a>
-                        <a class="btn btn-secondary" href="/hikes">My Hikes</a>
-                    </p>
-            </header>
-
-            <section class="l-cards" aria-label="Hike highlights">
-                <article class="card">
-                    <h2 class="card-title"><i class="card-title-icon fa-regular fa-calendar"></i> Upcoming Hikes <a class="card-title-view-all" href="/hikes">View all <i class="fa-solid fa-angle-right"></i></a></h2>
-                    <ul class="card-item-list">
-                        <li >
-                            <a class="card-item" href="/hike">
-                                <time class="calendar" datetime="2026-05-15"><span class="calendar-month">MAY</span><strong class="calendar-day">15</strong></time>
-                                <div class="upcoming-hike-detail">
-                                    <h3 class="hike-title">Mt. Adams</h3>
-                                    <p class="hike-info">May 15 • 8.5 mi • Moderate</p>
-                                    <p class="hike-location"><i class="fa-solid fa-location-dot"></i> Washington</p>
-                                </div>
-                                <i class="card-item-chevron fa-solid fa-angle-right" aria-hidden="true"></i>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="card-item" href="/hike">
-                                <time class="calendar" datetime="2026-06-01"><span class="calendar-month">JUN</span><strong class="calendar-day">1</strong></time>
-                                <div class="upcoming-hike-detail">
-                                    <h3 class="hike-title">Glacier Trail</h3>
-                                    <p class="hike-info">June 1 • 12.6 mi • Challenging</p>
-                                    <p class="hike-location"><i class="fa-solid fa-location-dot"></i> Montana</p>
-                                </div>
-                                <i class="card-item-chevron fa-solid fa-angle-right" aria-hidden="true"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </article>
-
-                <article class="card">
-                    <h2 class="card-title"><i class="card-title-icon fa-solid fa-mountain"></i> Popular Trails <a class="card-title-view-all" href="/trails">View all <i class="fa-solid fa-angle-right"></i></a></h2>
-                    <ul class="card-item-list">
-                        <li>
-                            <a class="card-item" href="/trails">
-                                <img class="trail-photo" src="https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=180&q=80" alt="Angel's Landing trail view">
-                                <div class="upcoming-hike-detail">
-                                    <h3 class="hike-title">Angel's Landing</h3>
-                                    <p class="hike-info">Zion National Park <span class="hike-difficulty-chip hard">Hard</span></p>
-                                </div>
-                                <i class="card-item-chevron fa-solid fa-angle-right" aria-hidden="true"></i>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="card-item" href="/trails">
-                                <img class="trail-photo" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=180&q=80" alt="Zion Narrows canyon trail">
-                                <div class="upcoming-hike-detail">
-                                    <h3 class="hike-title">Zion Narrows</h3>
-                                    <p class="hike-info">Zion National Park <span class="hike-difficulty-chip moderate">Moderate</span></p>
-                                </div>
-                                <i class="card-item-chevron fa-solid fa-angle-right" aria-hidden="true"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </article>
-
-                <article class="card">
-                    <h2 class="card-title"><i class="card-title-icon fa-solid fa-users"></i> Friend Hikes <a class="card-title-view-all" href="/hikes">View all <i class="fa-solid fa-angle-right"></i></a></h2>
-                    <ul class="card-item-list">
-                        <li>
-                            <a class="card-item" href="/hikes">
-                                <img class="friend-photo" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80" alt="Alex profile photo">
-                                <div class="upcoming-hike-detail">
-                                    <h3 class="hike-title">Alex hiked Mt. Hood</h3>
-                                    <p class="hike-info">April 28 • 9.4 mi</p>
-                                </div>
-                                <i class="card-item-chevron fa-solid fa-angle-right" aria-hidden="true"></i>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="card-item" href="/hikes">
-                                <img class="friend-photo" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80" alt="Sarah profile photo">
-                                <div class="upcoming-hike-detail">
-                                    <h3 class="hike-title">Sarah hiked Old Rag</h3>
-                                    <p class="hike-info">April 26 • 8.1 mi</p>
-                                </div>
-                                <i class="card-item-chevron fa-solid fa-angle-right" aria-hidden="true"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </article>
-            </section>
-
-            <section class="features" aria-label="Trailblazer benefits">
-                <article>
-                    <i class="feature-icon fa-regular fa-map"></i>
+    </div>
+    <nav class="nav">
+        <a class="nav-logo" href="/" aria-label="Trailblazer home">
+            <img src="mountain-logo.svg" alt="Trailblazer logo">Trailblazer
+        </a>
+        <ul class="nav-list">
+            <li>
+                <a href="/">Explore</a>
+            </li>
+            <li>
+                <a href="/hikes">My Hikes</a>
+            </li>
+        </ul>
+        <input type="checkbox" class="nav-menu-checkbox" id="user-menu-toggle" aria-label="User profile menu">
+        <label for="user-menu-toggle" class="nav-user-menu" aria-label="User profile menu">
+            <img class="nav-user-profile-image"
+                src="data:image/jpeg;base64,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"
+                alt="Andrew Carver profile photo">
+            Andrew Carver<i class="nav-user-profile-chevron fa-solid fa-angle-down"></i>
+        </label>
+        <label for="user-menu-toggle" class="nav-user-menu-backdrop"></label>
+        <ul class="nav-user-menu-list">
+            <li>
+                <a class="nav-logout" href="/logout" hx-boost="false">Logout</a>
+            </li>
+        </ul>
+    </nav>
+    <main class="l-main">
+        <section class="hikes-page">
+            <div class="card card--data-table">
+                <header class="hikes-header">
                     <div>
-                        <h3 class="feature-title">Discover Trails</h3>
-                        <p>Find the perfect trail for your next adventure.</p>
+                        <h1 class="hikes-title">My Hikes</h1>
+                        <p class="hikes-description">View, manage, and edit all of your upcoming and past hikes.</p>
                     </div>
-                </article>
-                <article>
-                    <i class="feature-icon fa-solid fa-user-group"></i>
-                    <div>
-                        <h3 class="feature-title">Plan Together</h3>
-                        <p>Coordinate hikes with friends easily.</p>
+                    <a class="btn btn-primary btn--compact" href="/hikes/new"><i class="fa-solid fa-plus"
+                            aria-hidden="true"></i> Add Hike</a>
+                </header>
+
+                <div class="hikes-toolbar">
+                    <nav class="filter-tabs" aria-label="Hike filters">
+                        <a class="filter-tab is-active" href="#all-hikes">All Hikes</a>
+                        <a class="filter-tab" href="#upcoming-hikes">Upcoming</a>
+                        <a class="filter-tab" href="#past-hikes">Past</a>
+                        <a class="filter-tab" href="#friends-hikes">Friends</a>
+                    </nav>
+                    <div class="hikes-tools">
+                        <label class="search" for="hike-search">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                            <input id="hike-search" type="search" placeholder="Search hikes...">
+                        </label>
+                        <button class="filter" type="button"><i class="fa-solid fa-sliders"
+                                aria-hidden="true"></i> Filters</button>
                     </div>
-                </article>
-                <article>
-                    <i class="feature-icon fa-solid fa-mountain-city"></i>
-                    <div>
-                        <h3 class="feature-title">Track Progress</h3>
-                        <p>Log your hikes and reach new summits.</p>
-                    </div>
-                </article>
-            </section>
-        </main>
-    </body>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="table table--data">
+                        <thead>
+                            <tr>
+                                <th scope="col">Hike Name <i class="fa-solid fa-arrows-up-down" aria-hidden="true"></i>
+                                </th>
+                                <th scope="col">Date Range <i class="fa-solid fa-arrows-up-down" aria-hidden="true"></i>
+                                </th>
+                                <th scope="col">Trail <i class="fa-solid fa-arrows-up-down" aria-hidden="true"></i></th>
+                                <th scope="col">Start Location <i class="fa-solid fa-arrows-up-down"
+                                        aria-hidden="true"></i></th>
+                                <th scope="col">End Location <i class="fa-solid fa-arrows-up-down"
+                                        aria-hidden="true"></i></th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="table__name"><img class="table__thumbnail"
+                                            src="https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&amp;fit=crop&amp;w=120&amp;h=120&amp;q=80"
+                                            alt="Mount Adams landscape"><span>Mt. Adams</span></div>
+                                </td>
+                                <td class="table__date"><i class="fa-regular fa-calendar" aria-hidden="true"></i> May 15 -
+                                    May 16, 2025</td>
+                                <td>Pacific Crest Trail</td>
+                                <td><span class="table__location"><i class="fa-solid fa-location-dot"
+                                            aria-hidden="true"></i> Cold Springs Trailhead,<br> WA</span></td>
+                                <td><span class="table__location"><i class="fa-solid fa-location-dot"
+                                            aria-hidden="true"></i> PCT North,<br> WA</span></td>
+                                <td><a class="table__action" href="/hikes/1" aria-label="Edit Mt. Adams"><i
+                                            class="fa-solid fa-pen" aria-hidden="true"></i></a></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="table__name"><img class="table__thumbnail"
+                                            src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&amp;fit=crop&amp;w=120&amp;h=120&amp;q=80"
+                                            alt="Glacier mountain landscape"><span>Glacier Trail</span></div>
+                                </td>
+                                <td class="table__date"><i class="fa-regular fa-calendar" aria-hidden="true"></i> June 1 -
+                                    June 4, 2025</td>
+                                <td>Glacier National Park</td>
+                                <td><span class="table__location"><i class="fa-solid fa-location-dot"
+                                            aria-hidden="true"></i> Avalanche Trailhead,<br> MT</span></td>
+                                <td><span class="table__location"><i class="fa-solid fa-location-dot"
+                                            aria-hidden="true"></i> The Loop,<br> MT</span></td>
+                                <td><a class="table__action" href="/hikes/2" aria-label="Edit Glacier Trail"><i
+                                            class="fa-solid fa-pen" aria-hidden="true"></i></a></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="table__name"><img class="table__thumbnail"
+                                            src="https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?auto=format&amp;fit=crop&amp;w=120&amp;h=120&amp;q=80"
+                                            alt="Zion canyon landscape"><span>Zion Narrows</span></div>
+                                </td>
+                                <td class="table__date"><i class="fa-regular fa-calendar" aria-hidden="true"></i> June 20
+                                    - June 22, 2025</td>
+                                <td>Zion Narrows</td>
+                                <td><span class="table__location"><i class="fa-solid fa-location-dot"
+                                            aria-hidden="true"></i> Temple of Sinawava,<br> UT</span></td>
+                                <td><span class="table__location"><i class="fa-solid fa-location-dot"
+                                            aria-hidden="true"></i> Big Springs,<br> UT</span></td>
+                                <td><a class="table__action" href="/hikes/3" aria-label="Edit Zion Narrows"><i
+                                            class="fa-solid fa-pen" aria-hidden="true"></i></a></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="table__name"><img class="table__thumbnail"
+                                            src="https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&amp;fit=crop&amp;w=120&amp;h=120&amp;q=80"
+                                            alt="North Cascades forest landscape"><span>North Cascades Loop</span></div>
+                                </td>
+                                <td class="table__date"><i class="fa-regular fa-calendar" aria-hidden="true"></i> July 10
+                                    - July 13, 2025</td>
+                                <td>North Cascades Loop</td>
+                                <td><span class="table__location"><i class="fa-solid fa-location-dot"
+                                            aria-hidden="true"></i> Marblemount,<br> WA</span></td>
+                                <td><span class="table__location"><i class="fa-solid fa-location-dot"
+                                            aria-hidden="true"></i> Marblemount,<br> WA</span></td>
+                                <td><a class="table__action" href="/hikes/4" aria-label="Edit North Cascades Loop"><i
+                                            class="fa-solid fa-pen" aria-hidden="true"></i></a></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="table__name"><img class="table__thumbnail"
+                                            src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&amp;fit=crop&amp;w=120&amp;h=120&amp;q=80"
+                                            alt="Grand Teton mountain landscape"><span>Grand Teton Hike</span></div>
+                                </td>
+                                <td class="table__date"><i class="fa-regular fa-calendar" aria-hidden="true"></i> Aug 5 -
+                                    Aug 8, 2025</td>
+                                <td>Teton Crest Trail</td>
+                                <td><span class="table__location"><i class="fa-solid fa-location-dot"
+                                            aria-hidden="true"></i> Phillips Pass Trailhead,<br> WY</span></td>
+                                <td><span class="table__location"><i class="fa-solid fa-location-dot"
+                                            aria-hidden="true"></i> String Lake Trailhead,<br> WY</span></td>
+                                <td><a class="table__action" href="/hikes/5" aria-label="Edit Grand Teton Hike"><i
+                                            class="fa-solid fa-pen" aria-hidden="true"></i></a></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="table__name"><img class="table__thumbnail"
+                                            src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&amp;fit=crop&amp;w=120&amp;h=120&amp;q=80"
+                                            alt="Old Rag forest landscape"><span>Old Rag</span></div>
+                                </td>
+                                <td class="table__date"><i class="fa-regular fa-calendar" aria-hidden="true"></i> Sep 12 -
+                                    Sep 13, 2025</td>
+                                <td>Shenandoah National Park</td>
+                                <td><span class="table__location"><i class="fa-solid fa-location-dot"
+                                            aria-hidden="true"></i> Saddle Trailhead,<br> VA</span></td>
+                                <td><span class="table__location"><i class="fa-solid fa-location-dot"
+                                            aria-hidden="true"></i> Saddle Trailhead,<br> VA</span></td>
+                                <td><a class="table__action" href="/hikes/6" aria-label="Edit Old Rag"><i
+                                            class="fa-solid fa-pen" aria-hidden="true"></i></a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <footer class="table-footer">
+                    <span>Showing 1 to 6 of 12 hikes</span>
+                    <nav class="table-pagination" aria-label="Hike pages">
+                        <a class="table-pagination__button" href="#previous" aria-label="Previous page"><i
+                                class="fa-solid fa-angle-left" aria-hidden="true"></i></a>
+                        <a class="table-pagination__button is-active" href="#page-1" aria-current="page">1</a>
+                        <a class="table-pagination__button" href="#page-2">2</a>
+                        <a class="table-pagination__button" href="#next" aria-label="Next page"><i
+                                class="fa-solid fa-angle-right" aria-hidden="true"></i></a>
+                    </nav>
+                </footer>
+            </div>
+        </section>
+    </main>
+    <script src="../_framework/aspnetcore-browser-refresh.js"></script>
+</body>
+
 </html>

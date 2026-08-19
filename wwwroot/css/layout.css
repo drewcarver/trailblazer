@@ -1,3 +1,7 @@
+.l-main {
+    padding: 0 var(--default-gutter);
+}
+
 .l-cards {
     display: grid;
     gap: 1rem;

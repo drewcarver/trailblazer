@@ -26,3 +26,14 @@
 .btn-secondary:hover {
     background-color: var(--home-surface);
 }
+
+.btn--compact {
+    display: inline-flex;
+    align-items: center;
+    gap: .8rem;
+    flex: 0 0 auto;
+    padding: 1rem 1.55rem;
+    border: 0;
+    border-radius: 8px;
+    font-size: 1.4rem;
+}

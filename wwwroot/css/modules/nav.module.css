@@ -26,16 +26,75 @@
   font-weight: 600;
 }
 
-.nav-logout {
+.nav-user-menu {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   font-weight: 600;
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  position: relative;
+}
+
+.nav-menu-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+}
+
+.nav-user-menu-list {
+  display: none;
+  position: absolute;
+  background-color: #ffffff;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  border-radius: 4px;
+  padding: 0;
+  margin: 4px 0 0 0;
+  list-style: none;
+  z-index: 1;
+  overflow: hidden;
+  z-index: 6;
+  top: 48px;
+}
+
+.nav-menu-checkbox:checked ~ .nav-user-menu-list {
+  display: block;
+}
+
+.nav-user-menu-list li a {
+  color: #333;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.nav-user-menu-backdrop {
+  display: none;
+}
+
+.nav-menu-checkbox:checked ~ .nav-user-menu-backdrop {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 5;
 }
 
 .nav-user-profile {
   font-size: var(--font-size-lg);
   color: var(--home-green-deep);
+}
+
+.nav-user-profile-image {
+  height: 48px;
+  border-radius: 999px;
+  object-fit: cover;
 }
 
 .nav-user-profile-chevron {
