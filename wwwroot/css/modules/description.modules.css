@@ -1,5 +1,5 @@
-.description {
+.page-description {
     margin: 0;
     color: var(--home-muted);
-    font-size: 1.45rem;
+    font-size: var(--font-size-sm);
 }

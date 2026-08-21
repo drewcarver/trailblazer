@@ -2,6 +2,19 @@
     padding: 0 var(--default-gutter);
 }
 
+.l-input-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.l-entry-page {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin: 2rem var(--default-gutter);
+    gap: 2rem;
+}
+
 .l-list-page {
     display: grid;
     margin: 0 auto;

@@ -1,4 +1,3 @@
-@import url('home.modules.css');
 @import url('nav.module.css');
 @import url('hero-banner.module.css');
 @import url('btn.modules.css');
@@ -15,3 +14,11 @@
 @import url('filter.modules.css');
 @import url('heading.modules.css');
 @import url('description.modules.css');
+@import url('breadcrumb.modules.css');
+@import url('text-input.modules.css');
+@import url('section-hike-select.modules.css');
+@import url('map-legend.modules.css');
+@import url('route-preview.modules.css');
+@import url('hike-planner.modules.css');
+@import url('select.modules.css');
+@import url('day-selector.modules.css');

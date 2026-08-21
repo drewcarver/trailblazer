@@ -1,0 +1,10 @@
+.breadcrumb {
+    display: inline-flex;
+    align-items: center;
+    gap: .8rem;
+    margin-bottom: 1.4rem;
+    color: var(--home-green);
+    font-size: var(--font-size-sm);
+    line-height: var(--font-size-sm);
+    font-weight: 500;
+}
