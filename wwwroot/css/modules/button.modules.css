@@ -2,6 +2,7 @@
     display: inline-block;
     padding: .75em 2.5em;
     font-size: var(--font-size-sm);
+    background-color: var(--home-surface);
     font-weight: 600;
     text-align: center;
     text-decoration: none;

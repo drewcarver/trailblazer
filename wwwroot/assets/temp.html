@@ -43,7 +43,7 @@
     </nav>
 
     <form class="l-entry-page">
-        <section aria-labelledby="page-title">
+        <section class="l-new-hike-section" aria-labelledby="page-title">
             <a class="breadcrumb" href="#"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i> Back to My
                 Hikes</a>
             <header>
@@ -144,7 +144,7 @@
             </div>
         </section>
 
-        <aside class="map-preview" aria-labelledby="route-preview-title">
+        <aside class="card card-no-padding route-preview" aria-labelledby="route-preview-title">
             <header class="map-header">
                 <div>
                     <h2 id="route-preview-title">Route Preview</h2>
@@ -156,19 +156,7 @@
                     <span><i class="day-dot day-three"></i>Day 3</span>
                 </div>
             </header>
-            <div class="map-canvas" aria-label="Map showing the planned three day hike route">
-                <div class="route-path day-one"></div>
-                <div class="route-path day-two"></div>
-                <div class="route-path day-three"></div>
-                <span class="map-marker trailhead"><b>Trailhead</b></span><span class="map-marker camp-one"><b>Camp
-                        1</b></span><span class="map-marker camp-two"><b>Camp 2</b></span><span
-                    class="map-marker camp-three"><b>Camp 3</b></span><span class="map-marker end-point"><b>End
-                        Point</b></span>
-                <div class="map-controls"><button type="button" aria-label="Locate me"><i
-                            class="fa-solid fa-location-arrow"></i></button><button type="button"
-                        aria-label="Zoom in"><i class="fa-solid fa-plus"></i></button><button type="button"
-                        aria-label="Zoom out"><i class="fa-solid fa-minus"></i></button></div>
-            </div>
+            <div id="map" class="map" aria-label="Map showing the planned hike route" />
             <div class="route-summary">
                 <div class="day-summary"><span><i class="day-dot day-one"></i>Day 1</span><span>Trailhead</span><i
                         class="fa-solid fa-arrow-right" aria-hidden="true"></i><span>Camp 1</span><span>7.4
@@ -182,6 +170,15 @@
             </div>
         </aside>
     </form>
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([37.7749, -122.4194], 13);
+
+        // Add a tile layer to the map
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+    </script>
 </body>
 
 </html>

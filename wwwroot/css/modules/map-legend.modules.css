@@ -1,4 +1,33 @@
-.map-legend { display: flex; align-items: center; gap: 1.7rem; color: #4e5865; font-size: 1.05rem; white-space: nowrap; }
-.map-legend span { display: inline-flex; align-items: center; gap: .6rem; }
-.day-dot { display: inline-block; width: .75rem; height: .75rem; border-radius: 50%; background: currentColor; }
-.day-one { color: #2f6a42; }.day-two { color: #1f6fb6; }.day-three { color: #74319c; }
+.map-legend {
+    display: flex;
+    align-items: center;
+    gap: 1.7rem;
+    color: #4e5865;
+    white-space: nowrap;
+}
+
+.map-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+}
+
+.day-dot {
+    display: inline-block;
+    width: .75rem;
+    height: .75rem;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.day-one {
+    color: #2f6a42;
+}
+
+.day-two {
+    color: #1f6fb6;
+}
+
+.day-three {
+    color: #74319c;
+}

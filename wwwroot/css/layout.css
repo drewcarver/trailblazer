@@ -10,8 +10,13 @@
 
 .l-entry-page {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr .75fr;
     margin: 2rem var(--default-gutter);
+    gap: 2rem;
+}
+
+.l-new-hike-section {
+    display: grid;
     gap: 2rem;
 }
 

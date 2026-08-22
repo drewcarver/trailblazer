@@ -1,8 +1,228 @@
-.map-preview { align-self: start; min-width: 0; overflow: hidden; border: 1px solid #edf0f2; border-radius: 10px; background: #fff; box-shadow: 0 9px 24px rgba(30, 42, 54, .09); }
-.map-header { display: flex; align-items: center; justify-content: space-between; gap: 2rem; min-height: 6.6rem; padding: 1.3rem 1.6rem; }.map-header h2 { margin: 0 0 .35rem; color: #18212c; font-size: 1.45rem; }.map-header p { margin: 0; color: #65707c; font-size: 1rem; }
-.map-canvas { position: relative; height: 39.8rem; overflow: hidden; background-color: #d9e6d3; background-image: linear-gradient(25deg, transparent 44%, rgba(255,255,255,.58) 45%, transparent 46%), linear-gradient(152deg, transparent 47%, rgba(134,166,120,.34) 48%, transparent 50%), repeating-linear-gradient(118deg, rgba(61,105,78,.12) 0 1px, transparent 1px 23px), repeating-linear-gradient(27deg, rgba(115,150,103,.14) 0 2px, transparent 2px 36px), radial-gradient(ellipse at 22% 36%, rgba(179,207,227,.8) 0 3%, transparent 3.3%), radial-gradient(ellipse at 68% 21%, #b6d1ac 0 18%, transparent 18.5%), radial-gradient(ellipse at 43% 74%, #c0d7b7 0 20%, transparent 20.5%); }
-.route-path { position: absolute; z-index: 1; width: .55rem; border-radius: 9px; transform-origin: bottom; box-shadow: 0 0 0 2px rgba(255,255,255,.7); }.route-path.day-one { height: 14.5rem; left: 34%; bottom: 19%; transform: rotate(29deg); background: #2f6a42; }.route-path.day-two { height: 12rem; left: 48%; bottom: 47%; transform: rotate(-28deg); background: #1f6fb6; }.route-path.day-three { height: 15rem; left: 63%; bottom: 67%; transform: rotate(45deg); background: #74319c; }
-.map-marker { position: absolute; z-index: 2; display: flex; align-items: center; gap: .5rem; color: #252d36; font-size: 1rem; }.map-marker::before { content: ''; width: 1rem; height: 1rem; border: 3px solid currentColor; border-radius: 50%; background: #fff; }.map-marker b { padding: .55rem .75rem; border-radius: 4px; background: rgba(255,255,255,.94); box-shadow: 0 2px 6px rgba(30,40,45,.12); font-weight: 700; white-space: nowrap; }.trailhead { left: 29%; bottom: 18%; color: #2f6a42; }.camp-one { left: 44%; bottom: 44%; color: #2f6a42; }.camp-two { left: 47%; bottom: 64%; color: #1f6fb6; }.camp-three { left: 62%; bottom: 79%; color: #74319c; }.end-point { left: 77%; top: 7%; color: #74319c; }
-.map-controls { position: absolute; z-index: 3; top: 1.8rem; right: 1.6rem; display: grid; gap: .9rem; }.map-controls button { display: grid; width: 3.2rem; height: 3.2rem; place-items: center; border: 0; border-radius: 6px; background: rgba(255,255,255,.95); color: #35404e; font-size: 1.3rem; box-shadow: 0 1px 4px rgba(30,40,45,.15); cursor: pointer; }.map-controls button:nth-child(2) { margin-bottom: -1rem; border-radius: 6px 6px 0 0; }.map-controls button:nth-child(3) { border-radius: 0 0 6px 6px; }
-.route-summary { display: grid; gap: 0; margin: -13.2rem 1rem 1rem; position: relative; z-index: 4; overflow: hidden; border-radius: 8px; background: rgba(255,255,255,.96); box-shadow: 0 2px 9px rgba(30,40,45,.12); }.day-summary { display: grid; grid-template-columns: 6.2rem 1fr 1.7rem 1.35fr 5.2rem 6.2rem; align-items: center; min-height: 3.7rem; gap: .55rem; padding: 0 1.1rem; border-bottom: 1px solid #e8ebee; color: #48525e; font-size: 1rem; }.day-summary:last-child { border-bottom: 0; }.day-summary span:first-child { display: inline-flex; align-items: center; gap: .65rem; color: #303945; }.day-summary span:nth-last-child(-n+2), .day-summary > i { font-size: .95rem; white-space: nowrap; }.day-summary > i { color: #56616e; }
-@media (max-width: 760px) { .map-header { align-items: flex-start; flex-direction: column; }.day-summary { grid-template-columns: 6rem 1fr 1.5rem 1fr; }.day-summary span:nth-last-child(-n+2) { display: none; } }
+.route-preview {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.map {
+    border-radius: var(--default-radius);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.map-preview {
+    align-self: start;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid #edf0f2;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 9px 24px rgba(30, 42, 54, .09);
+}
+
+.map-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    min-height: 6.6rem;
+    padding: 1.3rem 1.6rem;
+}
+
+.map-header h2 {
+    margin: 0 0 .35rem;
+    color: #18212c;
+    font-size: var(--font-size-lg);
+}
+
+.map-header p {
+    margin: 0;
+    color: #65707c;
+    font-size: var(--font-size-sm);
+}
+
+.map-canvas {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    background-color: #d9e6d3;
+    background-image: linear-gradient(25deg, transparent 44%, rgba(255, 255, 255, .58) 45%, transparent 46%), linear-gradient(152deg, transparent 47%, rgba(134, 166, 120, .34) 48%, transparent 50%), repeating-linear-gradient(118deg, rgba(61, 105, 78, .12) 0 1px, transparent 1px 23px), repeating-linear-gradient(27deg, rgba(115, 150, 103, .14) 0 2px, transparent 2px 36px), radial-gradient(ellipse at 22% 36%, rgba(179, 207, 227, .8) 0 3%, transparent 3.3%), radial-gradient(ellipse at 68% 21%, #b6d1ac 0 18%, transparent 18.5%), radial-gradient(ellipse at 43% 74%, #c0d7b7 0 20%, transparent 20.5%);
+}
+
+.route-path {
+    position: absolute;
+    z-index: 1;
+    width: .55rem;
+    border-radius: 9px;
+    transform-origin: bottom;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, .7);
+}
+
+.route-path.day-one {
+    height: 14.5rem;
+    left: 34%;
+    bottom: 19%;
+    transform: rotate(29deg);
+    background: #2f6a42;
+}
+
+.route-path.day-two {
+    height: 12rem;
+    left: 48%;
+    bottom: 47%;
+    transform: rotate(-28deg);
+    background: #1f6fb6;
+}
+
+.route-path.day-three {
+    height: 15rem;
+    left: 63%;
+    bottom: 67%;
+    transform: rotate(45deg);
+    background: #74319c;
+}
+
+.map-marker {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    color: #252d36;
+    font-size: var(--font-size-sm);
+}
+
+.map-marker::before {
+    content: '';
+    width: 1rem;
+    height: 1rem;
+    border: 3px solid currentColor;
+    border-radius: 50%;
+    background: #fff;
+}
+
+.map-marker b {
+    padding: .55rem .75rem;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 2px 6px rgba(30, 40, 45, .12);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.trailhead {
+    left: 29%;
+    bottom: 18%;
+    color: #2f6a42;
+}
+
+.camp-one {
+    left: 44%;
+    bottom: 44%;
+    color: #2f6a42;
+}
+
+.camp-two {
+    left: 47%;
+    bottom: 64%;
+    color: #1f6fb6;
+}
+
+.camp-three {
+    left: 62%;
+    bottom: 79%;
+    color: #74319c;
+}
+
+.end-point {
+    left: 77%;
+    top: 7%;
+    color: #74319c;
+}
+
+.map-controls {
+    position: absolute;
+    z-index: 3;
+    top: 1.8rem;
+    right: 1.6rem;
+    display: grid;
+    gap: .9rem;
+}
+
+.map-controls button {
+    display: grid;
+    width: 3.2rem;
+    height: 3.2rem;
+    place-items: center;
+    border: 0;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, .95);
+    color: #35404e;
+    box-shadow: 0 1px 4px rgba(30, 40, 45, .15);
+    cursor: pointer;
+}
+
+.map-controls button:nth-child(2) {
+    margin-bottom: -1rem;
+    border-radius: 6px 6px 0 0;
+}
+
+.map-controls button:nth-child(3) {
+    border-radius: 0 0 6px 6px;
+}
+
+.route-summary {
+    background: rgba(255, 255, 255, .96);
+    border-radius: var(--default-radius);
+    bottom: 32px;
+    box-shadow: 0 2px 9px rgba(30, 40, 45, .12);
+    display: grid;
+    gap: 0;
+    margin: 0 1rem;
+    overflow: hidden;
+    position: absolute;
+    width: calc(100% - 2rem);
+    z-index: 9999;
+}
+
+.day-summary {
+    display: grid;
+    grid-template-columns: 6.2rem 1fr 1.7rem 1.35fr 5.2rem 6.2rem;
+    align-items: center;
+    min-height: 3.7rem;
+    gap: .55rem;
+    padding: 0 1.1rem;
+    border-bottom: 1px solid #e8ebee;
+    color: #48525e;
+    font-size: 1rem;
+}
+
+.day-summary:last-child {
+    border-bottom: 0;
+}
+
+.day-summary span:first-child {
+    display: inline-flex;
+    align-items: center;
+    gap: .65rem;
+    color: #303945;
+}
+
+.day-summary>i {
+    color: #56616e;
+}
+
+@media (max-width: 760px) {
+    .map-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .day-summary {
+        grid-template-columns: 6rem 1fr 1.5rem 1fr;
+    }
+
+    .day-summary span:nth-last-child(-n+2) {
+        display: none;
+    }
+}
