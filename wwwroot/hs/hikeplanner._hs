@@ -77,7 +77,7 @@ behavior AddPoint()
         set @id of <select/> in clone to "camp-point-select-day-" + ^campCounter
         set @data-day of <select/> in clone to ^campCounter
         set @for of <label/> in clone to "camp-point-select-day-" + ^campCounter
-        set innerHTML of <label/> in clone to "Day " + ^campCounter
+        set textContent of <.day-label/> in clone to "Day " + ^campCounter
 
         put clone after currentSelect 
         call refreshMileBoundaries(^campCounter)

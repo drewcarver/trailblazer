@@ -73,18 +73,25 @@
     gap: 1rem;
 }
 
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.route-preview .map {
+    min-height: 42rem;
+}
+
 @media (max-width: 860px) {
-    .entry-layout {
+    .l-entry-page {
         grid-template-columns: 1fr;
         max-width: 66rem;
+        margin-inline: auto;
     }
 
     .map-preview {
         order: -1;
-    }
-
-    .map-canvas {
-        height: 34rem;
     }
 }
 
@@ -102,15 +109,28 @@
         display: none;
     }
 
-    .entry-layout {
+    .l-entry-page {
         padding: 2rem 1.4rem 3rem;
     }
 
-    .details-fields {
+    .l-input-row {
         grid-template-columns: 1fr;
     }
 
-    .page-heading h1 {
-        font-size: 2.6rem;
+    .day-selector {
+        grid-template-columns: 5.4rem minmax(0, 1fr) 2.5rem;
+    }
+
+    .route-arrow {
+        display: none;
+    }
+
+    .more-options {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    .route-preview .map {
+        min-height: 32rem;
     }
 }

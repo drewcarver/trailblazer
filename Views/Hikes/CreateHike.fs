@@ -2,14 +2,10 @@ module HikePlanner.Views.Hikes.CreateHike
 
 open System;
 open Giraffe.ViewEngine
-open HikePlanner.Views.Components.TextInput
-open HikePlanner.Views.Components.DatePicker
 open HikePlanner.Views.Components.Select
 open HikePlanner.Views.MasterLayout
 open HikePlanner.Repositories.HikeRepoTypes
 open HikePlanner.Core
-open HikePlanner.Views.Components.Button
-open HikePlanner.Views.Components.Autosuggest
 
 type HikeFormMode =
     | Create
@@ -24,6 +20,53 @@ let private submitPath mode =
     match mode with
     | Create -> "/hikes"
     | Edit hikeId -> sprintf "/hikes/%d" hikeId
+
+let private inputGroup id name labelText inputType value placeholder attributes =
+    label [ _for id; _class "input-group" ] [
+        span [ _class "input-label" ] [ str labelText ]
+        input ([
+            _id id
+            _name name
+            _type inputType
+            _value value
+            _placeholder placeholder
+            _class "input-control"
+        ] @ attributes)
+    ]
+
+let private campPointSelect day (options: SelectOption list) (selectedPoint: string option) =
+    let id = sprintf "camp-point-select-day-%d" day
+
+    div [ _class "day-selector" ] [
+        div [ _class "day-label" ] [ str (sprintf "Day %d" day) ]
+        label [ _for id; _class "input-group" ] [
+            span [ _class "input-label" ] [ str "End Point" ]
+            select [
+                _id id
+                _name "campPoints"
+                _class "select-control"
+                attr "required" "required"
+                attr "_" "install SelectPoint"
+                attr "data-day" (string day)
+            ] [
+                option [
+                    _value ""
+                    attr "disabled" "disabled"
+                    if selectedPoint.IsNone then attr "selected" "selected"
+                ] [ str "Select end location" ]
+                for selectOption in options do
+                    option [
+                        _value selectOption.Value
+                        if selectedPoint = Some selectOption.Value then attr "selected" "selected"
+                        yield! selectOption.Attributes |> Seq.map (fun (key, value) -> attr key value)
+                    ] [ str selectOption.Label ]
+            ]
+        ]
+        i [ _class "route-arrow fa-solid fa-arrow-right"; attr "aria-hidden" "true" ] []
+        button [ _type "button"; _class "more-options"; attr "aria-label" "More options" ] [
+            i [ _class "fa-solid fa-ellipsis-vertical"; attr "aria-hidden" "true" ] []
+        ]
+    ]
 
 let createHikeView userName (friends: Friend list) (trailPointsOfInterest: Result<TrailPointOfInterest list, TrailblazerError>) mode (existingHike: SavedHike option) =
         let toOptionLabel (poi: TrailPointOfInterest) = sprintf "%s - Mile %.2f" poi.Name poi.TrailMile
@@ -63,66 +106,101 @@ let createHikeView userName (friends: Friend list) (trailPointsOfInterest: Resul
 
                 friend.Email, sprintf "%s (%s)" friendName friend.Email)
 
-        div [ _class "page-section create-hike" ] [
-            h1 [ _class "form-panel__title" ] [ str (formHeader mode) ]
-            div [ _class "create-hike__layout" ] [
-                form [ _class "form-panel"; 
-                        attr "_" (sprintf "install InitForm");
-                        attr "action" (submitPath mode);
-                        attr "method" "post";
-                        attr "hx-post" (submitPath mode); 
-                        attr "hx-swap" "outerHTML" ] [
-                            div [ _class "field" ] [
-                                label [ _for "hike-name"; _class "field__label" ] [ str "Hike Name" ]
-                                input [ 
-                                    _type "text"; 
-                                    _id "hike-name"; 
-                                    _name "hikeName"; 
+        form [
+            _class "l-entry-page"
+            attr "_" "install InitForm"
+            attr "action" (submitPath mode)
+            attr "method" "post"
+            attr "hx-post" (submitPath mode)
+            attr "hx-swap" "outerHTML"
+        ] [
+            section [ _class "l-new-hike-section"; attr "aria-labelledby" "page-title" ] [
+                a [ _class "breadcrumb"; _href "/hikes" ] [
+                    i [ _class "fa-solid fa-chevron-left"; attr "aria-hidden" "true" ] []
+                    str " Back to My Hikes"
+                ]
+                header [] [
+                    h1 [ _id "page-title" ] [ str (formHeader mode) ]
+                    p [ _class "page-description" ] [ str "Plan your route, add camp locations, and invite friends." ]
+                ]
+                section [ _class "card"; attr "aria-labelledby" "details-title" ] [
+                    h2 [ _id "details-title" ] [ str "Hike Details" ]
+                    div [ _class "l-input-row" ] [
+                        inputGroup "hike-name" "hikeName" "Hike Name" "text" hikeNameValue "e.g., High Sierra Adventure" [ attr "required" "required" ]
+                        label [ _for "start-date"; _class "input-group" ] [
+                            span [ _class "input-label" ] [ str "Start Date" ]
+                            span [ _class "input-with-icon" ] [
+                                input [
+                                    _id "start-date"
+                                    _name "startDate"
+                                    _type "date"
+                                    _value ((startDateValue |> Option.defaultValue DateTime.Now).ToString("yyyy-MM-dd"))
+                                    _min (match mode with | Create -> DateTime.Now.ToString("yyyy-MM-dd") | Edit _ -> "")
+                                    _class "input-control"
                                     attr "required" "required"
-                                    _value hikeNameValue
-                                    _class "field__control" 
                                 ]
-                                span [ _class "field__message" ] [ 
-                                    str "Please enter a value." 
-                                ]
+                                i [ _class "fa-regular fa-calendar"; attr "aria-hidden" "true" ] []
                             ]
-                            datePicker
-                                "start-date"
-                                "startDate"
-                                "Start Date"
-                                (match mode with | Create -> Some DateTime.Now | Edit _ -> None)
-                                Required
-                                [ "value", (startDateValue |> Option.defaultValue DateTime.Now).ToString("yyyy-MM-dd") ]
-                            trailblazerAutosuggest "friend-search" "invitees" "Invite Friends" Optional friendOptions [
-                                "placeholder", "Type friend name or email"
-                                "autocomplete", "off"
-                            ]
-                            for day, selectedPoint in campPointValuesByDay |> List.indexed |> List.map (fun (index, value) -> index + 1, value) do
-                                trailblazerSelectWithSelected
-                                    (sprintf "camp-point-select-day-%d" day)
-                                    "campPoints"
-                                    (sprintf "Day %d" day)
-                                    Required
-                                    pointsOfInterestOptions
-                                    selectedPoint
-                                    [ "_", "install SelectPoint"; "data-day", string day ]
-                            div [ _class "button-group" ] [
-                                trailblazerButton (Some "add-point") "Add Point" "Add Point" "button" ([ "_", "install AddPoint" ] @ if addPointDisabled then [ "disabled", "true" ] else [])
-                                trailblazerButton (Some "remove-point") "Remove Point" "Remove Point" "button" removePointButtonAttrs
-                                trailblazerButton (Some "submit-plan") "Submit Plan" "Submit Plan" "submit" []
-                            ]
-                ]
-                div [ _class "create-hike__sidebar" ] [
-                    div [ _id "map"; _class "map-pane" ] []
-                    match trailPointsOfInterest with
-                        | Ok _ -> emptyText
-                        | Error e -> span [ _class "form-panel__error" ] [ 
-                            match e with
-                                | DatabaseError error -> str (e.ToString ())
-                                | FormValidationError e -> str e
-                                | NotFound e -> str e
                         ]
+                        label [ _for "friend-search"; _class "input-group" ] [
+                            span [ _class "input-label" ] [ str "Invite Friends" ]
+                            input [ _type "hidden"; _name "invitees"; _value "" ]
+                            span [ _class "input-with-icon" ] [
+                                input [
+                                    _id "friend-search"
+                                    _type "text"
+                                    _class "input-control"
+                                    attr "list" "friend-search-list"
+                                    attr "data-field-name" "invitees"
+                                    attr "data-list-id" "friend-search-list"
+                                    attr "data-badges-id" "friend-search-badges"
+                                    attr "_" "install Autosuggest"
+                                    _placeholder "Search friends..."
+                                    attr "autocomplete" "off"
+                                ]
+                                i [ _class "fa-regular fa-user"; attr "aria-hidden" "true" ] []
+                            ]
+                            div [ _id "friend-search-badges"; _class "autosuggest__badges" ] []
+                            datalist [ _id "friend-search-list"; _class "autosuggest__list" ] [
+                                for value, label in friendOptions do
+                                    option [ _value value ] [ str label ]
+                            ]
+                        ]
+                    ]
                 ]
+                section [ _class "card camp-locations-section"; attr "aria-labelledby" "camp-title" ] [
+                    header [] [
+                        h2 [ _id "camp-title" ] [ str "Camp Locations (Days)" ]
+                        p [] [ str "Add each day of your hike by selecting an end point." ]
+                    ]
+                    for day, selectedPoint in campPointValuesByDay |> List.indexed |> List.map (fun (index, value) -> index + 1, value) do
+                        campPointSelect day pointsOfInterestOptions selectedPoint
+                    button ([
+                        _id "add-point"
+                        _type "button"
+                        _class "btn btn-secondary add-day-btn"
+                        attr "_" "install AddPoint"
+                    ] @ if addPointDisabled then [ attr "disabled" "disabled" ] else []) [
+                        i [ _class "fa-solid fa-plus"; attr "aria-hidden" "true" ] []
+                        str " Add Day"
+                    ]
+                ]
+                div [ _class "form-actions" ] [
+                    button [ _id "submit-plan"; _type "submit"; _class "btn btn-primary" ] [ str "Save Hike" ]
+                    a [ _href "/hikes"; _class "btn btn-secondary" ] [ str "Cancel" ]
+                ]
+            ]
+            aside [ _class "card card-no-padding route-preview"; attr "aria-labelledby" "route-preview-title" ] [
+                header [ _class "map-header" ] [
+                    div [] [
+                        h2 [ _id "route-preview-title" ] [ str "Route Preview" ]
+                        p [] [ str "Review your planned route and daily segments." ]
+                    ]
+                ]
+                div [ _id "map"; _class "map"; attr "aria-label" "Map showing the planned hike route" ] []
+                match trailPointsOfInterest with
+                | Ok _ -> emptyText
+                | Error error -> span [ _class "form-panel__error" ] [ str (error.ToString()) ]
             ]
         ]
         |> XmlNodeBody |> withMasterLayout userName
