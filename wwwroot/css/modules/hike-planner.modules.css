@@ -64,6 +64,15 @@
     font-size: .95rem;
 }
 
+.add-day-btn {
+    max-width: 11em;
+}
+
+.camp-locations-section {
+    display: grid;
+    gap: 1rem;
+}
+
 @media (max-width: 860px) {
     .entry-layout {
         grid-template-columns: 1fr;
